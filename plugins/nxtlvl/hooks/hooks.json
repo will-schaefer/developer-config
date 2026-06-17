@@ -6,6 +6,14 @@
         "hooks": [
           { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/fallback-log.sh" }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}\"/hooks/dangerous-bash.js", "timeout": 10 }
+        ],
+        "description": "Block high-confidence catastrophic shell commands (rm -rf /, force-push to main, curl|sh, dd to disk, mkfs, chmod -R 777, fork bomb); warn on git reset --hard / git clean -f. Kill switch: NXTLVL_DANGEROUS_BASH=off.",
+        "id": "pre:dangerous-bash"
       }
     ],
     "PostToolUse": [

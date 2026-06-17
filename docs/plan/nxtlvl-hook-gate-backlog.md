@@ -19,7 +19,7 @@ near-miss to qualify. ADR-008 governs how *later*, task-flavored gates earn admi
 
 ---
 
-## 1. `dangerous-bash` — STATUS: BUILDING (spawned to its own session, 2026-06-17)
+## 1. `dangerous-bash` — STATUS: BUILT (2026-06-17); install + live-test pending (manual)
 
 **Why it passes the membership test:** catastrophic, irreversible shell commands are a hazard
 on every task. Highest catastrophe-severity of any candidate gate → first to land.
@@ -40,8 +40,36 @@ on every task. Highest catastrophe-severity of any candidate gate → first to l
 - **Smoke matrix (must pass before handoff):** benign cmd→0 · `rm -rf /`→2 · kill-switch on→0 ·
   malformed JSON→0.
 
-**Open questions for the build session:** block vs. warn on `git reset --hard` / `git clean -fdx`;
-whether to parse without `jq` (bash-native) to avoid a dependency; exact stderr override wording.
+**Open questions — RESOLVED in the build session:**
+- *Parse strategy:* **Node** (`plugins/nxtlvl/hooks/dangerous-bash.js`), not bash+jq. `JSON.parse`
+  handles quoted/escaped/multiline commands robustly, reuses the `context-alert.js` node-hook
+  precedent, and has no jq dependency that could be absent and silently neuter the gate. Sets the
+  precedent for the gate family (config-protection next).
+- *`git reset --hard` / `git clean -f…`:* **warn** (exit 0 + stderr nudge), never block — per the
+  "warn at most" guidance. Demonstrates the non-blocking warn path.
+- *stderr wording:* block message names the reason + echoes the (one-lined, ≤400-char) command +
+  the `NXTLVL_DANGEROUS_BASH=off` override; warn message is a single-line nudge.
+
+**Build artifacts:**
+- `plugins/nxtlvl/hooks/dangerous-bash.js` — `decide(raw, env)` core (exported + unit-tested),
+  ordered block detectors, two warn detectors. Whole body fail-open: any throw → exit 0.
+- `plugins/nxtlvl/hooks/hooks.json` — new `PreToolUse` block, matcher `Bash`, id `pre:dangerous-bash`.
+
+**Verification (all pass, agent-scriptable):**
+- Required smoke matrix: benign→0 · `rm -rf /`→2 · kill-switch→0 · malformed JSON→0 (+ empty
+  stdin→0, no-command→0).
+- All 16 block patterns→2; both warn patterns→0; 9 precision cases (targeted `rm`, `--force-with-lease`,
+  force-push to a feature branch, `dd of=file`, `> /dev/null`, targeted `chmod`, `curl -o`, …)→0.
+- **Fault-injection (ADR-006):** a mutant whose `decide()` throws on every call still exits 0 on
+  `rm -rf /` — a broken gate never blocks.
+
+**Known, deliberate trade-off:** detection matches the raw command string (no shell-quote parsing),
+so `echo 'rm -rf /'` / `git commit -m "fix rm -rf / guard"` will also trip the gate. Accepted on
+purpose: stripping quoted strings to avoid that would let the genuinely-catastrophic `bash -c 'rm -rf /'`
+slip through — a false-negative is worse than a clearly-messaged, overridable false-positive.
+
+**Remaining (manual, interactive `claude` only):** `/plugin marketplace update nxtlvl-dev` to reinstall,
+then live-fire one block (e.g. confirm a real `rm -rf /` attempt is stopped) + the kill switch.
 
 ---
 
