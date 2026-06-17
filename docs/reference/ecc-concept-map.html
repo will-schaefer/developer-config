@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ECC Architecture — Concept Map</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --panel2:#1c232d; --line:#2a323d;
+    --ink:#e6edf3; --muted:#8b949e; --faint:#5b646e;
+    --know:#15803d; --fuzzy:#a16207; --unknown:#3a424d;
+    --g-surface:#60a5fa; --g-install:#a78bfa; --g-orch:#fb923c; --g-gov:#f472b6; --g-plat:#22d3ee;
+    --accent:#58a6ff;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --ui:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:14px;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+  header{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  header h1{font-size:15px;margin:0;font-weight:600;letter-spacing:.2px}
+  header .sub{color:var(--muted);font-size:12px}
+  header .presets{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+  button{font-family:var(--ui);font-size:12px;color:var(--ink);background:var(--panel2);border:1px solid var(--line);
+    border-radius:7px;padding:5px 10px;cursor:pointer;transition:background .12s,border-color .12s}
+  button:hover{background:#243040;border-color:#3a4754}
+  button.active{background:#1f6feb33;border-color:var(--accent);color:#cfe4ff}
+  .main{flex:1;display:flex;min-height:0}
+  .stage{flex:1;position:relative;min-width:0;background:
+    radial-gradient(900px 600px at 60% 38%, #11161d 0%, var(--bg) 70%)}
+  canvas{display:block;width:100%;height:100%;cursor:grab}
+  canvas.connecting{cursor:crosshair}
+  .tooltip{position:absolute;pointer-events:none;max-width:280px;background:#0b0e13ee;border:1px solid var(--line);
+    border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.4;box-shadow:0 8px 28px #000a;opacity:0;transition:opacity .1s;z-index:5}
+  .tooltip b{color:#fff}
+  .tooltip .path{font-family:var(--mono);color:var(--accent);font-size:11px;display:block;margin:3px 0 4px}
+  .tooltip .desc{color:var(--muted)}
+  .stage .hint{position:absolute;left:12px;bottom:10px;color:var(--faint);font-size:11px;font-family:var(--mono)}
+  aside{width:320px;flex:none;border-left:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;min-height:0}
+  .sect{padding:10px 12px;border-bottom:1px solid var(--line)}
+  .sect h2{margin:0 0 7px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600}
+  .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--muted)}
+  .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:4px;vertical-align:-1px}
+  .legend .k{width:18px;height:0;border-top:3px solid;vertical-align:3px;margin-right:4px;display:inline-block;border-radius:2px}
+  select{font-family:var(--ui);font-size:12px;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:5px 8px}
+  .nodelist{flex:1;overflow:auto;padding:6px 8px}
+  .nl-group{margin:6px 2px 2px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--faint)}
+  .nitem{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:7px}
+  .nitem:hover{background:var(--panel2)}
+  .nitem .vis{appearance:none;width:14px;height:14px;border:1px solid var(--line);border-radius:4px;background:var(--panel2);cursor:pointer;flex:none}
+  .nitem .vis:checked{background:var(--accent);border-color:var(--accent)}
+  .nitem .nm{flex:1;font-size:12.5px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nitem .nm .dot{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:6px;vertical-align:0}
+  .chip{font-size:10px;font-family:var(--mono);padding:2px 7px;border-radius:20px;cursor:pointer;border:1px solid #0000;flex:none;min-width:58px;text-align:center}
+  .chip.know{background:#15803d33;color:#7ee2a8;border-color:#15803d}
+  .chip.fuzzy{background:#a1620733;color:#f3cf86;border-color:#a16207}
+  .chip.unknown{background:#3a424d44;color:#aab4bf;border-color:#4a535f}
+  .promptwrap{border-top:1px solid var(--line);padding:10px 12px;background:var(--panel2)}
+  .promptwrap .top{display:flex;align-items:center;margin-bottom:6px}
+  .promptwrap h2{margin:0;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+  #prompt{white-space:pre-wrap;font-family:var(--mono);font-size:11.5px;line-height:1.5;color:#c9d4df;background:#0b0e13;
+    border:1px solid var(--line);border-radius:8px;padding:10px;max-height:230px;overflow:auto}
+  #copy{margin-left:auto}
+  #copy.ok{background:#15803d33;border-color:var(--know);color:#7ee2a8}
+  .stat{color:var(--faint);font-size:11px;font-family:var(--mono)}
+</style>
+</head>
+<body>
+<header>
+  <h1>ECC Architecture — Concept Map</h1>
+  <span class="sub">Everything Claude Code · drag nodes · mark what you know · copy a learning prompt</span>
+  <div class="presets">
+    <button data-preset="overview">Overview</button>
+    <button data-preset="zoomout">Zoom out</button>
+    <button data-preset="orch">Focus: Orchestration</button>
+    <button data-preset="install">Focus: Install</button>
+    <button data-preset="gov">Focus: Governance</button>
+    <button data-preset="reset">Reset</button>
+  </div>
+</header>
+
+<div class="main">
+  <div class="stage">
+    <canvas id="cv"></canvas>
+    <div class="tooltip" id="tip"></div>
+    <div class="hint" id="hint">tip: turn on Connect, click two nodes to add a relationship · double-click a node to cycle knowledge</div>
+  </div>
+
+  <aside>
+    <div class="sect">
+      <h2>Legend</h2>
+      <div class="legend" style="margin-bottom:6px">
+        <span><span class="k" style="border-color:var(--know)"></span>Know</span>
+        <span><span class="k" style="border-color:var(--fuzzy)"></span>Fuzzy</span>
+        <span><span class="k" style="border-color:var(--unknown)"></span>Unknown</span>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--g-surface)"></i>Surface</span>
+        <span><i style="background:var(--g-install)"></i>Install</span>
+        <span><i style="background:var(--g-orch)"></i>Orchestration</span>
+        <span><i style="background:var(--g-gov)"></i>Governance</span>
+        <span><i style="background:var(--g-plat)"></i>Platform</span>
+      </div>
+      <div class="legend" style="margin-top:4px">node fill = knowledge · border = group</div>
+    </div>
+
+    <div class="sect">
+      <h2>Edit the map</h2>
+      <div class="row">
+        <button id="connectBtn">Connect</button>
+        <select id="relType" title="relationship type for new edges">
+          <option>delegates to</option><option>installs</option><option>bundles</option>
+          <option>wraps</option><option>invokes</option><option>governs</option>
+          <option>gates</option><option>enforces</option><option>feeds</option>
+          <option>mirrors</option><option>manages</option><option>applied by</option>
+          <option>selects</option><option>relates to</option>
+        </select>
+        <button id="autoBtn">Auto-layout</button>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <button id="labelsBtn" class="active">Edge labels</button>
+        <button id="clearAddedBtn">Clear added edges</button>
+        <span class="stat" id="stat"></span>
+      </div>
+    </div>
+
+    <div class="nodelist" id="nodelist"></div>
+
+    <div class="promptwrap">
+      <div class="top"><h2>Learning prompt</h2><button id="copy">Copy</button></div>
+      <div id="prompt"></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+"use strict";
+const W = 1000, H = 680;
+const GROUPS = {
+  surface:{label:"Surface", color:"#60a5fa"},
+  install:{label:"Install", color:"#a78bfa"},
+  orch:{label:"Orchestration", color:"#fb923c"},
+  gov:{label:"Governance", color:"#f472b6"},
+  plat:{label:"Platform", color:"#22d3ee"},
+};
+const KN = {know:"#15803d", fuzzy:"#a16207", unknown:"#3a424d"};
+const KORDER = ["know","fuzzy","unknown"];
+
+// ---- pre-populated ECC concepts (real paths + descriptions) ----
+const NODES = [
+  // surface
+  {id:"skills",   g:"surface", label:"Skills",            path:"skills/ (271)",                 x:500,y:320, desc:"Invokable capability modules; each is a folder with a SKILL.md. The canonical, growing workflow surface."},
+  {id:"agents",   g:"surface", label:"Subagents",         path:"agents/ (67)",                  x:610,y:392, desc:"Specialist agents the harness dispatches for focused tasks: reviewers, build-resolvers, planner, loop-operator, harness-optimizer."},
+  {id:"commands", g:"surface", label:"Commands (legacy)", path:"commands/ (92)",                x:392,y:392, desc:"Slash-command compatibility surface. New work lands in skills first; commands mostly delegate to them."},
+  {id:"rules",    g:"surface", label:"Rules",             path:"rules/ (114)",                  x:486,y:212, desc:"Always-follow common + per-language coding standards (coding-style, patterns, security, testing, hooks)."},
+  {id:"hooks",    g:"surface", label:"Hooks",             path:"hooks/ (28)",                   x:628,y:268, desc:"Event-driven lifecycle automation: pre/post tool, stop, session. Some block (exit 2), most observe."},
+  // install
+  {id:"modules",   g:"install", label:"Modules",          path:"manifests/install-modules.json",   x:196,y:330, desc:"Atomic install unit: kind, paths, harness targets, deps, cost, stability (rules-core, agents-core, hooks-runtime…)."},
+  {id:"components",g:"install", label:"Components",        path:"manifests/install-components.json",x:150,y:218, desc:"Installable families grouping modules (baseline:*, lang:*)."},
+  {id:"profiles",  g:"install", label:"Install Profiles",  path:"manifests/install-profiles.json",  x:138,y:440, desc:"Named bundles of modules: minimal, opencode, core, developer (default), security, research, full."},
+  {id:"projinit",  g:"install", label:"project-init",      path:"config/project-stack-mappings.json",x:270,y:470, desc:"Detects a project's stack from indicator files → selects rules/skills + default build/test/lint commands; emits a dry-run onboarding plan."},
+  // orchestration
+  {id:"orchpipe", g:"orch", label:"orch-pipeline",        path:"skills/orch-pipeline",            x:760,y:330, desc:"Shared gated engine: Research→Plan→TDD→Review→Commit, a size classifier, and two human gates."},
+  {id:"orchwrap", g:"orch", label:"orch-* wrappers",      path:"skills/orch-add-feature, …",      x:872,y:280, desc:"Thin task-type wrappers (add-feature, change-feature, fix-defect, refine-code, build-mvp) over orch-pipeline."},
+  {id:"gan",      g:"orch", label:"GAN harness",          path:"skills/gan-style-harness",        x:848,y:404, desc:"Generator vs. ruthlessly strict Evaluator in a bounded scored loop (gan-generator/evaluator/planner agents)."},
+  {id:"multi",    g:"orch", label:"Multi-model (multi-*)",path:"skills/multi-plan, multi-execute",x:728,y:470, desc:"Multi-model workflows (research/plan/execute/optimize/review) while keeping Claude as the only filesystem writer."},
+  {id:"santa",    g:"orch", label:"santa-method",         path:"skills/santa-method",             x:872,y:486, desc:"Adversarial dual-review convergence: two independent reviewers must both approve before shipping."},
+  {id:"loops",    g:"orch", label:"Autonomous loops",     path:"skills/autonomous-loops",         x:640,y:470, desc:"Sequential/infinite/PR/RFC-DAG loop patterns with quality gates and recovery; driven by the loop-operator agent."},
+  // governance
+  {id:"gateguard",g:"gov", label:"GateGuard",             path:"hooks · gateguard-fact-force",    x:560,y:560, desc:"Fact-forcing gate: blocks the first edit per file (and risky Bash) until the agent gathers required facts. Toggle: ECC_GATEGUARD=off."},
+  {id:"qgate",    g:"gov", label:"Quality gates",         path:"hooks · quality-gate / format-typecheck", x:430,y:578, desc:"Post-edit format + typecheck + config-protection; can fail the Stop hook on errors."},
+  {id:"cl",       g:"gov", label:"Continuous learning",   path:"hooks · observe + evaluate-session", x:316,y:556, desc:"Captures tool-use signals and end-of-session patterns → candidate instincts/skills."},
+  {id:"principles",g:"gov",label:"Principles",            path:"SOUL.md · RULES.md · CLAUDE.md",  x:300,y:300, desc:"Five core principles (Agent-First, Test-Driven, Security-First, Immutability, Plan-Before-Execute) + a prompt-defense baseline."},
+  // platform
+  {id:"ecc2",     g:"plat", label:"ecc2 control plane",   path:"ecc2/ (Rust)",                    x:660,y:96,  desc:"Emerging 'layer above' that manages many sessions/loops at once — the operator control plane."},
+  {id:"mirrors",  g:"plat", label:"Multi-tool mirrors",   path:".agents · .cursor · .gemini · …",  x:868,y:120, desc:"The catalogue mirrored for other harnesses (Codex, Cursor, Gemini, Zed, Qwen, Kiro, Trae, CodeBuddy) — cross-harness portability."},
+  {id:"cli",      g:"plat", label:"CLIs & scripts",       path:"scripts/ (~200) · ecc, ecc-install", x:236,y:96, desc:"Cross-platform hook helpers and the ecc / ecc-install / ecc-control-pane CLIs that wire everything together."},
+];
+
+// ---- pre-populated relationships ----
+const SEED_EDGES = [
+  // install model
+  ["profiles","modules","bundles"], ["components","modules","groups"],
+  ["modules","skills","installs"], ["modules","agents","installs"],
+  ["modules","rules","installs"], ["modules","hooks","installs"],
+  ["projinit","modules","selects"], ["cli","modules","installs"],
+  // orchestration
+  ["orchwrap","orchpipe","wraps"], ["orchpipe","agents","delegates to"],
+  ["orchpipe","skills","delegates to"], ["orchpipe","gan","invokes"],
+  ["multi","agents","delegates to"], ["santa","agents","dual-reviews via"],
+  ["loops","orchpipe","loops"], ["ecc2","loops","manages"],
+  // governance
+  ["hooks","gateguard","includes"], ["hooks","qgate","includes"],
+  ["hooks","cl","feeds"], ["qgate","rules","enforces"],
+  ["gateguard","agents","gates"], ["cl","skills","extracts"],
+  ["principles","skills","governs"], ["principles","agents","governs"],
+  ["principles","rules","governs"], ["rules","agents","applied by"],
+  ["commands","skills","delegate to"],
+  // cross-harness
+  ["mirrors","skills","mirror"], ["mirrors","agents","mirror"], ["mirrors","commands","mirror"],
+];
+
+// ---- state ----
+const nodes = NODES.map(n => ({...n, knowledge:"fuzzy", visible:true, w:0, h:36}));
+const byId = {}; nodes.forEach(n => byId[n.id]=n);
+let edges = SEED_EDGES.map(([a,b,t]) => ({from:a,to:b,type:t,seed:true}));
+
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+const tip = document.getElementById("tip");
+const promptEl = document.getElementById("prompt");
+const statEl = document.getElementById("stat");
+let connecting=false, showLabels=true, pendingStart=null, hover=null, drag=null, dragMoved=false;
+
+function fit(){
+  const DPR = window.devicePixelRatio||1;
+  cv.width = W*DPR; cv.height = H*DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  measureAll(); draw();
+}
+function measureAll(){
+  ctx.font = "600 13px system-ui,sans-serif";
+  nodes.forEach(n => n.w = Math.max(78, ctx.measureText(n.label).width + 26));
+}
+function toCanvas(e){
+  const r = cv.getBoundingClientRect();
+  return { x:(e.clientX-r.left)*(W/r.width), y:(e.clientY-r.top)*(H/r.height) };
+}
+function nodeAt(x,y){
+  for(let i=nodes.length-1;i>=0;i--){ const n=nodes[i]; if(!n.visible) continue;
+    if(Math.abs(x-n.x)<=n.w/2 && Math.abs(y-n.y)<=n.h/2) return n; }
+  return null;
+}
+function edgeVisible(e){ return byId[e.from].visible && byId[e.to].visible; }
+
+// boundary point of a rounded-rect node toward (tx,ty)
+function edgePoint(n,tx,ty){
+  const dx=tx-n.x, dy=ty-n.y, hw=n.w/2, hh=n.h/2;
+  if(dx===0&&dy===0) return {x:n.x,y:n.y};
+  const sx=hw/Math.abs(dx||1e-6), sy=hh/Math.abs(dy||1e-6), s=Math.min(sx,sy);
+  return {x:n.x+dx*s, y:n.y+dy*s};
+}
+function rrect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // edges
+  edges.forEach(e=>{
+    if(!edgeVisible(e)) return;
+    const a=byId[e.from], b=byId[e.to];
+    const p1=edgePoint(a,b.x,b.y), p2=edgePoint(b,a.x,a.y);
+    const hot = hover && (e.from===hover.id||e.to===hover.id);
+    ctx.strokeStyle = hot ? "#7d8896" : "#333c47";
+    ctx.lineWidth = hot ? 2 : 1.3;
+    ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+    // arrowhead
+    const ang=Math.atan2(p2.y-p1.y,p2.x-p1.x), ah=7;
+    ctx.fillStyle = hot ? "#7d8896" : "#3c4651";
+    ctx.beginPath();
+    ctx.moveTo(p2.x,p2.y);
+    ctx.lineTo(p2.x-ah*Math.cos(ang-0.4), p2.y-ah*Math.sin(ang-0.4));
+    ctx.lineTo(p2.x-ah*Math.cos(ang+0.4), p2.y-ah*Math.sin(ang+0.4));
+    ctx.closePath(); ctx.fill();
+    if(showLabels){
+      const mx=(p1.x+p2.x)/2, my=(p1.y+p2.y)/2;
+      ctx.font="10px ui-monospace,Menlo,monospace";
+      const tw=ctx.measureText(e.type).width;
+      ctx.fillStyle="#0b0e13d9"; rrect(mx-tw/2-4,my-8,tw+8,15,4); ctx.fill();
+      ctx.fillStyle = hot ? "#c9d4df" : "#6b7681";
+      ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText(e.type,mx,my);
+    }
+  });
+  // pending connect line
+  if(connecting && pendingStart && hover && hover!==pendingStart){
+    ctx.strokeStyle="#58a6ff"; ctx.setLineDash([5,4]); ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(pendingStart.x,pendingStart.y); ctx.lineTo(hover.x,hover.y); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  // nodes
+  nodes.forEach(n=>{
+    if(!n.visible) return;
+    const x=n.x-n.w/2, y=n.y-n.h/2;
+    rrect(x,y,n.w,n.h,9);
+    ctx.fillStyle = KN[n.knowledge]; ctx.fill();
+    const sel = n===pendingStart, hov = n===hover;
+    ctx.lineWidth = sel?3:(hov?2.4:1.8);
+    ctx.strokeStyle = sel ? "#58a6ff" : GROUPS[n.g].color; ctx.stroke();
+    ctx.font="600 13px system-ui,sans-serif"; ctx.fillStyle="#f2f6fa";
+    ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(n.label,n.x,n.y+0.5);
+  });
+}
+
+// ---- interaction ----
+cv.addEventListener("mousedown",e=>{
+  const {x,y}=toCanvas(e); const n=nodeAt(x,y); if(!n) return;
+  if(connecting){
+    if(!pendingStart){ pendingStart=n; }
+    else if(n!==pendingStart){ addEdge(pendingStart.id,n.id); pendingStart=null; }
+    draw(); return;
+  }
+  drag={n, dx:x-n.x, dy:y-n.y}; dragMoved=false; cv.style.cursor="grabbing";
+});
+cv.addEventListener("mousemove",e=>{
+  const {x,y}=toCanvas(e);
+  if(drag){ drag.n.x=clamp(x-drag.dx,drag.n.w/2,W-drag.n.w/2); drag.n.y=clamp(y-drag.dy,20,H-20); dragMoved=true; hover=drag.n; draw(); return; }
+  const n=nodeAt(x,y);
+  if(n!==hover){ hover=n; draw(); }
+  if(n){ showTip(n,e); } else { tip.style.opacity=0; }
+  if(connecting && pendingStart) draw();
+});
+window.addEventListener("mouseup",()=>{ if(drag){ drag=null; cv.style.cursor=connecting?"crosshair":"grab"; } });
+cv.addEventListener("dblclick",e=>{ const {x,y}=toCanvas(e); const n=nodeAt(x,y); if(n){ cycle(n); } });
+cv.addEventListener("mouseleave",()=>{ tip.style.opacity=0; });
+
+function showTip(n,e){
+  const r=cv.getBoundingClientRect();
+  tip.innerHTML=`<b>${n.label}</b><span class="path">${n.path}</span><span class="desc">${n.desc}</span>`;
+  tip.style.opacity=1;
+  let lx=e.clientX-r.left+14, ly=e.clientY-r.top+14;
+  if(lx>r.width-300) lx=e.clientX-r.left-tip.offsetWidth-14;
+  tip.style.left=lx+"px"; tip.style.top=ly+"px";
+}
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+function cycle(n){ n.knowledge=KORDER[(KORDER.indexOf(n.knowledge)+1)%3]; sync(); }
+function addEdge(a,b){ if(a===b) return; if(edges.some(e=>e.from===a&&e.to===b)) return; edges.push({from:a,to:b,type:document.getElementById("relType").value,seed:false}); sync(); }
+
+// ---- auto-layout (force-directed) ----
+function autoLayout(){
+  const vis=nodes.filter(n=>n.visible);
+  for(let it=0; it<260; it++){
+    vis.forEach(n=>{n._fx=0;n._fy=0;});
+    for(let i=0;i<vis.length;i++) for(let j=i+1;j<vis.length;j++){
+      let dx=vis[i].x-vis[j].x, dy=vis[i].y-vis[j].y, d=Math.hypot(dx,dy)||1;
+      let rep=16000/(d*d); let ux=dx/d, uy=dy/d;
+      vis[i]._fx+=ux*rep; vis[i]._fy+=uy*rep; vis[j]._fx-=ux*rep; vis[j]._fy-=uy*rep;
+    }
+    edges.forEach(e=>{ if(!edgeVisible(e)) return; const a=byId[e.from], b=byId[e.to];
+      let dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy)||1, f=(d-150)*0.02, ux=dx/d, uy=dy/d;
+      a._fx+=ux*f; a._fy+=uy*f; b._fx-=ux*f; b._fy-=uy*f;
+    });
+    vis.forEach(n=>{ n._fx+=(W/2-n.x)*0.004; n._fy+=(H/2-n.y)*0.004;
+      n.x=clamp(n.x+clamp(n._fx,-14,14), n.w/2, W-n.w/2);
+      n.y=clamp(n.y+clamp(n._fy,-14,14), 24, H-24);
+    });
+  }
+  draw();
+}
+
+// ---- sidebar list ----
+function buildList(){
+  const host=document.getElementById("nodelist"); host.innerHTML="";
+  for(const gk of Object.keys(GROUPS)){
+    const hdr=document.createElement("div"); hdr.className="nl-group"; hdr.textContent=GROUPS[gk].label; host.appendChild(hdr);
+    nodes.filter(n=>n.g===gk).forEach(n=>{
+      const row=document.createElement("div"); row.className="nitem";
+      const vis=document.createElement("input"); vis.type="checkbox"; vis.className="vis"; vis.checked=n.visible;
+      vis.onchange=()=>{ n.visible=vis.checked; sync(); };
+      const nm=document.createElement("div"); nm.className="nm";
+      nm.innerHTML=`<span class="dot" style="background:${GROUPS[n.g].color}"></span>${n.label}`;
+      nm.title="center on "+n.label; nm.onclick=()=>{ flash(n); };
+      const chip=document.createElement("div"); chip.className="chip "+n.knowledge; chip.dataset.id=n.id;
+      chip.textContent=n.knowledge; chip.onclick=()=>cycle(n);
+      row.append(vis,nm,chip); host.appendChild(row);
+    });
+  }
+}
+function refreshChips(){
+  document.querySelectorAll(".chip").forEach(c=>{ const n=byId[c.dataset.id];
+    c.className="chip "+n.knowledge; c.textContent=n.knowledge; });
+}
+let flashId=null;
+function flash(n){ flashId=n.id; pendingStart=n; draw(); setTimeout(()=>{ if(pendingStart===n&&!connecting) pendingStart=null; draw(); },650); }
+
+// ---- prompt ----
+function nat(arr){ if(arr.length===0) return ""; if(arr.length===1) return arr[0];
+  return arr.slice(0,-1).join(", ")+" and "+arr[arr.length-1]; }
+function updatePrompt(){
+  const vis=nodes.filter(n=>n.visible);
+  const know=vis.filter(n=>n.knowledge==="know").map(n=>n.label);
+  const fuzzy=vis.filter(n=>n.knowledge==="fuzzy").map(n=>n.label);
+  const unknown=vis.filter(n=>n.knowledge==="unknown").map(n=>n.label);
+  const rels=edges.filter(edgeVisible).map(e=>`${byId[e.from].label} ${e.type} ${byId[e.to].label}`);
+  let p=`I'm learning the architecture of ECC ("Everything Claude Code"), a harness-native agent operating system (reference repo: reference/ECC-main).\n`;
+  if(know.length) p+=`\nI already understand: ${nat(know)}.`;
+  if(fuzzy.length) p+=`\nI'm fuzzy on: ${nat(fuzzy)}.`;
+  if(unknown.length) p+=`\nI have no idea about: ${nat(unknown)}.`;
+  if(rels.length){
+    p+=`\n\nRelationships I want to understand:\n`+rels.map(r=>`  • ${r}`).join("\n");
+  }
+  const focus = (fuzzy.length||unknown.length) ? "the concepts I marked fuzzy or unknown" : "these concepts";
+  p+=`\n\nPlease explain ${focus}, focusing on the relationships above and building on what I already know. Use concrete file references from reference/ECC-main and the full component map at docs/reference/ecc-main-map.md.`;
+  promptEl.textContent=p;
+}
+function sync(){ refreshChips(); updatePrompt(); statEl.textContent=`${nodes.filter(n=>n.visible).length} nodes · ${edges.filter(edgeVisible).length} edges`; draw(); }
+
+// ---- presets ----
+function setVisible(ids){ const set=new Set(ids); nodes.forEach(n=>n.visible=set.has(n.id)); }
+function allKnowledge(k){ nodes.forEach(n=>n.knowledge=k); }
+const PRESETS={
+  overview(){ nodes.forEach(n=>n.visible=true); },
+  reset(){ nodes.forEach(n=>{n.visible=true;n.knowledge="fuzzy";}); resetPos(); },
+  zoomout(){ setVisible(["skills","agents","commands","rules","hooks","profiles","ecc2","mirrors"]); },
+  orch(){ setVisible(["orchpipe","orchwrap","gan","multi","santa","loops","agents","skills","ecc2"]); },
+  install(){ setVisible(["profiles","components","modules","projinit","cli","skills","agents","rules","hooks"]); },
+  gov(){ setVisible(["hooks","gateguard","qgate","cl","principles","rules","agents","skills"]); },
+};
+function resetPos(){ NODES.forEach(s=>{ byId[s.id].x=s.x; byId[s.id].y=s.y; }); }
+
+document.querySelectorAll("[data-preset]").forEach(b=>b.onclick=()=>{
+  PRESETS[b.dataset.preset](); buildList(); sync();
+  if(b.dataset.preset!=="reset" && b.dataset.preset!=="overview") autoLayout();
+});
+document.getElementById("connectBtn").onclick=function(){ connecting=!connecting; pendingStart=null;
+  this.classList.toggle("active",connecting); cv.classList.toggle("connecting",connecting);
+  document.getElementById("hint").textContent= connecting
+    ? "connect mode ON · click a source node, then a target node"
+    : "tip: turn on Connect, click two nodes to add a relationship · double-click a node to cycle knowledge";
+  draw(); };
+document.getElementById("autoBtn").onclick=autoLayout;
+document.getElementById("labelsBtn").onclick=function(){ showLabels=!showLabels; this.classList.toggle("active",showLabels); draw(); };
+document.getElementById("clearAddedBtn").onclick=()=>{ edges=edges.filter(e=>e.seed); sync(); };
+document.getElementById("copy").onclick=function(){
+  navigator.clipboard.writeText(promptEl.textContent).then(()=>{
+    this.textContent="Copied!"; this.classList.add("ok");
+    setTimeout(()=>{ this.textContent="Copy"; this.classList.remove("ok"); },1400);
+  });
+};
+window.addEventListener("resize",fit);
+
+// ---- boot ----
+buildList(); fit(); sync();
+</script>
+</body>
+</html>

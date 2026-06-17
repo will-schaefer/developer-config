@@ -10,3 +10,7 @@
 
 # Nested editor-config repos with their own git history — keep out of this bundle
 config/helix/
+
+# Vendored references — large, machine-local "books on the shelf" (e.g. ECC-main ~49MB).
+# Our own analysis of them lives in docs/reference/ and IS tracked.
+/reference/

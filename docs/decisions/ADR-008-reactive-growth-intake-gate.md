@@ -1,0 +1,62 @@
+---
+id: ADR-008
+title: "Reactive growth governed by a written membership/intake gate"
+status: Accepted
+date: 2026-06-16
+---
+
+# ADR-008: Reactive growth governed by a written membership/intake gate
+
+## Context
+My workload is varied — Next.js full-stack, Python, Rust, knowledge-base and LLM-wiki
+construction, and agentic engineering. With that much variety, the risk **inverts**: the
+danger is not that `nxtlvl` stays too thin, but that a reactive "just add a skill for this"
+engine pulls things in *fast* and re-explodes the harness back to ecc scale — the exact
+bloat the rebuild exists to escape.
+
+So growth needs a brake that is **falsifiable**, not a vibe ("this seems useful").
+
+## Decision
+Govern all growth with two written tests:
+
+- **Membership test:** *Would I want this no matter what I'm working on this week?*
+  → **build now** (task-independent machinery / workflow shape). *Only matters once a
+  specific task names it?* → **reactive** (e.g. a `react-reviewer`, a `postgres-migration`
+  skill) — not pre-built.
+- **Written intake gate (not a vibe):** a new skill/workflow joins **only** via a one-line
+  backlog entry naming **the task that required it** *and* **the existing thing that failed.**
+  This is falsifiable and is fed by the fallback log
+  ([ADR-005](ADR-005-fallback-log-dual-metric.md)).
+- **Harden trigger:** when the log shows the same recurring miss **N≈2–3 times** for a
+  specific workflow, that becomes a revision ticket. Workflows are revised on **logged
+  repeat-need, never on inspiration.**
+
+The fallback log *is* the reactive catalog backlog and the un-defer trigger; deferred
+machinery (continuous-learning capture, governance, the optimizer loop, the heavyweight
+Bash dispatcher) un-defers only when the log proves repeat-need.
+
+## Alternatives Considered
+
+### Proactive breadth (pre-build for anticipated needs)
+- Pros: capability ready before it's needed.
+- Cons: re-explodes to ecc-scale breadth; most of it never gets used; defeats the rebuild.
+- Rejected: "core machinery first; scale machinery reactively."
+
+### Vibe-based reactive additions (add when it feels useful)
+- Pros: low friction.
+- Cons: no falsifiable bar; the harness drifts back toward bloat by a thousand small "seems
+  useful" calls.
+- Rejected: the one-line intake entry (task + what failed) is the required falsifiable gate.
+
+### Never grow past Phase 0
+- Pros: maximally lean.
+- Cons: real recurring gaps go uncovered; fallback-rate never plateaus low.
+- Rejected: growth is wanted — but *gated*, not free.
+
+## Consequences
+- Adding any new skill/workflow is an **ask-first** action requiring the written intake entry.
+- `nxtlvl` stays lean by the intake gate **plus** dormant-ecc as the fallback
+  ([ADR-002](ADR-002-ecc-dormant-reference-backstop.md)) for genuine edge cases.
+- Vendoring individual agent-skills skills, and a likely fourth "agent-building" workflow,
+  both stay **reactive** rather than pre-built ([ADR-003](ADR-003-compose-not-reconstruct.md)).
+- The success metric and the growth engine share one substrate: the fallback log.
