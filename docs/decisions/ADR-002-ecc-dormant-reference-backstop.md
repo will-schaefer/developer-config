@@ -58,3 +58,10 @@ ecc covers only what I consciously reach for, and every reach is logged.
   ([ADR-001](ADR-001-plugin-local-marketplace-packaging.md)) — sub-minute recovery.
 - Confirmed 2026-06-17: ecc's agents/MCP disconnected at runtime after restart — dormant in
   practice, not just in config.
+- Generalized 2026-06-17: **dormant-not-deleted is the standard endpoint for *any* vendored
+  upstream, not just ecc.** As `agent-skills` skills are vendored into `nxtlvl` and refined for
+  fit ([ADR-003](ADR-003-compose-not-reconstruct.md)) under the gated intake
+  ([ADR-008](ADR-008-reactive-growth-intake-gate.md)), the upstream plugin is retired the same
+  way — installed-but-dormant once enough is vendored, **never `rm`-ed** — preserving it as
+  reference/backstop and keeping the fallback signal intact. First vendored:
+  `documentation-and-adrs` (2026-06-17).
