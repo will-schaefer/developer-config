@@ -22,7 +22,7 @@
         "hooks": [
           { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}\"/hooks/context-alert.js", "timeout": 10 }
         ],
-        "description": "Alert the agent once live context crosses NXTLVL_CONTEXT_ALERT_TOKENS (default 180k)",
+        "description": "Alert the agent once live context crosses NXTLVL_CONTEXT_ALERT_TOKENS (default 200k)",
         "id": "post:context-alert"
       }
     ]

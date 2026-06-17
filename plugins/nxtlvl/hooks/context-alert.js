@@ -35,7 +35,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const DEFAULT_THRESHOLD = 180000;
+const DEFAULT_THRESHOLD = 200000;
 const REARM_FRACTION = 0.9; // re-arm once context drops below 90% of threshold
 const TAIL_BYTES = 4 * 1024 * 1024; // bound the per-call transcript read
 const MAX_SESSION_ID_LENGTH = 64;
