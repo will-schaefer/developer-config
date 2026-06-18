@@ -49,6 +49,18 @@ a hand-built router is structurally a slower, capped shim around the real dispat
 itself reimplements none of this). I learn orchestration by *reading* CC/ecc and *designing
 the composition layer*; deterministic multi-agent control uses the native `Workflow` tool.
 
+**Operating model → orchestrator + specialists.** The main session is a *lean orchestrator*:
+it holds the task and the context budget and delegates specialized work to subagents chosen by
+the present task, instead of doing everything inline. This is the composition layer's defining
+shape — and it rides on the **native** dispatch primitive (description-triggered routing, the
+`Task`/`Workflow` tools), never a hand-built router: I own *which* specialists exist and *when*
+to delegate; the dispatch underneath stays native. Specialists are **scoped** to my actual
+stacks (Next.js/TS, Python, Rust + cross-cutting general agents + agent-building) and **grow
+reactively** through the intake gate — realized as native agents with injected skills by
+default, as custom agents only where the sandbox/isolation/model test justifies one, with
+dormant ecc as the on-demand fallback library. Delegation is also context preservation: heavy
+work runs in an isolated subagent context, keeping the orchestrator lean.
+
 ### Reconstruction backlog (ordered — feeds `/plan`)
 
 1. **Layered config + plugin packaging** — can't run without it; teaches the skeleton.

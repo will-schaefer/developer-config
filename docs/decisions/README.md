@@ -21,3 +21,4 @@ Anchors these consume: [`../intent/personal-harness.md`](../intent/personal-harn
 | [009](ADR-009-objective-invoked-audit-gate.md) | Promotion gated by an objective, binary, *invoked* audit | Accepted (impl. deferred to Phase ≥1) |
 | [010](ADR-010-global-decision-rule.md) | A global decision rule governs how decisions are made + recorded; ADR-worthy tier first | Accepted |
 | [011](ADR-011-prose-quality-stop-slop.md) | Prose quality governed harness-wide by a vendored stop-slop skill + a condensed always-on chat convention | Accepted |
+| [012](ADR-012-agent-design-contract.md) | Main session orchestrates; agents are scoped specialists on a lean ECC-style contract, realized by the sandbox test | Accepted |
