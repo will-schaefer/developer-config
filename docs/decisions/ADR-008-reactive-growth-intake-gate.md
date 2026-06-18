@@ -35,6 +35,25 @@ The fallback log *is* the reactive catalog backlog and the un-defer trigger; def
 machinery (continuous-learning capture, governance, the optimizer loop, the heavyweight
 Bash dispatcher) un-defers only when the log proves repeat-need.
 
+### Hook-layer corollary
+
+The same gate governs hook *structure*, not just hook *count*. Hooks register **flat — one
+per event+matcher lane** (e.g. `PreToolUse`/`Bash`, `PostToolUse`/`*`). A consolidating
+dispatcher (one thin entry point fanning out to a registered chain of sub-checks) is itself
+**reactive machinery subject to this gate**: it is admitted only when a single lane first
+carries **≥2 independent hooks** that share input parsing *or* need deterministic ordering,
+short-circuit, or result-merging. Until then, flat registration wins. Consolidating *within
+one concern* (e.g. the 200K ping and ~325K backstop living in one `context-alert.js` with a
+two-stage state machine, per [ADR-006](ADR-006-hook-fail-open-gated-blocking.md)) is the
+right grain and needs no dispatcher.
+
+Rationale: ECC's `bash-hook-dispatcher` is a **family** consolidation — it bundles the Bash
+*quality* checks that share command-parsing — **not** "one hook per event." ECC's own
+`hooks.json` registers ~28 hooks across 7 events, and a single `Bash` call still fires four
+separate hook processes (the dispatcher is one of them). Adopting that scaffold now — for a
+harness whose every lane holds ~1 hook by design — would be architecture-before-earned, the
+precise failure this ADR exists to prevent.
+
 ## Alternatives Considered
 
 ### Proactive breadth (pre-build for anticipated needs)
@@ -60,3 +79,5 @@ Bash dispatcher) un-defers only when the log proves repeat-need.
 - Vendoring individual agent-skills skills, and a likely fourth "agent-building" workflow,
   both stay **reactive** rather than pre-built ([ADR-003](ADR-003-compose-not-reconstruct.md)).
 - The success metric and the growth engine share one substrate: the fallback log.
+- Hook registration stays **flat per event+matcher lane**; a consolidating dispatcher is
+  earned structure, admitted only once a lane carries ≥2 hooks (see Hook-layer corollary).
