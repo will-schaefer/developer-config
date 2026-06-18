@@ -25,14 +25,15 @@
  * once per crossing, and re-arms when context falls back below
  * REARM_FRACTION * its OWN threshold (e.g. after /compact). The primary
  * injects a one-line "FYI, don't stop" instruction the agent surfaces at
- * its next report; the backstop is notification-only (osascript, wired in T4).
+ * its next report; the backstop is notification-only (osascript, darwin-only).
  *
  * Tunable via env:
  *   NXTLVL_CONTEXT_ALERT_TOKENS            primary threshold (default 200000)
  *   NXTLVL_CONTEXT_ALERT_BACKSTOP_TOKENS   backstop threshold (default 325000;
  *                                          ignored if <= primary)
  *   NXTLVL_CONTEXT_ALERT_NOTIFY            set to off/0/false to suppress the macOS
- *                                          notification (the in-context line stays)
+ *                                          notification (a primary's in-context line
+ *                                          still fires; a backstop then goes silent)
  *   NXTLVL_CONTEXT_ALERT                   set to off/0/false to disable entirely
  */
 
@@ -50,9 +51,15 @@ const TAIL_BYTES = 4 * 1024 * 1024; // bound the per-call transcript read
 const MAX_SESSION_ID_LENGTH = 64;
 const MAX_STDIN = 4 * 1024 * 1024;
 
+const OFF_VALUES = ['0', 'false', 'no', 'off', 'disabled'];
+
+/** True when an env value reads as an explicit off/disable switch. */
+function isOffLike(raw) {
+  return OFF_VALUES.includes(String(raw || '').trim().toLowerCase());
+}
+
 function isDisabled(env) {
-  const v = String(env.NXTLVL_CONTEXT_ALERT || '').trim().toLowerCase();
-  return ['0', 'false', 'no', 'off', 'disabled'].includes(v);
+  return isOffLike(env.NXTLVL_CONTEXT_ALERT);
 }
 
 function resolveThreshold(env) {
@@ -151,6 +158,10 @@ function readState(sessionId) {
   try {
     const s = JSON.parse(fs.readFileSync(statePath(sessionId), 'utf8'));
     if (!s || typeof s !== 'object') return { primary: false, backstop: false };
+    // Migrate the pre-two-stage shape {alerted:bool}: treat a prior alert as a
+    // fired primary so an in-flight upgrade does not re-ping a session already
+    // past the line. Without this, {alerted:true} reads as {primary:false,...}.
+    if ('alerted' in s && !('primary' in s)) return { primary: !!s.alerted, backstop: false };
     return { primary: !!s.primary, backstop: !!s.backstop };
   } catch {
     return { primary: false, backstop: false };
@@ -185,8 +196,7 @@ function buildPrimaryMessage(ctx) {
 }
 
 function notifyDisabled(env) {
-  const v = String(env.NXTLVL_CONTEXT_ALERT_NOTIFY || '').trim().toLowerCase();
-  return ['0', 'false', 'no', 'off', 'disabled'].includes(v);
+  return isOffLike(env.NXTLVL_CONTEXT_ALERT_NOTIFY);
 }
 
 /**

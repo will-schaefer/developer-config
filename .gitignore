@@ -14,3 +14,6 @@ config/helix/
 # Vendored references — large, machine-local "books on the shelf" (e.g. ECC-main ~49MB).
 # Our own analysis of them lives in docs/reference/ and IS tracked.
 /reference/
+
+# Packaged skill bundles — built artifacts; rebuild from source, don't track.
+*.skill

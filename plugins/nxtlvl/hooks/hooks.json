@@ -22,7 +22,7 @@
         "hooks": [
           { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}\"/hooks/context-alert.js", "timeout": 10 }
         ],
-        "description": "Alert the agent once live context crosses NXTLVL_CONTEXT_ALERT_TOKENS (default 200k)",
+        "description": "Two-stage context awareness: a primary FYI when live context crosses NXTLVL_CONTEXT_ALERT_TOKENS (default 200k), then a notify-only backstop at NXTLVL_CONTEXT_ALERT_BACKSTOP_TOKENS (default 325k). NXTLVL_CONTEXT_ALERT_NOTIFY=off suppresses the macOS notification; NXTLVL_CONTEXT_ALERT=off disables entirely.",
         "id": "post:context-alert"
       }
     ]

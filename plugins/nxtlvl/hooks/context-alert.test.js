@@ -175,6 +175,45 @@ test('disabled via env emits nothing even above threshold', () => {
   assert.strictEqual(hook.run(input, { ...ENV, NXTLVL_CONTEXT_ALERT: 'off' }), '');
 });
 
+// --- schema migration -----------------------------------------------------
+
+test('legacy {alerted:true} state migrates to a fired primary (no re-ping on upgrade)', () => {
+  const sid = newSession();
+  // A pre-two-stage session that had already alerted under the old single-stage hook.
+  fs.writeFileSync(path.join(os.tmpdir(), `nxtlvl-ctx-alert-${sid}.json`), JSON.stringify({ alerted: true }));
+  assert.strictEqual(callAt(sid, 150000), '', 'an already-alerted legacy session must not re-fire on upgrade');
+});
+
+// --- transcript parsing (token computation) -------------------------------
+
+test('lastUsageFromText skips sidechain and non-assistant records', () => {
+  const main = { type: 'assistant', isSidechain: false, message: { usage: { input_tokens: 111 } } };
+  const sidechain = { type: 'assistant', isSidechain: true, message: { usage: { input_tokens: 999 } } };
+  const toolResult = { type: 'user', message: { content: 'tool output' } };
+  // Newest-first scan must walk past the later sidechain + non-assistant lines
+  // and return the main-thread usage (111), never the subagent's inflated 999.
+  const text = [main, sidechain, toolResult].map(o => JSON.stringify(o)).join('\n');
+  const usage = hook.lastUsageFromText(text, false);
+  assert.ok(usage, 'expected a usage block');
+  assert.strictEqual(usage.input_tokens, 111);
+});
+
+test('liveContextTokens falls back to a full read when the usage block sits beyond the tail window', () => {
+  const p = path.join(os.tmpdir(), `nxtlvl-ctxtest-bigtail-${uniqueSuffix()}.jsonl`);
+  tmpFiles.push(p);
+  // The only assistant usage record sits at the very start; >TAIL_BYTES (4MB) of
+  // non-assistant filler follows, so the tail read misses it and only the
+  // full-read fallback in liveContextTokens can recover the count.
+  const rec = JSON.stringify({
+    type: 'assistant', isSidechain: false,
+    message: { usage: { input_tokens: 123456, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 } }
+  });
+  const filler = JSON.stringify({ type: 'user', message: { content: 'x'.repeat(4096) } }) + '\n';
+  const fillerCount = Math.ceil((5 * 1024 * 1024) / filler.length);
+  fs.writeFileSync(p, rec + '\n' + filler.repeat(fillerCount));
+  assert.strictEqual(hook.liveContextTokens(p), 123456);
+});
+
 // --- message builder ------------------------------------------------------
 
 test('buildPrimaryMessage rounds to K and carries the right semantics', () => {
