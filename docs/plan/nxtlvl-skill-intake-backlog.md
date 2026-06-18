@@ -32,3 +32,26 @@
 - **Upstream disposition:** `agent-skills` stays installed and untouched — dormant-not-deleted
   endpoint per [ADR-002](../decisions/ADR-002-ecc-dormant-reference-backstop.md) once enough of it
   is vendored.
+
+## 2. `github-workflow` (skill + agent) — VENDORED (2026-06-18)
+
+- **Task that required it:** standardize the GitHub workflow *for agents* — give nxtlvl one driven
+  `branch → commit → PR → review → CI → merge` loop instead of agents improvising branch names,
+  commit style, and PR shape differently every session.
+- **Existing thing that failed:** `git-workflow` + `github-ops` document the loop but nothing
+  *executes* it, and three conventions clash with nxtlvl — ECC mandates Conventional Commits while
+  this repo's history is sentence-case, attribution defaults disagree, and the bases re-derive review
+  instead of reusing `nxtlvl:review`. A thin call to either upstream left the conventions unresolved
+  and nothing driving the steps.
+- **Membership:** build-now. A standardized GitHub loop is task-independent machinery (it applies on
+  every project that touches GitHub), so it qualifies on the spot — no logged near-miss needed.
+- **Action taken:** vendored `git-workflow` + `github-ops` into
+  [`plugins/nxtlvl/skills/github-workflow/SKILL.md`](../../plugins/nxtlvl/skills/github-workflow/SKILL.md),
+  refined for fit ([ADR-003](../decisions/ADR-003-compose-not-reconstruct.md), [ADR-012](../decisions/ADR-012-github-workflow-agent-and-conventions.md)):
+  Conventional Commits, draft-PR-first, no attribution, full-loop scope. Added the **first nxtlvl
+  agent**, [`plugins/nxtlvl/agents/github-workflow.md`](../../plugins/nxtlvl/agents/github-workflow.md),
+  which drives the loop and **composes** `nxtlvl:github-workflow` + `nxtlvl:review` rather than
+  reconstructing them. Dropped the live upstream calls; long-tail recipes stay a pointer into
+  `reference/ECC-main/skills/git-workflow`.
+- **Upstream disposition:** `agent-skills`/ECC stay installed and untouched — dormant-not-deleted
+  per [ADR-002](../decisions/ADR-002-ecc-dormant-reference-backstop.md).
