@@ -66,7 +66,9 @@ this is its capability-domain corollary.
 - Rejected: the core is bounded to *demonstrated* certainties, not the full active map.
 
 ## Consequences
-- Five domains become build-now (**15 components**); they do not wait on the fallback signal.
+- Five domains are **build-committed** (**15 components**); they do not wait on the fallback
+  signal. Immediate build was **deferred 2026-06-18** — execution is tracked as **one GitHub
+  issue per domain** (committed work, *not* subject to the reactive intake gate).
 - The fallback log + intake gate still govern all non-core growth; ADR-008's membership and
   harden triggers are unchanged for everything outside the core.
 - Resolves the intent's parked open question (`../intent/personal-harness.md:220`, *"which
