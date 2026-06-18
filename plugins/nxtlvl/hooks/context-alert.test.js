@@ -175,6 +175,21 @@ test('disabled via env emits nothing even above threshold', () => {
   assert.strictEqual(hook.run(input, { ...ENV, NXTLVL_CONTEXT_ALERT: 'off' }), '');
 });
 
+test('a failed state write suppresses the alert (fail toward silence, not spam)', () => {
+  // Each PostToolUse is a fresh process; if the fired-flag cannot be persisted,
+  // the next process would re-read the unchanged state and re-fire forever.
+  // So an un-persistable crossing must stay silent. Build the transcript BEFORE
+  // stubbing writeFileSync (transcriptWith uses it), then break only the persist.
+  const input = JSON.stringify({ session_id: newSession(), transcript_path: transcriptWith(150000) });
+  const origWrite = fs.writeFileSync;
+  fs.writeFileSync = () => { throw new Error('disk full'); };
+  try {
+    assert.strictEqual(hook.run(input, ENV), '', 'cannot persist → no alert rather than spam');
+  } finally {
+    fs.writeFileSync = origWrite;
+  }
+});
+
 // --- schema migration -----------------------------------------------------
 
 test('legacy {alerted:true} state migrates to a fired primary (no re-ping on upgrade)', () => {

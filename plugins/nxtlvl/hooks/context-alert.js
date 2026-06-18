@@ -168,18 +168,21 @@ function readState(sessionId) {
   }
 }
 
+/** Persist state atomically. Returns true on success, false if it could not be written. */
 function writeState(sessionId, state) {
   const target = statePath(sessionId);
   const tmp = `${target}.${process.pid}.${crypto.randomBytes(4).toString('hex')}.tmp`;
   try {
     fs.writeFileSync(tmp, JSON.stringify(state), 'utf8');
     fs.renameSync(tmp, target);
+    return true;
   } catch {
     try {
       fs.unlinkSync(tmp);
     } catch {
       /* best effort */
     }
+    return false;
   }
 }
 
@@ -261,11 +264,17 @@ function run(rawInput, env = process.env) {
     if (ctx < primaryRearm && next.primary) next.primary = false;
     if (ctx < backstopRearm && next.backstop) next.backstop = false;
 
+    let persisted = true;
     if (next.primary !== state.primary || next.backstop !== state.backstop) {
-      writeState(sessionId, next);
+      persisted = writeState(sessionId, next);
     }
 
     if (!fired) return '';
+
+    // If we crossed a stage but could not record that fact, stay silent rather
+    // than re-fire on every later tool call (each PostToolUse is a fresh process
+    // that re-reads the unchanged state). Fail toward no-op, per the contract.
+    if (!persisted) return '';
 
     // Fire-and-forget desktop notification (darwin-only; never blocks or throws).
     const k = Math.round(ctx / 1000);
