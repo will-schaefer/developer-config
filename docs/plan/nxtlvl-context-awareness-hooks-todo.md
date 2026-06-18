@@ -15,11 +15,12 @@
 ## Phase 1 — Hook 1 rebuild (ships first)
 - [x] **T2** 🤖 Default → 200K at both sites (`DEFAULT_THRESHOLD` + `hooks.json` desc); all four sites
   agree; grep + load + fail-open smoke + JSON all pass.
-- [ ] **T3** 🤖 Two-stage state machine (`{primary, backstop}`), independent fire-once + hysteresis
-  re-arm; replace `buildMessage` with the one-line FYI (+ backstop line per D-backstop); add
-  `context-alert.test.js` (`node --test`). Tests green; fail-open paths covered.
-- [ ] **T4** 🤖 `osascript` notification fire-and-forget (detached, `unref`, errors swallowed, never
-  blocks 10s timeout); darwin-only per D-portable. Spawn-stub-throws test passes.
+- [x] **T3** 🤖 Two-stage state machine (`{primary, backstop}`), independent fire-once + per-stage
+  hysteresis re-arm; replaced `buildMessage` → `buildPrimaryMessage` one-line FYI; backstop is
+  notify-only. `context-alert.test.js` (`node --test`) — 16 tests green incl. fail-open paths.
+- [x] **T4** 🤖 `osascript` notify fire-and-forget (detached, `stdio:'ignore'`, `unref`, errors
+  swallowed); darwin-only + `NXTLVL_CONTEXT_ALERT_NOTIFY` kill switch. 4 stubbed-spawn tests
+  (throwing-spawn fail-open, detached opts, notify-only suppression) green. Suite total: 20/20.
 - [ ] **Checkpoint A** 🧑 Install; real crossing → FYI once + agent doesn't stop + notification
   visible + backstop per D-backstop + re-arm after `/compact`. **Hook 1 ships.**
 

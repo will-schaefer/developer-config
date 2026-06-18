@@ -19,13 +19,21 @@
  * exits 0, and on any error the hook emits NOTHING (a true no-op). It
  * never blocks or alters a tool call.
  *
- * Cadence: fires once when context crosses the threshold upward, then
- * re-arms when context falls back below REARM_FRACTION * threshold
- * (e.g. after auto-compaction), so each climb past the line alerts once.
+ * Two-stage cadence: a PRIMARY awareness ping when context first crosses
+ * the threshold (default 200K), then a single blunter BACKSTOP at ~325K
+ * if the session keeps climbing. Each stage arms and fires independently,
+ * once per crossing, and re-arms when context falls back below
+ * REARM_FRACTION * its OWN threshold (e.g. after /compact). The primary
+ * injects a one-line "FYI, don't stop" instruction the agent surfaces at
+ * its next report; the backstop is notification-only (osascript, wired in T4).
  *
  * Tunable via env:
- *   NXTLVL_CONTEXT_ALERT_TOKENS   threshold in tokens (default 200000)
- *   NXTLVL_CONTEXT_ALERT          set to off/0/false to disable entirely
+ *   NXTLVL_CONTEXT_ALERT_TOKENS            primary threshold (default 200000)
+ *   NXTLVL_CONTEXT_ALERT_BACKSTOP_TOKENS   backstop threshold (default 325000;
+ *                                          ignored if <= primary)
+ *   NXTLVL_CONTEXT_ALERT_NOTIFY            set to off/0/false to suppress the macOS
+ *                                          notification (the in-context line stays)
+ *   NXTLVL_CONTEXT_ALERT                   set to off/0/false to disable entirely
  */
 
 'use strict';
@@ -35,8 +43,9 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const DEFAULT_THRESHOLD = 200000;
-const REARM_FRACTION = 0.9; // re-arm once context drops below 90% of threshold
+const DEFAULT_THRESHOLD = 200000; // primary awareness ping
+const DEFAULT_BACKSTOP = 325000; // blunter escalation if the session keeps climbing
+const REARM_FRACTION = 0.9; // re-arm once context drops below 90% of a stage's threshold
 const TAIL_BYTES = 4 * 1024 * 1024; // bound the per-call transcript read
 const MAX_SESSION_ID_LENGTH = 64;
 const MAX_STDIN = 4 * 1024 * 1024;
@@ -49,6 +58,13 @@ function isDisabled(env) {
 function resolveThreshold(env) {
   const n = parseInt(env.NXTLVL_CONTEXT_ALERT_TOKENS, 10);
   return Number.isFinite(n) && n > 0 ? n : DEFAULT_THRESHOLD;
+}
+
+/** Backstop threshold, or null when it would not sit above the primary. */
+function resolveBackstop(env, primary) {
+  const n = parseInt(env.NXTLVL_CONTEXT_ALERT_BACKSTOP_TOKENS, 10);
+  const v = Number.isFinite(n) && n > 0 ? n : DEFAULT_BACKSTOP;
+  return v > primary ? v : null;
 }
 
 /** Reject path traversal, strip unsafe chars, bound length. */
@@ -134,9 +150,10 @@ function statePath(sessionId) {
 function readState(sessionId) {
   try {
     const s = JSON.parse(fs.readFileSync(statePath(sessionId), 'utf8'));
-    return s && typeof s === 'object' ? s : { alerted: false };
+    if (!s || typeof s !== 'object') return { primary: false, backstop: false };
+    return { primary: !!s.primary, backstop: !!s.backstop };
   } catch {
-    return { alerted: false };
+    return { primary: false, backstop: false };
   }
 }
 
@@ -155,17 +172,41 @@ function writeState(sessionId, state) {
   }
 }
 
-function buildMessage(ctx, threshold) {
+function buildPrimaryMessage(ctx) {
   const k = Math.round(ctx / 1000);
-  const mark = Math.round(threshold / 1000);
   return (
-    `CONTEXT NOTICE: ~${k}K tokens now in context (crossed the ${mark}K mark). ` +
-    'Begin winding down to a clean stopping point rather than starting new work: ' +
-    'finish or checkpoint the step in progress, commit or save anything uncommitted, ' +
-    'and write a short summary of what remains. Then run /compact to reclaim context ' +
-    'before continuing — and if you cannot invoke it yourself, tell the user it is a ' +
-    'good moment to run /compact.'
+    `CONTEXT FYI — do not stop or change course. Live context is ~${k}K tokens, ` +
+    'entering the range where output quality can start to soften. Finish the current ' +
+    'step normally. At your next message to the user, append exactly one plain line ' +
+    `noting this — e.g. "Context ~${k}K — a good moment to /compact at the next natural ` +
+    'break." Do not dramatize it, do not repeat it on later turns, and do not act on it ' +
+    'beyond that single line.'
   );
+}
+
+function notifyDisabled(env) {
+  const v = String(env.NXTLVL_CONTEXT_ALERT_NOTIFY || '').trim().toLowerCase();
+  return ['0', 'false', 'no', 'off', 'disabled'].includes(v);
+}
+
+/**
+ * Fire-and-forget macOS notification. Spawns osascript detached, swallows every
+ * error, and never blocks — it must never break or stall the hook (fail-open by
+ * design). Darwin-only (D-portable); a no-op everywhere else.
+ */
+function notify(title, body, env = process.env) {
+  try {
+    if (notifyDisabled(env)) return;
+    if (process.platform !== 'darwin') return;
+    const esc = s => String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const script = `display notification "${esc(body)}" with title "${esc(title)}"`;
+    const cp = require('child_process');
+    const child = cp.spawn('osascript', ['-e', script], { detached: true, stdio: 'ignore' });
+    if (child && typeof child.on === 'function') child.on('error', () => {});
+    if (child && typeof child.unref === 'function') child.unref();
+  } catch {
+    /* fail-open: a notification must never break the hook */
+  }
 }
 
 /**
@@ -184,26 +225,52 @@ function run(rawInput, env = process.env) {
     const ctx = liveContextTokens(input.transcript_path);
     if (ctx === null) return '';
 
-    const threshold = resolveThreshold(env);
-    const rearm = Math.floor(threshold * REARM_FRACTION);
+    const primary = resolveThreshold(env);
+    const backstop = resolveBackstop(env, primary);
+    const primaryRearm = Math.floor(primary * REARM_FRACTION);
+    const backstopRearm = backstop ? Math.floor(backstop * REARM_FRACTION) : Infinity;
+
     const state = readState(sessionId);
+    const next = { primary: state.primary, backstop: state.backstop };
+    let fired = null; // 'primary' | 'backstop'
 
-    if (ctx >= threshold) {
-      if (state.alerted) return ''; // already alerted on this crossing
-      writeState(sessionId, { alerted: true });
-      return JSON.stringify({
-        hookSpecificOutput: {
-          hookEventName: 'PostToolUse',
-          additionalContext: buildMessage(ctx, threshold)
-        }
-      });
+    // Fire the highest stage crossed that has not yet fired this crossing.
+    // Jumping straight past the primary into the backstop range marks BOTH
+    // fired, so the gentle primary line never lands after you are already past it.
+    if (backstop && ctx >= backstop && !state.backstop) {
+      next.backstop = true;
+      next.primary = true;
+      fired = 'backstop';
+    } else if (ctx >= primary && !state.primary) {
+      next.primary = true;
+      fired = 'primary';
     }
 
-    // Below threshold: re-arm once we drop under the hysteresis floor.
-    if (ctx < rearm && state.alerted) {
-      writeState(sessionId, { alerted: false });
+    // Re-arm each stage once context drops below its own hysteresis floor
+    // (e.g. after /compact), so the next climb past the line fires again.
+    if (ctx < primaryRearm && next.primary) next.primary = false;
+    if (ctx < backstopRearm && next.backstop) next.backstop = false;
+
+    if (next.primary !== state.primary || next.backstop !== state.backstop) {
+      writeState(sessionId, next);
     }
-    return '';
+
+    if (!fired) return '';
+
+    // Fire-and-forget desktop notification (darwin-only; never blocks or throws).
+    const k = Math.round(ctx / 1000);
+    if (fired === 'backstop') {
+      // Backstop is notification-only (D-backstop) — no in-context line.
+      notify(`nxtlvl · context ~${k}K`, 'Past the quality zone — a good time to /compact soon.', env);
+      return '';
+    }
+    notify(`nxtlvl · context ~${k}K`, 'A good moment to /compact at your next natural break.', env);
+    return JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: 'PostToolUse',
+        additionalContext: buildPrimaryMessage(ctx)
+      }
+    });
   } catch {
     return ''; // fail-open: never alter the session
   }
@@ -228,5 +295,7 @@ module.exports = {
   lastUsageFromText,
   sanitizeSessionId,
   resolveThreshold,
-  buildMessage
+  resolveBackstop,
+  buildPrimaryMessage,
+  notify
 };
