@@ -83,7 +83,10 @@ Incorporate stop-slop as a **vendored canonical source with two faces**, with fi
 - The audit's drift-check spans the global↔plugin boundary; it is built when `nxtlvl:audit` exists
   (Phase ≥1, [ADR-009](ADR-009-objective-invoked-audit-gate.md)). Until then drift is caught by eye.
 - Always-on context grows by ≤ 15 lines — the one budgeted exception to
-  [ADR-007](ADR-007-context-budgeted-injection.md); it must stay small or it loses its justification.
+  [ADR-007](ADR-007-context-budgeted-injection.md). Its quality bar is **coverage of every core
+  rule** (the floor, checked by the audit); the ≤ 15-line figure is a soft densification target, not
+  a license to drop a rule to hit the count ([ADR-012](ADR-012-quality-first-over-leanness.md)). It
+  stays a tight, dense extract that still covers every rule, or it loses its justification.
 - Coverage gap by design: workflow-less prose (KB/wiki) leans on on-demand invocation until a KB/wiki
   workflow is built reactively ([ADR-008](ADR-008-reactive-growth-intake-gate.md)).
 - Two reactive escalations stay on the shelf, gated by the fallback log: a warn-only Stop hook (if

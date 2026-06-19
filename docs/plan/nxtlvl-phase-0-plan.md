@@ -319,11 +319,11 @@ the metric), then integration + promotion.
 | `hooks.json` referencing not-yet-built scripts errors mid-build | Med | **Incremental wiring** — wire each event only when its script lands (PreToolUse@M0, SessionStart@M4, SessionEnd@M6). |
 | Install / `/nxtlvl:*` steps are interactive-only; agent cannot run them | Med | Tasks 4, 5, 11, 13–15 marked **[MANUAL]**; user runs and reports the binary result. |
 | Shell fail-open is subtle (`set -e`, `pipefail`, traps, missing files) | **High** — a blocking session hook is the worst failure mode | No `set -e`; explicit `exit 0` on every path; wrap body; **fault-injection test** (T12) is a required gate. |
-| Context-injection token budget undefined | Low | Pick a concrete budget now (OQ1: ≤ ~300 tokens); cut lowest-value block first. |
+| Context-injection token budget undefined | Low | Pick a concrete budget now (OQ1: ≤ ~300 tokens) as a **soft backstop**; densify first, cut lowest-value (non-earning) block before dropping proven value ([ADR-012](../decisions/ADR-012-quality-first-over-leanness.md)). |
 
 ## Open Questions (resolve before / during implementation; defaults proposed)
 
-1. **Context-injection token budget (M4/T9).** Propose a concrete cap: **≤ ~300 tokens (~20 lines)**, cut order = fallback digest → task pointer → git line. Confirm or set a number.
+1. **Context-injection token budget (M4/T9).** Propose a concrete **soft backstop** (not a hard cap): **≤ ~300 tokens (~20 lines)**; over budget → densify/consolidate first, then cut order = fallback digest → task pointer → git line (lowest-value non-earner first, never proven value to hit the number; [ADR-012](../decisions/ADR-012-quality-first-over-leanness.md)). Confirm or set a number.
 2. **`hooks.json` wiring strategy (T3/T9/T12).** Recommend **incremental** (wire each event with its script). Alternative: wire all three at M0 with `exit 0` stubs. Confirm incremental.
 3. **Spike ecc-prefix confirmation (T5/T13).** Is non-ecc field discovery + reasoning sufficient for Phase 0, or do you want one temporary **logged** ecc re-enable to confirm the literal `ecc:` prefix end-to-end? (Recommend: discover with non-ecc; do one logged ecc confirmation at T13.)
 4. **dev-skill vendoring (T7).** Spec resolves this as "stays reactive" — v1 **composes**, does not vendor individual agent-skills skills. Confirmed unless you want a specific skill vendored now.

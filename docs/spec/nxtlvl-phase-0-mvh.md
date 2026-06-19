@@ -269,7 +269,10 @@ error is swallowed. Non-ecc invocations append nothing.
 
 **`session-context.sh` contract (M4):** read the SessionStart event on stdin → assemble a
 **bounded** pointer block, emit it as the hook's `additionalContext` → **always `exit 0`**, even on
-error. Payload, in priority order, **token-budgeted** (cut the lowest-value block first if over budget):
+error. Payload, in priority order, **token-budgeted** — the budget is a *soft backstop* (densify
+first; shed only non-earning blocks, never proven value to hit a number;
+[ADR-012](../decisions/ADR-012-quality-first-over-leanness.md)); cut the lowest-value block first if
+still over:
 1. git: current branch + dirty/clean flag (one line).
 2. current-task pointer: e.g. `task in progress → read docs/spec/nxtlvl-phase-0-mvh.md` (a *pointer*,
    never the file's content).
@@ -283,7 +286,9 @@ hygiene). The single `quality` field (1–5 / "did I redo this") is appended **b
 number is manual and the dual (fallback-rate × quality) metric is computable from the first session.
 
 **Conventions:** kebab-case skill/hook names; `${CLAUDE_PLUGIN_ROOT}` for all in-plugin paths;
-every auto-injected context block justifies its tokens or is cut (**pointers > content**).
+every auto-injected context block justifies its tokens or is cut (**pointers > content**) — the cut
+sheds non-earners, never proven value to hit the budget
+([ADR-012](../decisions/ADR-012-quality-first-over-leanness.md)).
 
 ## Testing / Verification Strategy
 

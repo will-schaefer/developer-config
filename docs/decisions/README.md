@@ -16,8 +16,9 @@ Anchors these consume: [`../intent/personal-harness.md`](../intent/personal-harn
 | [004](ADR-004-extend-native-memory.md) | Extend native CC file-memory; build no new memory system | Accepted |
 | [005](ADR-005-fallback-log-dual-metric.md) | Hook-written fallback log + dual fallback-rate × quality north-star metric | Accepted |
 | [006](ADR-006-hook-fail-open-gated-blocking.md) | Hooks fail-open on error (absolute); blocking only via the intake gate + kill switches | Accepted |
-| [007](ADR-007-context-budgeted-injection.md) | Context assembly as a budgeted injection policy — pointers over content, by lifetime | Accepted |
-| [008](ADR-008-reactive-growth-intake-gate.md) | Reactive growth governed by a written membership/intake gate | Accepted |
+| [007](ADR-007-context-budgeted-injection.md) | Context assembly as a budgeted injection policy — pointers over content, by lifetime | Accepted · amended by [012](ADR-012-quality-first-over-leanness.md) |
+| [008](ADR-008-reactive-growth-intake-gate.md) | Reactive growth governed by a written membership/intake gate | Accepted · amended by [012](ADR-012-quality-first-over-leanness.md) |
 | [009](ADR-009-objective-invoked-audit-gate.md) | Promotion gated by an objective, binary, *invoked* audit | Accepted (impl. deferred to Phase ≥1) |
 | [010](ADR-010-global-decision-rule.md) | A global decision rule governs how decisions are made + recorded; ADR-worthy tier first | Accepted |
 | [011](ADR-011-prose-quality-stop-slop.md) | Prose quality governed harness-wide by a vendored stop-slop skill + a condensed always-on chat convention | Accepted |
+| [012](ADR-012-quality-first-over-leanness.md) | Quality first — size and leanness are backstops, never the objective; amends 007 + 008 | Accepted |
