@@ -13,3 +13,11 @@ harnesses over time**. Reviewing ecc is expected and intended, not a dependency 
 Distillations land in [`docs/reference/`](docs/reference/); each decision becomes an ADR. The
 main session orchestrates and delegates — **when spawning a subagent during the build, pass this
 method along** so it knows we study harnesses to shape ours.
+
+## Scaffolding new harness items — `sandbox/`
+Build new skills/agents/commands in [`sandbox/`](sandbox/) — a staging tree **off the harness's
+discovery path**, so work-in-progress isn't loaded, routed to, or warned about by the live plugin.
+It mirrors the plugin's shape (`sandbox/{skills,agents,commands}/`); promote when ready with
+`git mv sandbox/skills/<name> plugins/nxtlvl/skills/<name>` — the move *is* the activation. See
+[`sandbox/README.md`](sandbox/README.md). For throwaway experiments use the gitignored
+`*-workspace/` convention instead.
