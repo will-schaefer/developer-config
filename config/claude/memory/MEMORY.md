@@ -28,3 +28,6 @@
 - [ECC component-scoping doctrine](ecc-component-scoping-doctrine.md) — when to build agent vs skill vs command vs hook vs rule; operative axis + pairing pattern; full guide at docs/reference/ecc-agent-vs-skill-scoping.md.
 - [Distill reusable → doc + memory](distill-reusable-to-doc-plus-memory.md) — log reusable findings as a docs/reference/ doc + auto-memory pointer; default destination, don't re-ask.
 - [~/.claude config repo](claude-config-repo.md) — Developer repo is the SOURCE for global CC config at config/claude/ (CLAUDE.md, settings.json, rules/, skills/, memory/); ~/.claude/* symlink into it (link.sh reproduces); standalone ~/.claude repo retired; keep secrets out of settings.json; has a GitHub remote (will-schaefer/developer-config) + PR→main workflow (PR #1 merged 2026-06-18).
+- [ADRs advisory, not canonical](adrs-advisory-not-canonical.md) — on nxtlvl, reference ADRs but don't treat them as binding; record overrides.
+- [ADR numbering collision hazard](adr-numbering-collision-hazard.md) — doc-keeper assigns ADR numbers by globbing the working tree; verify against committed/remote tree to avoid dups.
+- [Meta-skill discoverability in plumbing](meta-skill-discoverability-in-plumbing.md) — router/meta-skills don't fire via description; wire entry into the floor brief, not frontmatter.

@@ -23,3 +23,6 @@ config/helix/
 # Claude Code local settings — the per-machine layer the tool auto-writes on every
 # permission approval. Durable, portable config lives in .claude/settings.json (tracked).
 .claude/settings.local.json
+
+# Skill-creator eval workspaces — throwaway run artifacts (benchmarks, desc-opt), not source.
+*-workspace/
