@@ -25,7 +25,7 @@ filler**, and the distillation's first job is to separate the two.
 | **Hooks** | 13 lifecycle scripts (`hooks/*.py`) + 4 `validators/` + `utils/{llm,tts}` | **High signal** — the core of the repo |
 | **Agents** | `meta-agent`, `team/{builder,validator}`, `work-completion-summary`, `crypto/*` (×12), `hello-world`, `llm-ai-agents-and-eng-research` | Mixed — patterns signal, crypto/hello-world demo |
 | **Commands** | `prime`/`prime_tts`, `plan_w_team`, `build`, `all_tools`, `question`, `git_status` + `cook`/`sentient`/`crypto_research*` | Mixed — `prime`/`plan_w_team` signal, rest demo |
-| **Output styles** | 8 (`output-styles/*.md`) | Mostly confirmation — you already run one |
+| **Output styles** | 8 (`output-styles/*.md`) | Mostly redundant — you already run one |
 | **Status lines** | 9 versions (`status_lines/status_line*.py`) | v6/v9 signal (context-window HUD) |
 | **Docs/specs** | `ai_docs/*` (verbatim upstream-doc scrapes + `legacy/`), `specs/*`, `apps/*` | `ai_docs`/`specs` patterns; `apps/` is demo |
 
@@ -324,9 +324,9 @@ stdin parse, always `exit 0` with a fallback line, never crash the HUD. For nxtl
 *passive* complement to the *active* context-alert hook: render the bar against the **150–200K
 degradation band**, not a generic 0–100%.
 
-**Output styles (8) — mostly confirmation.** Each is a thin system-prompt rewrite changing *format
+**Output styles (8) — mostly redundant.** Each is a thin system-prompt rewrite changing *format
 only* (tables, bullets, ultra-concise, etc.). nxtlvl already runs an explanatory style, so this is
-confirmation, not new capability — the one genuinely interesting member is **`yaml-structured`**
+no new capability — the one genuinely interesting member is **`yaml-structured`**
 (machine-parseable agent output) if a future agent needs structured stdout.
 
 **`ai_docs` vendoring vs `docs/reference/`.** `ai_docs/` is **verbatim upstream-doc scrapes** (they
@@ -358,11 +358,12 @@ output" thesis (§2) made concrete; nxtlvl achieves the same via its spec/plan/A
 | `.env`-access objective blocker | **Adapt** | Candidate *second* objective PreToolUse gate (block-on-facts) if secret protection is wanted. |
 | Dangerous-`rm` regex set | **Adapt (diff)** | Diff against nxtlvl's gate to close gaps, but trim their over-broad `*`/`.` paths (the false-positive class nxtlvl already hit on `git branch -f main`). |
 | Body-as-pointer agent authoring | **Adapt** | Keep ideation aliases/variants in sync via one shared prompt. |
+| Meta-agent patterns (§4.2): least-privilege tool inference; Step-0 live-doc scrape | **Adapt (principle)** | Not building an agent-generator — but "infer the minimal tool set from task shape" reinforces the scoping doctrine, and "scrape the live docs before emitting" fits any doc/ADR-emitting skill. |
 | Model-tier eval rig | **Adapt (one-off)** | Calibrate which tier an agent needs (Max → cost irrelevant); not a standing 3× fan-out. |
 | Planner-lead → DAG → terminal validate loop | **Adapt (trim)** | Orchestration shape is sound; trim heavy `TaskCreate` bookkeeping to what's needed. |
 | Completion-signal sink discipline | **Adapt (maybe)** | Only if ambient "done" signals wanted; keep "1 sentence, locked toolset", drop TTS. |
 | `ai_docs/legacy/` versioning | **Adapt** | Mirror keep-don't-overwrite (already have it via superseded ADRs). |
-| `yaml-structured` output style (§5) | **Adapt (maybe)** | Only if a future agent needs machine-parseable stdout; the other 7 styles are confirmation, not new capability. |
+| `yaml-structured` output style (§5) | **Adapt (maybe)** | Only if a future agent needs machine-parseable stdout; the other 7 styles add no new capability. |
 | Self-validatable `specs/` template + `all_tools`/`question` command idioms (§5) | **Adapt** | "Templated format = predictable output" (§2) made concrete; nxtlvl already gets this upstream via spec/plan/ADR house formats + the review rubric. Borrow the *self-checkable template* discipline, not the files. |
 | uv / PEP-723 packaging | **Reject** | nxtlvl is Node; port contracts, re-express packaging as `process.argv` dispatch. |
 | Force-continuation hook apps (Stop-block, prescriptive self-correction) | **Reject (doctrine)** | Conflicts with "hooks inform, don't force"; already settled. |
@@ -402,7 +403,9 @@ locks), #3 only **if/when built**. None is a fresh standalone ADR to write today
 **Concrete next actions:**
 - [ ] Apply read-only tool constraints to `idea-critic` + `context-scout` (sandbox/ or plugin) —
   confirm the current CC `disallowedTools`/`disallowed-tools` spelling first (§4.1), or the
-  constraint silently won't bind.
+  constraint silently won't bind. The change itself is small and reversible — do it now; the
+  amendment (decision point #1) only follows *if* read-only critics generalize to a cross-cutting
+  convention.
 - [ ] Fold the PreCompact findings into the C&M lifecycle plan (Hook 2 / Phase 2).
 - [ ] Diff the dangerous-`rm` regex set against nxtlvl's gate for gaps (trim over-broad paths).
 - [ ] Stage-3 reader-test this distillation with a fresh sub-agent, then it's done.
