@@ -70,15 +70,20 @@ Next.js full-stack · Python · Rust · knowledge-base · LLM-wiki · agentic en
 
 ### 2b. Domains deliberately *out* → dormant-in-ecc, reached only via the logged fallback
 
-Naming these **is** the scoping-down the intent insists on (`personal-harness.md:73-80`). Each
+Naming these **is** the scoping-down the intent insists on (`personal-harness.md:204-212`). Each
 is a candidate the intake gate ([ADR-008](../decisions/ADR-008-reactive-growth-intake-gate.md))
 must justify before it enters; until then it lives in dormant ecc
-([ADR-002](../decisions/ADR-002-ecc-dormant-reference-backstop.md)) and every reach is logged
-([ADR-005](../decisions/ADR-005-fallback-log-dual-metric.md)).
+([ADR-002](../decisions/ADR-002-ecc-dormant-reference-backstop.md), `personal-harness.md:73-80`)
+and every reach is logged ([ADR-005](../decisions/ADR-005-fallback-log-dual-metric.md)).
 
 | Out-of-scope domains | Out-of-scope languages |
 |---|---|
 | Content & Marketing · Finance & Trading · Healthcare · Scientific · Logistics & Ops · Motion & Animation · Networking · Data & ML · Autonomous Loops | C# · C++ · Dart · F# · Go · Java · Kotlin · Perl · PHP · Ruby · Swift · Vue |
+
+> **Taxonomy note:** the language column mirrors ECC's own `### Language:` groupings
+> ([ecc-main-map.md](ecc-main-map.md):281-388) — which is why **Vue** appears there as a
+> "language." **Ruby** is the one addition: ECC ships it only in its rules layer
+> ([ecc-main-map.md](ecc-main-map.md):986), not as a `Language:` section.
 
 > **Edge note:** Data & ML and Autonomous Loops sit closest to the line (Python/agentic work
 > brushes them). They stay *out* by default precisely because they're the easiest to
