@@ -52,8 +52,11 @@ Task arrives
     ├── Deprecating/migrating? ─────────────→ deprecation-and-migration
     ├── Writing docs / recording a decision?→ ◆ documentation-and-adrs
     ├── Adding logs/metrics/alerts? ────────→ observability-and-instrumentation
-    └── Deploying/launching? ───────────────→ shipping-and-launch
+    ├── Deploying/launching? ───────────────→ shipping-and-launch
+    └── Reviewing an *external* harness for what nxtlvl should adopt? → ◆ harness-review
 ```
+
+That last branch is an off-ramp from the SDLC, not a phase within it. `◆ harness-review` is wholly native — no upstream to fall through to — and it studies *someone else's* repo to mine patterns, which is not the same as `◆ review` (five-axis review of *our own* diff).
 
 Multiple skills routinely apply in sequence: a feature is often `spec-driven-development` → `planning-and-task-breakdown` → `incremental-implementation` → `◆ doubt-driven-development` (in-flight) → `test-driven-development` → `◆ review` → `◆ documentation-and-adrs`. When in doubt on a non-trivial task with no spec, start at `spec-driven-development`.
 
@@ -94,6 +97,7 @@ These hold across every skill the router dispatches to. The two house convention
 | Review | code-simplification · security-and-hardening · performance-optimization | upstream |
 | Ship | git-workflow-and-versioning · ci-cd-and-automation · deprecation-and-migration · observability-and-instrumentation · shipping-and-launch | upstream |
 | Ship | **documentation-and-adrs** — record the *why*, house ADR format (exec: `nxtlvl:doc-keeper`) | ◆ nxtlvl |
+| Build-method | **harness-review** — vendor an external harness → fan-out → distill into adopt/adapt/reject (native, no upstream) | ◆ nxtlvl |
 
 ## Verification
 

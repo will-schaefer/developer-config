@@ -79,7 +79,20 @@ skill, and composed by the git-workflow domain at its review step.
 
 ---
 
-## 5. Router (meta-domain)
+## 5. Harness review domain
+
+*Systematically review an external harness/repo and decide, area by area, what nxtlvl should
+adopt / adapt / reject* — the mechanical realization of the build method in
+[`CLAUDE.md`](../../CLAUDE.md). Skill-only (no command/agent): it orchestrates parallel read-only
+fan-out subagents and lands findings via the decision rule, rather than shipping its own executor.
+
+| Type | Name | Native? | Purpose |
+|------|------|---------|---------|
+| skill | `harness-review` | native | Vendor a repo (disposable clone) → partition into independent domains → parallel fan-out analysis → synthesize → distill an adopt/adapt/reject judgment into `docs/reference/`. Full phase detail + worked example in the skill's `references/`. |
+
+---
+
+## 6. Router (meta-domain)
 
 *Decides which skill applies and in what precedence — how every other nxtlvl skill is discovered.*
 
@@ -89,7 +102,7 @@ skill, and composed by the git-workflow domain at its review step.
 
 ---
 
-## 6. Confident-core capability domains — committed, **not yet built**
+## 7. Confident-core capability domains — committed, **not yet built**
 
 [ADR-016](../decisions/ADR-016-confident-core-capability-domains.md) commits five capability
 domains to a full `COMMAND → AGENT → SKILL` triad (15 components), tracked one GitHub issue per
@@ -114,4 +127,4 @@ proves the need.
 
 - **Commands:** 6 — `/brainstorm`, `/interview-me`, `/grill-me`, `/idea-refine`, `/git-workflow`, `/doc-keeper`
 - **Agents:** 5 — `context-scout`, `idea-critic`, `git-workflow-runner`, `doc-keeper`, `doubt-reviewer`
-- **Skills:** 6 — `brainstorming`, `github-workflow`, `documentation-and-adrs`, `doubt-driven-development`, `review`, `nxtlvl-router`
+- **Skills:** 7 — `brainstorming`, `github-workflow`, `documentation-and-adrs`, `doubt-driven-development`, `review`, `nxtlvl-router`, `harness-review`
