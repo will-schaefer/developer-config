@@ -31,7 +31,10 @@
       "Bash(head -12 config/claude/output-styles/co-builder.md)",
       "Bash(git commit -m ' *)",
       "Bash(gh pr create --base main --head add-nxtlvl-router-skill --title 'Add nxtlvl-router meta-skill \\(precedence router over agent-skills\\)' --body ' *)",
-      "Bash(gh pr *)"
+      "Bash(gh pr *)",
+      "Bash(git commit *)",
+      "Bash(git diff-tree *)",
+      "Bash(read f *)"
     ]
   },
   "enabledPlugins": {
