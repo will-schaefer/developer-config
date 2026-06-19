@@ -83,7 +83,7 @@ living **outside `~/.claude`**.
 | Component | Type | Trigger | Job | Failure mode |
 |---|---|---|---|---|
 | **Briefing** | SessionStart hook | session start | inject git line + newest bookmark (+ staleness flag) + quality-gated instincts | fail-open (no briefing) |
-| **Live capture** | PreToolUse + PostToolUse hook | every tool call | truncate, scrub secrets, append raw observation | fail-open (exit 0) |
+| **Live capture** | PreToolUse + PostToolUse hook | every tool call | truncate, scrub secrets (input+output, fail-closed), append raw observation | fail-open (exit 0); scrub failure drops the observation |
 | **Observer** | one-shot subprocess (Haiku) | every 20 observations | read new observations → create/update instincts (confidence + decay) | fail-open (no distill) |
 | **context-alert** | PostToolUse hook | ~200K / ~325K tokens | nudge before context pressure (kept **as-is**) | fail-open |
 | **PreCompact steer** | PreCompact hook | compaction | preserve task/bookmark pointer + next step + open files in the summary | fail-open |
@@ -113,14 +113,23 @@ Injects three blocks **on top of** what Claude Code already auto-loads (`CLAUDE.
 ### 4.2 Capture + distillation (floor; ecc-aligned)
 - **Live capture hook** — dumb, fires on **every tool call (pre + post)**, `async`/non-blocking,
   **fail-open** (any error → exit 0), with an **env-var kill switch**. Truncates (~5k chars),
-  **scrubs secrets (non-negotiable)**, appends raw observations to the durable log.
+  **scrubs secrets — best-effort but fail-closed**, appends raw observations to the durable log.
+  Scrubbing covers **both tool input and tool output** (a `.env` echoed in command *output* is as
+  dangerous as one on a command line), runs **named-format regexes** (tokens, API keys, `.env`-style
+  assignments) **plus an entropy-based redactor** for high-entropy strings the named patterns miss,
+  and is **fail-closed**: if a scrub throws or cannot complete, the observation is **dropped**, never
+  persisted raw (§7). "Best-effort" is the honest claim — no scrubber is omniscient; the *guarantee*
+  is fail-closed, not zero-leakage.
 - **Distillation = one-shot, not a daemon.** When the observation count hits **20**, spawn a fresh
   **Haiku** pass that reads new entries, updates instincts, and exits. (Deliberately avoids ecc's
   PID/lock/runaway-process machinery and macOS lock juggling.)
 - Observer detects ecc's **four patterns**: corrections, error→fix, repeated workflows, tool prefs.
 - **Skip guards:** never observe subagents, automated/non-interactive sessions, or the observer's
   own runs (prevents a self-watching loop).
-- **Explicit "remember this"** is a clean live-capture trigger, kept regardless of the size gate.
+- **Explicit "remember this"** writes **directly to native file-memory** (`MEMORY.md` + per-fact
+  file), **bypassing the observer/instinct path entirely** — it is a human-authored lesson, not an
+  inferred instinct. **Provenance is the ownership boundary** (§5): human-typed → native memory (no
+  decay, no ≥0.7 gate, surfaced by native recall); observer-inferred → instinct store.
 
 ### 4.3 Context fills
 - **`context-alert` nudge** — kept **exactly as-is** (PostToolUse, 200K + ~325K backstop).
@@ -130,8 +139,10 @@ Injects three blocks **on top of** what Claude Code already auto-loads (`CLAUDE.
   time action).
 
 ### 4.4 Close — SessionEnd (floor)
-- If the session is **non-trivial** (size gate; see X1), write a **dated bookmark note** for the
-  current piece of work. Trivial sessions write nothing — the previous note stays current.
+- Write a **dated bookmark note** for the current piece of work when the session is **non-trivial —
+  (tool-calls ≥ threshold) OR (a commit or file mutation occurred this session)** (size gate; see X1).
+  A short-but-pivotal session (e.g. three tool calls and one commit) **bookmarks**; a "glanced and
+  left" session writes nothing and the previous note stays current.
 - Record **fallback-rate** telemetry.
 - **Crash-safety:** `SessionEnd` does **not** reliably fire on a hard kill / crash / closed window.
   That's acceptable because the **continuous observation log is the crash-safe substrate** (appended
@@ -142,8 +153,11 @@ Injects three blocks **on top of** what Claude Code already auto-loads (`CLAUDE.
           best-effort (clean exit) ──► bookmark        ← convenience distillation
   ```
 
-  If a hard kill skips the bookmark, the **next briefing's staleness flag** (§4.1) catches it — the
-  prior note + fresh git line still give a real starting point.
+  If a hard kill skips the bookmark, the **next briefing's staleness flag** (§4.1) catches it: the
+  prior note + fresh git line are a **partial** starting point, not a full one. For a *long* crashed
+  session they under-represent what was lost — the flag can say "stale," it cannot reconstruct the
+  missing session. The durable observation log still holds the raw trail; turning that tail back into
+  a bookmark is **heal-on-close** (§9, deferred — preferred over heal-on-read).
 
 ### 4.5 On-demand commands (no ceiling)
 Graduating learnings is **always human-invoked** (these cluster with an LLM and *write files* — you
@@ -163,18 +177,31 @@ eyeball them first). The floor's recall nudge tells you *when*.
   **auto-purged** (entries >30 days; archive at ~10 MB) so it can't grow forever.
 - **Instinct store** — one file per instinct, ecc frontmatter:
   `id / trigger / confidence / domain / scope (+ project_id) / source` + `## Action` + `## Evidence`.
-  Frequency-based confidence with **decay**. **Project-scoped + global.** Keyed by **project
-  identity** (shared across worktrees of the same repo). **Lives outside `~/.claude`** (so the
-  background writer clears Claude Code's sensitive-path guard).
+  Frequency-based confidence with **decay**. **Project-scoped + global.**
+  - **Project identity = the git _common directory_** (`git rev-parse --git-common-dir`):
+    **worktrees** of one repo **share** identity (and instincts); separate **clones** get **distinct**
+    identities even at the same relative path. **Off-git, identity falls back to the working folder.**
+    (The identity key is *irreversible* once instincts persist under it — chosen deliberately, see X4.)
+  - **Atomic writes (tmp + `rename`).** Every instinct-file update writes a temp file and renames it
+    over the target — concurrent or crashed writers never tear a file or lose an update (§7-b).
+  - **Per-session single-flight guard.** Before spawning the one-shot observer, a per-session guard
+    admits only one observer at a time for that session — the cheap stand-in for ecc's PID/lock
+    machinery, sufficient because writes are atomic and the observer is short-lived.
+  - **Lives outside `~/.claude`** (so the background writer clears Claude Code's sensitive-path guard).
 - **Bookmark trail** — one **dated note per session**, grouped by **branch** (fall back to **folder**
   when not in git). Kept as a **trail**; the briefing reads the **newest**. Stored **privately,
   outside shared git history**.
-- **Exact paths** are a `/plan` detail; the only binding constraint is *outside `~/.claude`* for
-  anything a background process writes.
+- **Exact paths** are a `/plan` detail; the binding constraints are two: *outside `~/.claude`*
+  (CC's sensitive-path guard) **and outside any sync/backup root** (Dropbox / iCloud / Time Machine —
+  a syncing filesystem racing the writer corrupts append-only JSONL and defeats the atomic
+  `tmp`+`rename`). **Recommend `$XDG_STATE_HOME/nxtlvl`** (machine-local *state*, not synced config).
 
-> **Two "lesson" homes coexist** — native memory (things *you* save) and the instinct store (things
-> the observer *learns*). Coherent for now; an explicit ownership rule is needed only if they begin
-> to overlap (tracked, not built).
+> **Two "lesson" homes, split by provenance.** Native memory holds what *you* explicitly save
+> ("remember this"); the instinct store holds what the observer *infers*. **Provenance is the
+> ownership rule** — no longer "tracked, not built": a human-authored lesson never enters the
+> instinct path, and an observer-inferred instinct never writes to native memory. The two **physical**
+> stores stay separate regardless — CC's sensitive-path guard forces the instinct store outside
+> `~/.claude` (below), so collapsing them isn't an option even if ownership were ambiguous.
 
 ---
 
@@ -186,23 +213,44 @@ eyeball them first). The floor's recall nudge tells you *when*.
 - Cut low-confidence / off-project / **stale** as noise — staleness is handled automatically by
   confidence **decay** drifting below the bar.
 - **Soft ceiling = backstop only, never silent truncation.** If strong instincts exceed it, inject
-  best-first up to the ceiling **and** emit a visible nudge: *"N more above the bar → `/evolve` to
-  consolidate."* Repeated breaches are the signal to consolidate into a skill.
+  best-first up to the ceiling **and** emit a visible nudge that **names what was left out** — e.g.
+  *"3 strong instincts NOT loaded: `prefer-ripgrep`, `branch-before-commit`, `verify-by-content` →
+  `/evolve` to consolidate."* The best-first list is already assembled, so the names are free; naming
+  the truncated instincts carries the **felt loss**, not just a count. Repeated breaches are the
+  signal to consolidate into a skill.
 
 ---
 
 ## 7. Safety & invariants
 
-- **Errors always fail open.** Any crash / bad-parse / timeout in any hook → **exit 0, do nothing**.
+- **Errors always fail open — "fail open" means *never HALT the session*, not *silently do
+  nothing*.** Any crash / bad-parse / timeout in any hook → the session proceeds uninterrupted
+  (`exit 0`, no block). Failing open does **not** waive the three invariants below; each holds
+  *even on the error path*.
+  - **(a) Liveness.** A hook or the background observer that dies leaves a **one-line
+    heartbeat/liveness record** — a silent observer death is a fault to surface at the next
+    briefing (§4.1 staleness), never an invisible no-op.
+  - **(b) Write-atomicity on shared stores.** Every write to a shared store (instinct files,
+    logs) is atomic (tmp + `rename`) — a crashed or concurrent writer can never leave a torn,
+    half-written, or lost-update record (§5).
+  - **(c) The secret invariant is fail-*closed*.** If scrubbing throws or cannot complete, the
+    observation is **DROPPED, never persisted raw** — a scrub failure must not fall through the
+    "error → do nothing" path into a raw secret on disk.
 - **Deliberate blocking (exit 2) is permitted only** as a **named, intake-gated, kill-switched
   gate** — never as a side effect of an error.
 - **Every hook has an env-var kill switch**; capture additionally honors a skip flag.
-- **Secret-scrubbing on capture is non-negotiable — secrets never persist.**
+- **Secret-scrubbing on capture is best-effort but fail-closed.** Best-effort because no scrubber
+  catches every secret (see §4.2 for scope — input *and* tool **output**, named-format regexes
+  *plus* an entropy redactor); fail-closed because on any scrub failure the observation is dropped,
+  not stored. *(Drops the earlier "non-negotiable… never persist" absolute as an over-claim — the
+  guarantee is* fail-closed, *not* omniscient.*)*
 - **Never observe** subagents, automated/non-interactive sessions, or the observer's own runs.
 - **Trust model = transparency + cheap undo, not gating.** Auto-saves land as **plain files you
   own**; *see* = open the file / `/instinct-status`; *undo* = edit/delete / `/prune`. No
-  approve-before-write step (it would gut the automatic floor; can be added later if silent writes
-  ever burn us).
+  approve-before-write step (it would gut the automatic floor). **Known trade-off:** a
+  silently-written instinct can steer the next session before you eyeball it; the **≥0.7 bar + decay**
+  bound the blast radius (X2). A **probation flag** (quarantine new instincts from recall until
+  confirmed) is recorded as the reactive-growth fix — built only if this ever burns a session (§9).
 
 ---
 
@@ -223,13 +271,19 @@ ecc-style, not to sessions. Amends ADR-005.)
 Built **only when a real pain appears**; recorded so the option isn't lost:
 
 - **On-demand roster** ("show my open work") and **backlog** of not-yet-started work.
-- **Heal-on-read auto-distill** — regenerating a missing bookmark from the log tail at briefing time
-  (puts a model call on the latency-sensitive briefing path; the staleness flag is the cheap stand-in).
+- **Heal-on-close / heal-on-read auto-distill** — regenerating a missing bookmark from the
+  observation-log tail. **Preferred shape = heal-on-close** (regenerate at the *next clean
+  `SessionEnd`*, off the latency-sensitive briefing path); heal-on-read (regenerate at briefing time)
+  is the fallback but puts a model call on the briefing path. **Deferred** — no evidence of repeat
+  pain yet (YAGNI); the staleness flag (§4.4) is the cheap stand-in. *(Decision D2: soften the §4.4
+  claim now, build neither until a crashed long session actually burns us.)*
 - **Bookmark trail trimming** — notes are tiny and only the newest is read; the big store (raw log)
   already self-bounds.
 - **`/digest <work>`** — on-demand synthesis of one long trail (the *right* shape for "compress as it
   ages" — **not** a daily cron, which would auto-fire an LLM that rewrites history).
-- **Approve-before-write** trust gate.
+- **Approve-before-write** trust gate, and its lighter cousin the **instinct probation flag** (write
+  silently but quarantine from recall until confirmed). Both deferred; the ≥0.7 bar + decay bound the
+  silent-write-then-steer risk for now (§7, X2).
 
 ---
 
@@ -238,17 +292,31 @@ Built **only when a real pain appears**; recorded so the option isn't lost:
 Per the meta-decision *ADRs are advisory, not canonical* — surface each conflict once, then proceed
 and record a superseding/amending ADR. Hand these to **`nxtlvl:doc-keeper`** (owns ADR house format):
 
-- **ADR-004** (extend native memory, no separate store) — **amend**: a **separate `nxtlvl` instinct
-  store outside `~/.claude`** is adopted (native memory still extended for human-saved lessons).
+- **ADR-004** (extend native memory, no separate store) — **amend (two clauses)**: (1) a **separate
+  `nxtlvl` instinct store outside `~/.claude`** is adopted (native memory still extended for
+  human-saved lessons); (2) **provenance is the ownership boundary** — "remember this" routes
+  directly to native memory and the observer never writes there, **replacing** ADR-004's
+  "tracked, not built" ownership punt with a live rule.
 - **ADR-005** (fallback log + dual metric) — **amend**: dual metric → **two automatic readouts**
   (fallback-rate + instinct-confidence); **no session quality score**.
-- **ADR-006** (fail-open + gated blocking + kill switches) — **carry forward** verbatim (§7).
+- **ADR-006** (fail-open + gated blocking + kill switches) — **carry forward + clarifying note**:
+  §7 adds a carve-out making explicit that "fail open" means *never HALT the session*, and does
+  **not** waive (a) a one-line liveness record, (b) write-atomicity on shared stores, or (c) the
+  fail-*closed* secret invariant (a scrub failure drops the observation, never persists it raw).
+  This is a clarification of the existing rule, **not a reversal**.
 - **ADR-007** (budgeted injection, pointers-over-content) — **amend**: recall is **quality-gated**
-  (≥0.7, best-first, soft-ceiling-as-nudge), not size-first; bookmark shown as **actual words**.
+  (≥0.7, best-first, soft-ceiling-as-nudge that **names the truncated instincts**, not just a count),
+  not size-first; bookmark shown as **actual words**. *(The naming refinement also refines
+  [ADR-013]'s floor-recall consequence — see DOC.)*
 - **ADR-008** (continuous-learning deferred) — **supersede**: continuous-learning is **un-deferred**
   and adopted as the floor's distillation mechanism.
-- **New integrating ADR** — record the **always-on floor + on-demand commands** backbone (the
-  dissolved ceiling) as the subsystem's organizing decision.
+- **Integrating ADR — recorded as [ADR-013]** (always-on floor + on-demand commands; dissolved
+  ceiling) — the subsystem's organizing decision.
+- **New ADR — project identity + observer concurrency** *(separate decision from ADR-013's
+  backbone)*: **identity = git common-dir** (worktrees share, clones don't, folder fallback off-git),
+  **atomic `tmp`+`rename` writes**, and a **per-session single-flight observer guard**. ADR-worthy
+  because the identity key is **expensive to reverse** once instincts persist under it (D1 → a new
+  ADR, not an ADR-013 consequence-amendment; next free number is **ADR-025**).
 
 ---
 ---
@@ -287,13 +355,16 @@ shared git history** and **outside `~/.claude`** for the background writer.
 **Recall rule (locked) — quality-gated, NOT size-gated** *(supersedes ADR-007 size-first framing)*:
 inject every instinct that is relevant (project + global) and ≥ the confidence bar (default ≥0.7,
 tunable), best-first; cut low-confidence/off-project/stale as noise (staleness via decay); soft
-ceiling = backstop only, never silent truncation — over it, inject up to the ceiling **and** nudge
-"N more above the bar → `/evolve`."
+ceiling = backstop only, never silent truncation — over it, inject up to the ceiling **and** nudge by
+**naming** the truncated instincts ("N strong instincts NOT loaded: [names] → `/evolve`"), not just a
+count (the best-first list is already assembled, so the names cost nothing).
 
 ## Stage 2 — capture (floor; ecc-aligned)
 
 - **Live capture hook:** dumb, every tool call (pre + post), `async`/non-blocking, fail-open,
-  env-var kill switch. Truncates (~5k), scrubs secrets (non-negotiable), appends to durable log.
+  env-var kill switch. Truncates (~5k), scrubs secrets **best-effort + fail-closed** (input *and*
+  output, named-format regexes + entropy redactor; a scrub failure drops the observation rather than
+  persisting it raw), appends to durable log.
 - **Distillation = one-shot, not a daemon.** At 20 observations, spawn a fresh Haiku pass that
   updates instincts and exits. Avoids ecc's PID/lock/runaway machinery.
 - Observer detects ecc's four patterns: corrections, error→fix, repeated workflows, tool prefs.
@@ -301,9 +372,11 @@ ceiling = backstop only, never silent truncation — over it, inject up to the c
   (+ Action, Evidence); frequency-based confidence with decay. **Scope:** project + global.
 - **Storage:** separate `nxtlvl` instinct store (departure from ADR-004), outside `~/.claude`.
 - **Skip guards:** never observe subagents, automated sessions, or the observer's own runs.
-- **Auto-purge** old observations (size/age). **Explicit "remember this"** kept regardless.
-- **Consequence flagged:** two lesson homes (native memory = you save; instinct store = observer
-  learns) — coherent now; needs an ownership rule if they overlap.
+- **Auto-purge** old observations (size/age). **Explicit "remember this"** does not enter the
+  observation log at all — it routes **directly to native file-memory** (provenance ownership; §4.2/§5).
+- **Ownership rule (now defined, not deferred):** two lesson homes split by **provenance** — native
+  memory = you save (human-typed); instinct store = observer learns (inferred). Provenance *is* the
+  rule (was "needs a rule if they overlap"); amends ADR-004.
 
 ## Stage 3 — context fills
 
@@ -338,23 +411,38 @@ ceiling = backstop only, never silent truncation — over it, inject up to the c
   `instinct-cli.py evolve` CLI subcommand (same for `/promote`). ecc's automatic loop stops at the
   observer; graduating is always human-invoked (it clusters with an LLM and writes files). Decision:
   no close ritual at all — backbone = always-on floor + on-demand commands; the floor's recall nudge
-  surfaces *when* to run `/evolve`. More ecc-faithful than keeping a ceiling, not a departure.
+  surfaces *when* to run `/evolve`. **Two ecc cites, kept separate (doubt-test correction):**
+  ecc-faithfulness soundly justifies **relocating distillation into the floor** (ecc's observer does
+  exactly this); it does **not** by itself justify the **graduation-trigger** decision — "ecc has no
+  ceiling → a ceiling has no value" is an appeal-to-reference, not an argument. The gap this leaves
+  (strong instincts can accumulate with no automatic graduation ritual) is **accepted and mitigated**
+  by the recall nudge that *names* the truncated instincts (§6, T8), not by ecc precedent.
   (Rejected: B = thin "wrap up" button; C = richer review ritual.)
 
 ## Cross-cutting decisions
 
-- **X1 (skip trivial sessions?) — LOCKED = A, skip by size (ecc-style).** *(Supersedes the earlier
-  X1 = C "never skip" lock.)* A `SessionEnd` below a small threshold writes **no** bookmark; the
-  previous note stays current (dumb deterministic count; mirrors ecc's `evaluate-session` gate).
-  Gates only the bookmark write — the observer already self-gates distillation by volume. A beats C
-  because skipping leaves the prior substantive note as the newest (C surfaced low-value "glanced and
-  left" notes). Threshold value = `/plan` detail. (Rejected: B = skip unless a file/commit changed;
-  C = never skip.)
+- **X1 (skip trivial sessions?) — LOCKED = A′, skip by size *OR* effect (refined).** *(Supersedes
+  the earlier X1 = C "never skip"; the doubt-test then folded the once-rejected B back in as an
+  OR-clause.)* Write a bookmark when **(tool-calls ≥ threshold) OR (a commit / file-mutation
+  occurred)**; otherwise write **no** bookmark and the previous note stays current (dumb
+  deterministic check; mirrors ecc's `evaluate-session` size gate, plus an effect signal). Gates
+  only the bookmark write — the observer self-gates distillation by volume. A′ keeps A's win
+  (skipping a "glanced and left" session leaves the prior substantive note newest) **and** fixes A's
+  miss (a terse-but-pivotal one-commit session was being skipped under pure count). Threshold value =
+  `/plan` detail. (Rejected: pure-count A — misses pivotal terse sessions; C = never skip — surfaces
+  low-value notes.)
 - **X2 (trust: see/undo auto-saves) — LOCKED = A, write silently + review on demand (ecc-style).**
   Auto-saves (bookmark, instincts) land as plain files the user owns; see = open / `/instinct-status`,
   undo = edit/delete / `/prune`. Not blind — the briefing surfaces them next session. Trust =
-  transparency + cheap undo, not gating. Secret-scrubbing non-negotiable. (Rejected: B =
-  approve-before-write — friction that contradicts the automatic floor.)
+  transparency + cheap undo, not gating. **Secret-scrubbing is best-effort + fail-closed** (§7).
+  **Trade-off recorded (doubt-test):** a silently-written instinct can **steer the next session** —
+  it gets injected at briefing *before* a human ever eyeballs it (silent-write-then-steer). The blast
+  radius is bounded by the **≥0.7 confidence bar + decay**: a wrong instinct needs repeated
+  reinforcement to cross the bar and decays if reinforcement stops, so the risk is **accepted, not
+  gated**. An **instinct probation flag** (quarantine new instincts from recall until confirmed) is
+  the reactive-growth fix — **recorded, not built** (D3): add it only if a wrong-confident instinct
+  actually burns a session. (Rejected: B = approve-before-write — friction that contradicts the
+  automatic floor.)
 - **X3 (bookmark trail trimming) — LOCKED = A, defer (YAGNI).** Notes are tiny; briefing reads only
   the newest; the raw log already self-bounds. (Rejected: B = trim now.) **Considered & deferred — a
   daily routine that consolidates old session notes:** the "compress as it ages" instinct is sound,
@@ -362,10 +450,18 @@ ceiling = backstop only, never silent truncation — over it, inject up to the c
   pattern S4-Q4 kept human-invoked; the briefing reads only the newest note anyway; a standing
   routine adds its own failure surface for a problem we have no evidence of). Preferred future shape:
   an on-demand `/digest <work>` command. Not built now; recorded.
-- **X4 (multi-worktree) — RESOLVED, no new decision.** Bookmarks keyed by branch → different
-  worktrees on different branches separate; same-branch appends. Instincts keyed by project identity,
-  shared across worktrees. One-shot observer avoids lock/PID contention.
+- **X4 (multi-worktree + observer concurrency) — REOPENED, now decided** *(was "resolved, no new
+  decision" — the doubt-test found "project identity" undefined and concurrent observers lacking a
+  tear-safety story).* Decided: **identity = git common-dir** (`git rev-parse --git-common-dir`) —
+  worktrees of one repo share identity/instincts, separate clones stay distinct, folder fallback
+  off-git; **atomic `tmp`+`rename` writes** plus a **per-session single-flight guard** make
+  concurrent or crashed observers safe **without** ecc's PID/lock daemon. Bookmarks remain
+  branch-keyed (different branches separate; same-branch appends). Recorded as a **new ADR** rather
+  than an ADR-013 consequence-amendment — the identity key is **expensive to reverse** once instincts
+  persist under it (D1). See §5.
 - **X5 (keep hands-on fast) — RESOLVED, already satisfied.** Capture async/non-blocking, observer
   one-shot background, briefing cheap/deterministic.
-- **X6 (exact storage paths) — PUNT to `/plan`.** Only binding constraint: instinct store outside
-  `~/.claude` (sensitive-path guard).
+- **X6 (exact storage paths) — PUNT to `/plan`, but the *constraints* ship now.** Two binding
+  constraints (no longer deferred): outside `~/.claude` (sensitive-path guard) **and outside any
+  sync/backup root** (a syncing filesystem racing atomic renames corrupts append-only JSONL).
+  **Recommended location: `$XDG_STATE_HOME/nxtlvl`.** Only the exact path remains a `/plan` detail.

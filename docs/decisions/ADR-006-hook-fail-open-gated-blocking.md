@@ -3,6 +3,7 @@ id: ADR-006
 title: "Hook safety — fail-open on error (absolute); deliberate blocking only via the intake gate, with kill switches"
 status: Accepted
 date: 2026-06-16
+amended: 2026-06-19
 ---
 
 # ADR-006: Hook safety — fail-open on error (absolute); deliberate blocking only via the intake gate, with kill switches
@@ -67,3 +68,27 @@ coworker" by enabling *few* gates — not by being unable to.
   [ADR-002](ADR-002-ecc-dormant-reference-backstop.md)).
 - The platform nuance is respected: `SessionStart`/`SessionEnd`/`Notification` cannot be
   blocked anyway; our session hooks fail open regardless.
+
+## Clarifying Note (2026-06-19) — carve-out, not a reversal
+
+The context-and-memory spec (§7) makes explicit what "fail open" means and does **not** mean.
+This note records that clarification; it does **not** change the rule above.
+
+**"Fail open" means *never HALT the session*.** Any crash / bad-parse / timeout → `exit 0`,
+session proceeds. It does **not** mean "silently do nothing on error." Three invariants hold
+even on the error path:
+
+**(a) Liveness record.** A hook or background observer that dies must leave a one-line
+heartbeat/liveness record. A silent observer death is a fault to surface at the next briefing
+(spec §4.1 staleness flag), not an invisible no-op.
+
+**(b) Write-atomicity on shared stores.** Every write to a shared file (instinct files, logs)
+is atomic — temp file + rename. A crashed or concurrent writer can never leave a torn or
+half-written record. (See [ADR-025](ADR-025-project-identity-observer-concurrency.md) for the
+observer concurrency model.)
+
+**(c) The secret invariant is fail-*closed*.** If scrubbing throws or cannot complete, the
+observation is **dropped, never persisted raw**. A scrub failure must not fall through the
+"error → do nothing" path into a raw secret on disk.
+
+Cross-reference: spec §7 and [ADR-013](ADR-013-floor-on-demand-backbone.md).

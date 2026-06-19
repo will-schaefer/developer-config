@@ -3,6 +3,7 @@ id: ADR-013
 title: "Session-lifecycle backbone — always-on automatic floor plus on-demand commands; no close ritual"
 status: Accepted
 date: 2026-06-19
+amended: 2026-06-19
 ---
 
 # ADR-013: Session-lifecycle backbone — always-on automatic floor plus on-demand commands; no close ritual
@@ -34,6 +35,15 @@ confirmed:
 The ceiling's last remaining job was a session-quality score. Once that score was dropped (ecc
 has none; the spec adopts the ecc model), nothing irreducible remained for the ceiling. It
 dissolved.
+
+**Two ecc cites, kept separate.** ecc-faithfulness soundly justifies *relocating distillation
+into the floor* — ecc's observer does exactly this, running automatically in the background
+during a session. It does **not** by itself justify the *graduation-trigger* decision. "ecc has
+no ceiling → a ceiling has no value" is an appeal-to-reference, not an argument. The real
+argument is that strong instincts can accumulate with no automatic graduation ritual, and that
+gap is **accepted and mitigated** by the recall nudge that names the truncated instincts (see
+Consequences), not by ecc precedent. The two rationales are kept separate to avoid conflating a
+sound precedent with an unsound one.
 
 ## Decision
 The `nxtlvl` session-lifecycle backbone is an **always-on automatic floor plus on-demand
@@ -116,13 +126,25 @@ instinct-confidence distribution (amends ADR-005).
 - **ADR-007 is amended**: recall is quality-gated (≥0.7, best-first, soft ceiling = nudge),
   not size-first. The bookmark is injected as actual words. Pointers-over-content holds for
   all other content.
-- **ADR-006 is unchanged** — §7 of the spec restates it verbatim. Every hook in the floor is
-  fail-open; each has an env-var kill switch; deliberate blocking via exit 2 remains gated.
+- **ADR-006 is clarified, not unchanged** — §7 of the spec adds a carve-out (recorded as a
+  clarifying note in ADR-006's Consequences, 2026-06-19): "fail open" means *never HALT the
+  session* and does not waive the liveness-record, write-atomicity, or fail-closed-secret
+  invariants. Every hook in the floor is still fail-open; each has an env-var kill switch;
+  deliberate blocking via exit 2 remains gated.
 - The floor is cheap and deterministic (no model calls on the briefing or close paths; the
   observer is a one-shot background process). A session that hard-kills before `SessionEnd`
   loses the bookmark (best-effort) but not the observation log (durable, appended every tool
   call). The next briefing's staleness flag covers the gap.
-- Graduating learnings remains human-invoked. The floor's recall nudge ("N more above the bar →
-  `/evolve`") is the reactive signal; it does not auto-trigger anything.
+- Graduating learnings remains human-invoked. The floor's recall nudge names what was left out
+  — e.g. *"3 strong instincts NOT loaded: `prefer-ripgrep`, `branch-before-commit`,
+  `verify-by-content` → `/evolve` to consolidate"* — rather than reporting a bare count. The
+  best-first list is already assembled, so names are free; naming the truncated instincts carries
+  the *felt loss*, not just a count. This is the accepted mitigation for the graduation gap
+  (strong instincts can accumulate with no automatic graduation ritual).
+- The graduation gap itself — strong instincts accumulating with no automatic graduation — is
+  **accepted**. The mitigant is the naming recall-nudge above; the precedent is *not* ecc
+  (ecc has no ceiling, but that fact alone is not an argument for or against a ceiling here).
+  The reactive fix, if the nudge proves insufficient, is a `/digest` command or scheduled
+  `/evolve` prompt (recorded in spec §9, not built).
 - Hook registration stays flat per event+matcher lane (ADR-008 hook-layer corollary, restated):
   a consolidating dispatcher is earned structure, admitted only once a lane carries ≥2 hooks.

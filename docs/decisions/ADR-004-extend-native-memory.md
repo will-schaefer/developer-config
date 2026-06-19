@@ -19,10 +19,20 @@ showcase. That would create a **fourth memory system** (native CC + ecc's + a ne
 context layer) — overlapping stores, unclear ownership, and rot.
 
 ## Decision
-**Extend the native CC file-memory; introduce no new store** — *with one amendment (2026-06-19):
-a separate `nxtlvl` instinct store, located outside `~/.claude`, is adopted for
-observer-learned instincts. Native file-memory is still extended for human-saved ("remember
-this") lessons.*
+**Extend the native CC file-memory; introduce no new store** — *with two amendments (both
+2026-06-19):*
+
+*Amendment 1 — separate instinct store:* a separate `nxtlvl` instinct store, located outside
+`~/.claude`, is adopted for observer-learned instincts. Native file-memory is still extended for
+human-saved ("remember this") lessons.
+
+*Amendment 2 — provenance is the ownership boundary (live rule, replaces the "tracked, not built"
+punt):* **"remember this" writes directly to native file-memory** (`MEMORY.md` + per-fact file),
+bypassing the observer/instinct path entirely; **the observer never writes to native memory**.
+Provenance is the rule — human-typed → native memory; observer-inferred → instinct store. The
+two stores are kept separate by both policy and physics (CC's sensitive-path guard forces the
+instinct store outside `~/.claude`, so collapsing them isn't an option even if ownership were
+ambiguous). See spec §4.2 and §5.
 
 - Memory continues to live in the native `MEMORY.md` index + per-fact files.
 - The Phase-0 delta is purely additive and small:
@@ -31,25 +41,23 @@ this") lessons.*
      ([ADR-007](ADR-007-context-budgeted-injection.md)).
 - **Zero new storage code for human-saved lessons.** Cross-session recall of `MEMORY.md`-backed
   facts uses the native mechanism unchanged.
-- **Amendment:** the context-and-memory spec (2026-06-19) adopts ecc's continuous-learning model
-  ([ADR-013](ADR-013-floor-on-demand-backbone.md)). Observer-learned instincts live in a
-  **separate `nxtlvl` instinct store outside `~/.claude`** — required because a background
-  subprocess writes to it and Claude Code's sensitive-path guard blocks writes inside `~/.claude`
-  from background processes. Exact paths are a `/plan` detail; the only binding constraint is
-  *outside `~/.claude`* for anything a background process writes.
+- Observer-learned instincts live in a **separate `nxtlvl` instinct store outside `~/.claude`** —
+  required because a background subprocess writes to it and Claude Code's sensitive-path guard
+  blocks writes inside `~/.claude` from background processes. Exact paths are a `/plan` detail;
+  the only binding constraints are *outside `~/.claude`* (sensitive-path guard) and *outside any
+  sync/backup root* (a syncing filesystem racing atomic renames corrupts append-only JSONL).
 
-**Two "lesson" homes coexist:**
-- **Native memory** — things *you* explicitly save ("remember this"). Governed as before.
-- **Instinct store** — things the observer *learns* automatically (confidence-scored, project +
-  global scope). New, from this amendment.
-
-Coherent for now; an explicit ownership rule is needed only if the two stores begin to overlap.
-That is tracked, not built.
+**Two "lesson" homes, split by provenance:**
+- **Native memory** — things *you* explicitly save ("remember this"). Written directly; no decay,
+  no confidence gate; surfaced by CC's native recall.
+- **Instinct store** — things the observer *infers* automatically (confidence-scored, project +
+  global scope, decay-eligible).
 
 This remains the memory-specific application of the compose-don't-reconstruct rule
 ([ADR-003](ADR-003-compose-not-reconstruct.md)): the native store *is* the platform for
 human-saved lessons; the instinct store extends the platform for observer-learned ones rather
-than replacing it.
+than replacing it. Cross-link: [ADR-025](ADR-025-project-identity-observer-concurrency.md)
+governs the identity key and concurrency model for the instinct store.
 
 ## Alternatives Considered
 
@@ -81,8 +89,12 @@ than replacing it.
 - A fact saved in one session is recalled in a fresh session via the native mechanism.
 - Observer-learned instincts accumulate in the separate instinct store and are quality-gated
   into context per [ADR-007](ADR-007-context-budgeted-injection.md) (amended).
-- **Two lesson homes coexist** — this is the standing consequence to monitor. If the two stores
-  begin to serve overlapping content, the next decision is an ownership rule; until then,
-  separation by provenance (human-saved vs observer-learned) is clear enough.
+- **Two lesson homes coexist, separated by provenance.** This is the standing design — not a
+  monitoring concern. Provenance is the rule: a human-authored lesson never enters the instinct
+  path; an observer-inferred instinct never writes to native memory. The stores are additionally
+  separated by physics (CC's sensitive-path guard), so ownership ambiguity cannot collapse them
+  even accidentally.
 - The "learning artifact" for memory is the **layering + surfacing policy**, not a storage
   engine — mirroring the context-assembly stance ([ADR-007](ADR-007-context-budgeted-injection.md)).
+- [ADR-025](ADR-025-project-identity-observer-concurrency.md) governs the identity key and
+  atomic-write discipline for the instinct store.
