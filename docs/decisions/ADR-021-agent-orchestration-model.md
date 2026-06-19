@@ -39,9 +39,10 @@ composition ours; ADR-003 keeps the runtime native.
    ([ADR-003](ADR-003-compose-not-reconstruct.md)).** Routing is native description-triggered
    dispatch (the `Task`/`Workflow` tools) plus the orchestrator's judgment over a small scoped
    roster ([ADR-017](ADR-017-agent-design-contract.md)) — not a tag->chain lookup table, a
-   `/orchestrate` chain-runner, or a Kanban control pane. The agent/command map is narrowed to
-   the operator's stacks plus cross-cutting generals, grown reactively
-   ([ADR-008](ADR-008-reactive-growth-intake-gate.md)).
+   `/orchestrate` chain-runner, or a Kanban control pane. The agent/command map starts from the
+   build-now confident-core ([ADR-016](ADR-016-confident-core-capability-domains.md): Python,
+   TS/JS, Rust, Frontend, Backend) plus cross-cutting generals, and grows reactively beyond it
+   through the intake gate ([ADR-008](ADR-008-reactive-growth-intake-gate.md)).
 3. **Adapt the composition-side patterns.** Self-contained delegation briefs — acceptance
    criteria and an inherited scope-guard, no "open the plan doc" dependency (plan-orchestrate
    Phase 3), which is skill injection ([ADR-018](ADR-018-agent-authoring-method.md)) plus a clear
@@ -100,4 +101,5 @@ composition ours; ADR-003 keeps the runtime native.
 - Team-runtime machinery stays rejected, but its failure modes become orchestrator guardrails,
   with worktree isolation as the answer to overlapping parallel writes.
 - The pipeline, its operations, and the agent map grow reactively through the intake gate
-  ([ADR-008](ADR-008-reactive-growth-intake-gate.md)), not pre-built to ECC's scale.
+  ([ADR-008](ADR-008-reactive-growth-intake-gate.md)) beyond the build-now confident-core
+  ([ADR-016](ADR-016-confident-core-capability-domains.md)), not pre-built to ECC's scale.

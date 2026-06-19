@@ -64,8 +64,9 @@ silent-failure-hunter, tdd-guide, refactor-cleaner, doc-updater, performance-opt
   generals + agent-building; grown reactively via the intake gate; dormant ecc as the fallback
   library. This is `agent-sort`'s evidence logic applied at the *operator* level — but ecc's
   install machinery is **not** adopted (already covered by ADR-002 + ADR-008).
-- **Realization test:** native agent + injected skill by default; custom agent only when isolated
-  context / restricted tools / a distinct model tier forces it.
+- **Realization test:** native agent that **loads** its skill by default (runner case per build
+  ADR-012/ADR-015; spawn-target agents take a schema pointer and don't load); custom agent only
+  when isolated context / restricted tools / a distinct model tier forces it.
 - **Adopted wholesale:** the lean agent contract and the harness-construction authoring checklist.
 
 ---
@@ -93,13 +94,14 @@ it leans on — eval-first, model-routed, with knowledge injected from a caller-
    output schema, plus stop-and-ask guardrails.
 
 ### nxtlvl decision → [ADR-018](../decisions/ADR-018-agent-authoring-method.md)
-- **Adopt:** one-way skill→lean-executor injection (the orchestrator injects the skill at
-  delegation); done-condition-first; explicit stop-and-ask guardrails; phased structure +
-  deterministic output + a binary decision rule.
+- **Adopt:** one-way skill→lean-executor dependency (the runner agent **loads** the skill it
+  fronts per build ADR-012/ADR-015; a spawn-target agent takes a schema pointer instead);
+  done-condition-first; explicit stop-and-ask guardrails; phased structure + deterministic output
+  + a binary decision rule.
 - **Adapt:** model-routing heuristic (tiers per ADR-017, escalate only on a reasoning-gap); the
   "15-min unit" → agent-sized / independently-verifiable / one-dominant-risk / clear-done-
   condition; compact at phase boundaries + delegate to isolate context.
-- **Reject:** ecc's per-task cost ledger (our metric is fallback × quality, ADR-005);
+- **Reject:** ecc's per-task cost ledger (our metric is the fallback-log readouts, ADR-005);
   re-deriving review/dev substance + gh-coupled command internals.
 - Formal eval suites deferred to Phase 3.
 
@@ -272,17 +274,17 @@ opposite (single-operator, gated, interactive, fail-open), so this phase mostly 
 ### The line: nxtlvl is gated and single-operator by design
 All three remove the human and run long-lived/autonomous/fleet workloads. nxtlvl's operate-time
 posture is already fixed: fail-open hooks + kill switches (ADR-006), an invoked-not-continuous
-gate (ADR-009), one fallback × quality north-star (ADR-005), native memory (ADR-004), human gates
+gate (ADR-009), the fallback-log readouts (ADR-005/ADR-013), native memory (ADR-004), human gates
 (ADR-021). So the nuggets fold into decisions already made rather than spawning new machinery.
 
 ### nxtlvl decision → [ADR-022](../decisions/ADR-022-agent-operation-model.md)
 - **Reject:** autonomous self-direction (autonomous-agent-harness), the continuous-loop runtime,
   and the enterprise fleet-ops platform — on ADR-003 (don't reconstruct runtime), ADR-004 (no new
   memory), ADR-006/009 (fail-open + gated, human-in-loop), and single-operator scope.
-- **Adapt:** loop failure-modes + recovery → ADR-020/013/016; failure-class distribution →
+- **Adapt:** loop failure-modes + recovery → ADR-020/018/021; failure-class distribution →
   reactively shape the ADR-005 fallback log; cost-drift awareness → ADR-018 model-escalation.
-- **Keep (already decided):** kill switches (ADR-006), incident pattern (ADR-020/016),
-  install+tag deployment (ADR-001), the single north-star metric (ADR-005); plus the
+- **Keep (already decided):** kill switches (ADR-006), incident pattern (ADR-020/021),
+  install+tag deployment (ADR-001), the fallback-log metric (ADR-005); plus the
   consent/dry-run/credentials-out discipline as the guard on any future opted-in, native-rooted
   automation.
 
@@ -291,5 +293,9 @@ gate (ADR-009), one fallback × quality north-star (ADR-005), native memory (ADR
 ## Review complete
 
 All six phases reviewed (Design → Author → Evaluate → Debug → Orchestrate → Operate), each
-recorded as an ADR (012–017). The same adopt/adapt/reject method now applies to any future
-harness brought in as a reference.
+recorded as an ADR (017–022, renumbered from 012–017 on merge to clear a collision with `main`'s
+build ADRs 012–016). The review decisions defer to those build ADRs where they decide the same
+point — most notably the agent↔skill mechanism (the executor **loads** its skill, build
+ADR-012/ADR-015, rather than the orchestrator injecting it) and the build-now confident-core
+(build ADR-016). The same adopt/adapt/reject method now applies to any future harness brought in
+as a reference.

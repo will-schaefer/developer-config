@@ -21,19 +21,32 @@ workloads. nxtlvl is the deliberate opposite: a single-operator, gated, interact
 personal harness. Its operate-time posture is already fixed by prior decisions — fail-open hooks
 with blocking only via the intake gate and kill switches
 ([ADR-006](ADR-006-hook-fail-open-gated-blocking.md)), an invoked (not continuous) promotion gate
-([ADR-009](ADR-009-objective-invoked-audit-gate.md)), a single fallback-rate x quality north-star
-([ADR-005](ADR-005-fallback-log-dual-metric.md)), native file-memory with no new memory system
+([ADR-009](ADR-009-objective-invoked-audit-gate.md)), a single fallback-log metric
+([ADR-005](ADR-005-fallback-log-dual-metric.md); amended by
+[ADR-013](ADR-013-floor-on-demand-backbone.md) to two automatic readouts — fallback-rate and
+instinct-confidence), native file-memory with no new memory system
 ([ADR-004](ADR-004-extend-native-memory.md)), and human gates in the pipeline
 ([ADR-021](ADR-021-agent-orchestration-model.md)). This decides nxtlvl's operating mode and what,
 if anything, it takes from ECC's operate layer.
 
+Since this phase, the build added an always-on automatic **floor** — a SessionStart briefing, live
+capture, a one-shot background observer, and a SessionEnd bookmark
+([ADR-013](ADR-013-floor-on-demand-backbone.md), which un-deferred continuous-learning and
+superseded ADR-008's deferral). That floor is automatic *observation and distillation*, not
+autonomous *self-direction*; the line this ADR draws is exactly between the two.
+
 ## Decision
 1. **nxtlvl operates as gated, interactive, single-operator sessions on the native runtime.**
-   Day-to-day operation is interactive sessions, not an autonomous loop: the promotion gate runs
-   when invoked ([ADR-009](ADR-009-objective-invoked-audit-gate.md)), hooks stay fail-open
-   ([ADR-006](ADR-006-hook-fail-open-gated-blocking.md)), the fallback log and its north-star are
-   the only standing telemetry ([ADR-005](ADR-005-fallback-log-dual-metric.md)), and growth is
-   reactive ([ADR-008](ADR-008-reactive-growth-intake-gate.md)).
+   Day-to-day operation is interactive sessions with an automatic observation floor but **no
+   autonomous self-direction**: the promotion gate runs when invoked
+   ([ADR-009](ADR-009-objective-invoked-audit-gate.md)), hooks stay fail-open
+   ([ADR-006](ADR-006-hook-fail-open-gated-blocking.md)), and the always-on floor observes and
+   distills in the background ([ADR-013](ADR-013-floor-on-demand-backbone.md)) — emitting two
+   automatic readouts, fallback-rate and instinct-confidence
+   ([ADR-005](ADR-005-fallback-log-dual-metric.md)) — while graduation stays human-invoked
+   (`/evolve`). Capability starts from a build-now confident-core
+   ([ADR-016](ADR-016-confident-core-capability-domains.md)) and grows reactively beyond it
+   ([ADR-008](ADR-008-reactive-growth-intake-gate.md)).
 2. **Reject autonomous, continuous-loop, and enterprise-fleet operation as the operating mode.**
    No self-directing cron/dispatch/computer-use runtime, no loop-selection engine, no fleet
    observability or lifecycle daemon. These reconstruct a runtime
@@ -41,7 +54,10 @@ if anything, it takes from ECC's operate layer.
    ([ADR-004](ADR-004-extend-native-memory.md)), remove the human against the gated pipeline
    ([ADR-021](ADR-021-agent-orchestration-model.md)) and the invoked-not-continuous gate
    ([ADR-009](ADR-009-objective-invoked-audit-gate.md)), and target a multi-agent fleet that a
-   single operator does not have.
+   single operator does not have. The distinction from
+   [ADR-013](ADR-013-floor-on-demand-backbone.md) is deliberate: that floor *observes and
+   distills* automatically, but never self-tasks, schedules its own work, or acts without the
+   operator — automatic observation is not autonomous self-direction.
 3. **Adapt the transferable disciplines into decisions already made.** Loop failure modes (churn
    without progress, retry on the same root cause, cost drift from unbounded escalation) and the
    freeze -> reduce-scope -> replay-with-acceptance-criteria recovery are the self-debug loop
@@ -81,8 +97,8 @@ if anything, it takes from ECC's operate layer.
 - Pros: production-grade operability for many long-lived agents.
 - Cons: fleet machinery for a single-operator personal harness; "deployment" is already plugin
   install + git-tag rollback ([ADR-001](ADR-001-plugin-local-marketplace-packaging.md)), and the
-  metric is already one north-star ([ADR-005](ADR-005-fallback-log-dual-metric.md)), not a
-  dashboard.
+  metric is already the fallback log's readouts ([ADR-005](ADR-005-fallback-log-dual-metric.md)),
+  not a dashboard.
 - Rejected: keep kill switches ([ADR-006](ADR-006-hook-fail-open-gated-blocking.md)) and the
   incident pattern (already covered); skip the platform.
 
@@ -90,8 +106,9 @@ if anything, it takes from ECC's operate layer.
 - nxtlvl's operating mode is settled and consistent end-to-end: interactive, gated,
   single-operator sessions; no autonomous runtime is built, so the harness cannot run away from
   its operator.
-- Phase 6 reaffirms rather than extends ADR-005/006/009: the operate layer is the prior safety and
-  metric decisions seen from the running-it-daily angle.
+- Phase 6 reaffirms rather than extends the prior safety/metric/floor decisions
+  (ADR-005/006/009/013): the operate layer is those decisions seen from the running-it-daily
+  angle.
 - Operate-time failures are handled by the existing self-debug loop and gates; recurring ones feed
   the fallback log ([ADR-005](ADR-005-fallback-log-dual-metric.md)) and intake gate
   ([ADR-008](ADR-008-reactive-growth-intake-gate.md)), not a new ops platform.

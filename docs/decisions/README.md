@@ -27,11 +27,11 @@ Anchors these consume: [`../intent/personal-harness.md`](../intent/personal-harn
 | [015](ADR-015-agent-skill-load-rule-methodology-vs-spawn-target.md) | Agents that front a skill load it only when they run the skill to completion; spawn-target agents must not | Accepted |
 | [016](ADR-016-confident-core-capability-domains.md) | Pre-build a bounded confident-core of capability domains (Python, TS/JS, Rust, Frontend, Backend); intake gate governs the rest — amends ADR-008 | Accepted |
 | [017](ADR-017-agent-design-contract.md) | Main session orchestrates; agents are scoped specialists on a lean ECC-style contract, realized by the sandbox test | Accepted |
-| [018](ADR-018-agent-authoring-method.md) | Authoring = caller-agnostic skill injected into a lean executor; eval-first disciplines, scoped and reactive | Accepted |
+| [018](ADR-018-agent-authoring-method.md) | Authoring = caller-agnostic skill loaded by a lean executor; eval-first disciplines, scoped and reactive | Accepted |
 | [019](ADR-019-agent-evaluation-model.md) | Evaluation = advisory per-task self-evaluation that defers to review/stop-slop; formal eval suites stay reactive; gates unchanged | Accepted |
 | [020](ADR-020-agent-debugging-model.md) | Debugging = adopt the introspection self-debug loop; scope the architecture audit to owned layers; diagnostic, never a gate | Accepted |
 | [021](ADR-021-agent-orchestration-model.md) | Orchestration = adopt the gated delegate-don't-inline pipeline; own the composition, never the dispatch runtime; scoped roster | Accepted |
-| [022](ADR-022-agent-operation-model.md) | Operation = gated, interactive, single-operator sessions; reject autonomous/continuous/enterprise runtimes; reuse the existing metric, gate, and kill switches | Accepted |
+| [022](ADR-022-agent-operation-model.md) | Operation = gated, interactive, single-operator sessions with an automatic observation floor but no autonomous self-direction; reuse the existing metric, gate, and kill switches | Accepted |
 | [023](ADR-023-github-workflow-skill-and-conventions.md) | GitHub workflow standardized — a vendored skill composing `nxtlvl:review`; Conventional Commits, no attribution | Superseded by ADR-024 |
 | [024](ADR-024-git-workflows-domain-command-agent-skill.md) | git-workflows shipped as a three-layer `command → agent → skill` domain with an isolated, edit-less executor (`git-workflow-runner`) | Accepted |
 

@@ -33,6 +33,16 @@ specialists (go, rust, swift, django, react, healthcare, seo, network, …). `nx
 operator working across a *limited* set of stacks, so most of that matrix is out of scope by
 relevance.
 
+**Relation to the build ADRs.** This is a *review-phase* design decision; the parallel
+*build-phase* ADRs since fixed the concrete agent↔skill mechanism and the starting roster —
+[ADR-012](ADR-012-agents-execute-skills-hold-knowledge.md) (agents execute, skills hold
+knowledge; point to a skill, don't restate it),
+[ADR-015](ADR-015-agent-skill-load-rule-methodology-vs-spawn-target.md) (runner agents load the
+skill, spawn-target agents do not), and
+[ADR-016](ADR-016-confident-core-capability-domains.md) (a build-now confident-core of domains).
+Where they decide the same point, they are authoritative; this ADR composes with them, noted
+inline below.
+
 ## Decision
 
 1. **Operating model: orchestrator + specialists (first-class).** The main session is a lean
@@ -41,13 +51,19 @@ relevance.
    (which specialists exist, when to delegate) is ours
    ([ADR-003](ADR-003-compose-not-reconstruct.md)).
    - **1a. Scope.** The roster is bounded to the operator's actual stacks (Next.js/TS, Python,
-     Rust) + cross-cutting general agents + agent-building. It grows **reactively** through the
+     Rust) + cross-cutting general agents + agent-building. A bounded confident-core is
+     **build-now** ([ADR-016](ADR-016-confident-core-capability-domains.md): Python, TS/JS, Rust,
+     Frontend & UI, Backend/Architecture); everything beyond it grows **reactively** through the
      intake gate ([ADR-008](ADR-008-reactive-growth-intake-gate.md)); dormant ecc is the
      on-demand fallback library ([ADR-002](ADR-002-ecc-dormant-reference-backstop.md)). This is
      ecc's own `agent-sort` evidence logic applied at the *operator* level.
-   - **1b. Realization test.** Realize a specialist as a **native agent + injected skill** by
-     default; build a **custom agent** only when an agent-only property forces it — isolated
-     context, a restricted tool allowlist, or a distinct model tier
+   - **1b. Realization test.** Realize a specialist as a **native agent that loads its knowledge
+     skill** by default — the runner case of
+     [ADR-012](ADR-012-agents-execute-skills-hold-knowledge.md) (a spawn-target agent instead
+     takes a schema pointer and does not load,
+     [ADR-015](ADR-015-agent-skill-load-rule-methodology-vs-spawn-target.md)); build a **custom
+     agent** only when an agent-only property forces it — isolated context, a restricted tool
+     allowlist, or a distinct model tier
      (per [`../reference/ecc-agent-vs-skill-scoping.md`](../reference/ecc-agent-vs-skill-scoping.md)).
      The test decides *how* to realize a specialist, not *whether* to have one.
 
@@ -55,7 +71,9 @@ relevance.
    - Frontmatter: `name` (kebab, matches filename), `description` (activation trigger), `tools`
      (minimal allowlist), `model` (tier name, not a pinned ID).
    - Body: prompt-defense baseline → role / when-invoked loop → rubric / output format → a
-     pointer to the knowledge skill, **not** the knowledge itself (pointers over content,
+     pointer to the knowledge skill, **not** the knowledge itself — the
+     point-to-a-skill-don't-restate-it convention later fixed by
+     [ADR-012](ADR-012-agents-execute-skills-hold-knowledge.md) (pointers over content,
      [ADR-007](ADR-007-context-budgeted-injection.md); knowledge stays caller-agnostic).
    - The tool allowlist is the load-bearing choice: read-only vs. write-capable is the sandbox.
 
@@ -96,4 +114,8 @@ relevance.
   designing the composition layer; the dispatch primitive underneath stays native.
 - Open: the first specialists graduate reactively from real tasks. The likeliest first custom
   agent is a read-only review specialist (sandbox over a diff) — to be weighed in Phase 3
-  (Evaluate) against the existing `review` skill.
+  (Evaluate) against the existing `review` skill. *(Resolved by the build: the first agents are
+  `doc-keeper`, a methodology/runner agent that loads its skill
+  ([ADR-012](ADR-012-agents-execute-skills-hold-knowledge.md)), and `doubt-reviewer`, a read-only
+  spawn-target reviewer that does not
+  ([ADR-015](ADR-015-agent-skill-load-rule-methodology-vs-spawn-target.md)).)*
