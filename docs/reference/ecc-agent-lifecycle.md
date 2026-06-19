@@ -15,7 +15,7 @@ The six phases: **Design → Author → Evaluate → Debug → Orchestrate → O
 | 2 | Author | ✅ reviewed | [ADR-013](../decisions/ADR-013-agent-authoring-method.md) |
 | 3 | Evaluate | ✅ reviewed | [ADR-014](../decisions/ADR-014-agent-evaluation-model.md) |
 | 4 | Debug | ✅ reviewed | [ADR-015](../decisions/ADR-015-agent-debugging-model.md) |
-| 5 | Orchestrate | ⏳ pending | — |
+| 5 | Orchestrate | ✅ reviewed | [ADR-016](../decisions/ADR-016-agent-orchestration-model.md) |
 | 6 | Operate | ⏳ pending | — |
 
 ---
@@ -191,3 +191,52 @@ keeps hooks fail-open.
   don't own).
 - **Boundary:** diagnostic, never a gate. Recurring failures route to the fallback log (ADR-005)
   + intake gate (ADR-008), not a new standing audit.
+
+---
+
+## Phase 5 — Orchestrate
+
+**What "orchestrate" means in ecc:** how multi-step, multi-agent work is sequenced — a gated
+pipeline, a plan-to-chain emitter, a team Kanban runtime, and an interactive agent picker. This
+is where nxtlvl's operating model (ADR-012) lands fully, against ADR-003's "never reconstruct
+orchestration."
+
+**Sources read:**
+- `reference/ECC-main/skills/orch-pipeline/SKILL.md`
+- `reference/ECC-main/skills/plan-orchestrate/SKILL.md`
+- `reference/ECC-main/skills/team-agent-orchestration/SKILL.md`
+- `reference/ECC-main/skills/team-builder/SKILL.md` (origin: community)
+
+### ecc's doctrine
+1. **`orch-pipeline`** — a gated Research → Plan → Implement(TDD) → Review → Commit pipeline. A
+   **size classifier** (trivial/small/standard/large) selects which phases run; a security-review
+   trigger pulls in the security reviewer on sensitive diffs; **two human gates** stand (after
+   Plan, before Commit). Cardinal rule: the wrappers are thin — they classify, choose phases, and
+   **delegate** each phase to an existing agent/command; they never re-implement work inline.
+2. **`plan-orchestrate`** — reads a plan, tags each step, looks up an agent chain from a
+   **tag→chain table**, and emits paste-able `/orchestrate custom "a,b,c" "task"` commands (with
+   plugin/legacy namespacing). Generative only.
+3. **`team-agent-orchestration`** — a multi-agent **team runtime**: work-item cards, agent Kanban
+   (Backlog…Merged), a control pane, an integrator role, cross-session board state. Names real
+   failure modes: agent soup, invisible work, board theater, overlapping writes.
+4. **`team-builder`** — an interactive picker: discover the roster (`claude agents`), present a
+   domain menu, pick ≤5, **fan out in parallel on the native Agent tool**, synthesize.
+
+### Composition vs dispatch runtime — the line ADR-003 draws
+Each surface splits into **composition** (which specialists, when, in what gated order, how
+briefed) and **dispatch runtime** (the chain-runner, the router table, the control pane). ADR-012
+makes the composition ours; ADR-003 keeps the runtime native. The orchestrator's "router" is its
+own judgment over a small scoped roster + native description-triggered dispatch — not a tag→chain
+table, a `/orchestrate` chain-runner, or a Kanban board.
+
+### nxtlvl decision → [ADR-016](../decisions/ADR-016-agent-orchestration-model.md)
+- **Adopt:** the gated, size-classified, delegate-don't-inline pipeline + the two human gates +
+  security trigger (orch-pipeline), agent map narrowed to the scoped roster (ADR-012).
+- **Adapt:** self-contained delegation briefs (plan-orchestrate Ph3); parallel fan-out +
+  synthesis + dynamic discovery on the native Agent tool (team-builder); team failure-mode
+  guardrails + worktree isolation for parallel writes (team-agent-orchestration). Per-phase
+  quality/recovery reuse ADR-014/ADR-015.
+- **Reject:** the `/orchestrate` chain-runner + tag→chain code-gen + namespacing
+  (plan-orchestrate); the Kanban control-pane/card/integrator runtime (team-agent-orchestration);
+  the interactive picker (team-builder) — all on ADR-003 (don't reconstruct orchestration) +
+  single-operator scope.

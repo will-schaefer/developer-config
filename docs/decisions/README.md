@@ -25,3 +25,4 @@ Anchors these consume: [`../intent/personal-harness.md`](../intent/personal-harn
 | [013](ADR-013-agent-authoring-method.md) | Authoring = caller-agnostic skill injected into a lean executor; eval-first disciplines, scoped and reactive | Accepted |
 | [014](ADR-014-agent-evaluation-model.md) | Evaluation = advisory per-task self-evaluation that defers to review/stop-slop; formal eval suites stay reactive; gates unchanged | Accepted |
 | [015](ADR-015-agent-debugging-model.md) | Debugging = adopt the introspection self-debug loop; scope the architecture audit to owned layers; diagnostic, never a gate | Accepted |
+| [016](ADR-016-agent-orchestration-model.md) | Orchestration = adopt the gated delegate-don't-inline pipeline; own the composition, never the dispatch runtime; scoped roster | Accepted |
