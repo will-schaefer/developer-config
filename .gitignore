@@ -19,3 +19,8 @@ config/helix/
 
 # Packaged skill bundles — built artifacts; rebuild from source, don't track.
 *.skill
+
+# Per-machine plugin install state — `claude plugin install` writes an absolute
+# marketplace path here, so it can't be shared across machines. The reproducible
+# install recipe lives in the repo instead. (settings.local.json IS tracked.)
+.claude/settings.json
