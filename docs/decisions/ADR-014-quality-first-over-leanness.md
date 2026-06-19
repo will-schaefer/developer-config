@@ -1,12 +1,12 @@
 ---
-id: ADR-012
+id: ADR-014
 title: "Quality first — size and leanness are backstops, never the objective"
 status: Accepted
 date: 2026-06-19
 amends: [ADR-007, ADR-008]
 ---
 
-# ADR-012: Quality first — size and leanness are backstops, never the objective
+# ADR-014: Quality first — size and leanness are backstops, never the objective
 
 ## Context
 Several harness decisions justify a choice by *size* or *leanness*: a token budget
@@ -90,13 +90,13 @@ Applied to the standing size mechanisms:
 - **Amends [ADR-007](ADR-007-context-budgeted-injection.md):** the ~300-token budget is reframed as a
   **soft attention-dilution backstop**; over-budget triggers densify/consolidate first and cuts only
   non-earning blocks. The lifetime-tier policy and pointers-over-content stand unchanged. (ADR-007
-  stays Accepted, annotated `amended-by: ADR-012`.) The raise to ~400 in the C&M subsystem spec is
+  stays Accepted, annotated `amended-by: ADR-014`.) The raise to ~400 in the C&M subsystem spec is
   consistent with this — that raise lifted the *backstop* to keep a proven 5th block, rather than
   dropping the block to fit the old number.
 - **Reframes [ADR-008](ADR-008-reactive-growth-intake-gate.md):** the reactive/membership gate stays
   verbatim; its *reason* is restated as **defer the UNPROVEN** (maintenance/attention cost on
   unproven machinery), not "keep things small." Build on proven need. (ADR-008 stays Accepted,
-  annotated `amended-by: ADR-012`.)
+  annotated `amended-by: ADR-014`.)
 - **Reframes the [ADR-011](ADR-011-prose-quality-stop-slop.md) Face-B cap:** the condensed block's
   quality bar is **coverage of every core rule** (the floor); the ≤15-line figure is a soft
   densification target, not a license to drop a rule to hit the count.
@@ -117,7 +117,7 @@ Applied to the standing size mechanisms:
   carries the verbatim text to mirror into the daily driver.
 
 ## Follow-up (personal-harness.md read-through — confirm separately)
-The anchor is **not** edited. Read these spots through ADR-012 (size = backstop, not goal) and
+The anchor is **not** edited. Read these spots through ADR-014 (size = backstop, not goal) and
 confirm each reading:
 
 - **L9, L71–80** — "ecc = dormant reference + backstop"; "keeps its 271 skills / 67 agents out of my

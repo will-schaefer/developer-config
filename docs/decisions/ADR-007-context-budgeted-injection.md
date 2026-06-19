@@ -3,12 +3,12 @@ id: ADR-007
 title: "Context assembly as a budgeted injection policy — pointers over content, organized by lifetime"
 status: Accepted
 date: 2026-06-16
-amended-by: ADR-012
+amended-by: ADR-014
 ---
 
 # ADR-007: Context assembly as a budgeted injection policy — pointers over content, organized by lifetime
 
-> **Amended by [ADR-012](ADR-012-quality-first-over-leanness.md) (2026-06-19):** the token budget is
+> **Amended by [ADR-014](ADR-014-quality-first-over-leanness.md) (2026-06-19):** the token budget is
 > a **soft attention-dilution backstop, not a hard cap**. Over budget → densify/consolidate first;
 > drop a block only when it isn't earning its tokens (noise/stale), never a proven-valuable block to
 > hit the number. The lifetime tiers and pointers-over-content stand unchanged.
@@ -36,11 +36,11 @@ information** rather than by a single dumping mechanism:
 
 **Hard rules:**
 - Every auto-injected block **justifies its tokens or it is cut** (the cut targets non-earners —
-  noise/stale/low-confidence — not proven value; [ADR-012](ADR-012-quality-first-over-leanness.md)).
+  noise/stale/low-confidence — not proven value; [ADR-014](ADR-014-quality-first-over-leanness.md)).
 - **Prefer pointers over content** — `"task X in progress → read docs/intent/…"`, never the
   file's contents.
 - Concrete Phase-0 budget: **≤ ~300 tokens (~20 lines)** — a **soft attention-dilution backstop, not
-  a hard cap** ([ADR-012](ADR-012-quality-first-over-leanness.md)). When a payload exceeds it,
+  a hard cap** ([ADR-014](ADR-014-quality-first-over-leanness.md)). When a payload exceeds it,
   **densify/consolidate first** (tighter pointers, fewer-but-higher-value entries); drop a block only
   when it isn't earning its tokens. Cut order **fallback-digest → task-pointer → git-line** names
   which *low-value* block sheds first — it never sheds a proven-valuable block just to hit the number.
@@ -74,4 +74,4 @@ information** rather than by a single dumping mechanism:
   not the injection plumbing.
 - The budget is a quality backstop, not a target: when good content exceeds it, the move is
   consolidation into a denser form, never truncation of proven value
-  ([ADR-012](ADR-012-quality-first-over-leanness.md)).
+  ([ADR-014](ADR-014-quality-first-over-leanness.md)).

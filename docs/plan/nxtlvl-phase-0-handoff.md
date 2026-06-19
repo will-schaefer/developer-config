@@ -46,7 +46,7 @@ runtime** (a restart took effect). Re-enabling ecc is an ask-first act. `ECC_GAT
 ineffective; full dormancy is the fix (memory `disable-ecc-active-hooks-dev`).
 
 ## Locked decisions (the plan's 5 open questions — all defaults accepted)
-1. Context-injection token budget (M4) = **≤ ~300 tokens (~20 lines)** — a *soft backstop*, not a hard cap; densify first, shed only non-earning blocks ([ADR-012](../decisions/ADR-012-quality-first-over-leanness.md)). Cut order: fallback-digest → task-pointer → git-line.
+1. Context-injection token budget (M4) = **≤ ~300 tokens (~20 lines)** — a *soft backstop*, not a hard cap; densify first, shed only non-earning blocks ([ADR-014](../decisions/ADR-014-quality-first-over-leanness.md)). Cut order: fallback-digest → task-pointer → git-line.
 2. Hook wiring = **incremental** (PreToolUse@M0 ✓, SessionStart@M4, SessionEnd@M6).
 3. Spike ecc-prefix confirmation = done live (both paths confirmed with real `ecc:` payloads). No further ecc re-enable needed.
 4. `nxtlvl:dev` = **composes** the agent-skills loop, vendors nothing.

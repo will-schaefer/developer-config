@@ -8,7 +8,7 @@
 > instead) collapsed the wind-down / checkpoint / handoff machinery into a lightweight awareness signal.
 > Smaller because that machinery became **irrelevant/unproven once compaction lands at user-chosen task
 > boundaries**, not because small is the goal — quality/relevance drove the cut
-> ([ADR-012](../decisions/ADR-012-quality-first-over-leanness.md)).
+> ([ADR-014](../decisions/ADR-014-quality-first-over-leanness.md)).
 > Revised 2026-06-17 after a doubt-driven adversarial review (single-model; cross-model skipped):
 > scoping made honest (the *code* change is a small rebuild — message + state machine — not a tune),
 > and three gaps closed: two-stage state, Hook-2 active-doc selection, delivery/native-trigger assumptions.

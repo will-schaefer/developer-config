@@ -271,7 +271,7 @@ error is swallowed. Non-ecc invocations append nothing.
 **bounded** pointer block, emit it as the hook's `additionalContext` → **always `exit 0`**, even on
 error. Payload, in priority order, **token-budgeted** — the budget is a *soft backstop* (densify
 first; shed only non-earning blocks, never proven value to hit a number;
-[ADR-012](../decisions/ADR-012-quality-first-over-leanness.md)); cut the lowest-value block first if
+[ADR-014](../decisions/ADR-014-quality-first-over-leanness.md)); cut the lowest-value block first if
 still over:
 1. git: current branch + dirty/clean flag (one line).
 2. current-task pointer: e.g. `task in progress → read docs/spec/nxtlvl-phase-0-mvh.md` (a *pointer*,
@@ -288,7 +288,7 @@ number is manual and the dual (fallback-rate × quality) metric is computable fr
 **Conventions:** kebab-case skill/hook names; `${CLAUDE_PLUGIN_ROOT}` for all in-plugin paths;
 every auto-injected context block justifies its tokens or is cut (**pointers > content**) — the cut
 sheds non-earners, never proven value to hit the budget
-([ADR-012](../decisions/ADR-012-quality-first-over-leanness.md)).
+([ADR-014](../decisions/ADR-014-quality-first-over-leanness.md)).
 
 ## Testing / Verification Strategy
 

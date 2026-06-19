@@ -80,7 +80,7 @@ chat has no trigger that reliably loads it. The condensed block earns its always
 prose-shaping is impossible without them. The mitigation is a size cap — a *soft densification
 target*, not a hard line that drops a rule: its floor is **coverage of every core rule**, and it
 stays a tight, dense extract (never the full skill) that still covers all of them
-([ADR-012](../decisions/ADR-012-quality-first-over-leanness.md)).
+([ADR-014](../decisions/ADR-014-quality-first-over-leanness.md)).
 
 **Sync model — literal copy + audit check** (chosen over `@import`). The block is a literal copy in
 the global layer; the audit verifies it still matches the skill's core rules. This keeps the
