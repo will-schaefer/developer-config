@@ -12,7 +12,7 @@ Anchors these consume: [`../intent/personal-harness.md`](../intent/personal-harn
 |---|---|---|
 | [001](ADR-001-plugin-local-marketplace-packaging.md) | Package as a CC plugin installed via a local marketplace; promotion = install, git-tag = rollback | Accepted |
 | [002](ADR-002-ecc-dormant-reference-backstop.md) | Keep `ecc` installed-but-dormant as reference + backstop | Accepted |
-| [003](ADR-003-compose-not-reconstruct.md) | Compose on native + agent-skills; reconstruct only the plumbing; never reconstruct orchestration | Accepted |
+| [003](ADR-003-compose-not-reconstruct.md) | Compose on native + agent-skills; reconstruct only the plumbing; never reconstruct orchestration — amended (2026-06-19): the *router's* agent-skills floor is delisted (precedence collapses to `nxtlvl → native`); the three-tier strategy otherwise stands | Accepted · amended by [027](ADR-027-router-endorses-only-established-items.md) |
 | [004](ADR-004-extend-native-memory.md) | Extend native CC file-memory; build no new memory system — amended (1) separate instinct store outside `~/.claude` for observer-learned instincts; (2) provenance is the ownership boundary: "remember this" → native memory directly, observer never writes there | Accepted (amended 2026-06-19) |
 | [005](ADR-005-fallback-log-dual-metric.md) | Hook-written fallback log + dual fallback-rate × quality north-star metric — amended: dual metric is now two automatic readouts (fallback-rate + instinct-confidence distribution); no session quality score | Accepted (amended 2026-06-19) |
 | [006](ADR-006-hook-fail-open-gated-blocking.md) | Hooks fail-open on error (absolute); blocking only via the intake gate + kill switches — clarified (2026-06-19): "fail open" = never HALT; liveness record, write-atomicity, and fail-closed-secret invariants hold even on error path | Accepted (clarified 2026-06-19) |
@@ -37,6 +37,7 @@ Anchors these consume: [`../intent/personal-harness.md`](../intent/personal-harn
 
 | [025](ADR-025-project-identity-observer-concurrency.md) | Project identity = git common directory; atomic writes (tmp + rename) + per-session single-flight observer guard | Accepted (impl. deferred) |
 | [026](ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md) | Ideation phase = three-layer domain with a main-thread orchestrator skill + isolated read-only agents (inverts [024](ADR-024-git-workflows-domain-command-agent-skill.md)) | Accepted |
+| [027](ADR-027-router-endorses-only-established-items.md) | Router endorses only established nxtlvl items; delist the agent-skills fallthrough floor (precedence collapses to `nxtlvl → native`, dark at unowned phases, `spec`/`plan` kept as interim exceptions) — amends [003](ADR-003-compose-not-reconstruct.md) | Accepted |
 
 > **Numbering note:** the git-workflows decisions are recorded as ADR-023 (skill + conventions,
 > superseded) and ADR-024 (the three-layer domain). They were originally drafted as ADR-012 →

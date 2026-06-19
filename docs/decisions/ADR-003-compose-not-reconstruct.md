@@ -3,6 +3,7 @@ id: ADR-003
 title: "Compose on native + agent-skills; reconstruct only the plumbing; never reconstruct orchestration"
 status: Accepted
 date: 2026-06-16
+amended: 2026-06-19
 ---
 
 # ADR-003: Compose on native + agent-skills; reconstruct only the plumbing; never reconstruct orchestration
@@ -70,3 +71,10 @@ the SDLC content.**
 - Vendoring individual agent-skills skills stays **reactive**
   ([ADR-008](ADR-008-reactive-growth-intake-gate.md)) — v1 workflows compose, they don't copy.
 - The "production quality" bar applies to the plumbing layer, not the envelope.
+- **Amended 2026-06-19 by [ADR-027](ADR-027-router-endorses-only-established-items.md):** the
+  *router's* exposure of the agent-skills floor is removed — `nxtlvl-router` endorses only
+  established nxtlvl items and goes dark at unowned phases (precedence collapses to
+  `nxtlvl → native`). This narrows the "compose on agent-skills" conclusion **for the router only**;
+  the three-tier strategy (plumbing-reconstruct, orchestration-native, reactive workflow-vendoring)
+  otherwise stands. agent-skills remains installed and composable directly — it is simply no longer
+  routed to.
