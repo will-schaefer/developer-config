@@ -3,9 +3,21 @@ id: ADR-008
 title: "Reactive growth governed by a written membership/intake gate"
 status: Accepted
 date: 2026-06-16
+amended-by: [ADR-013, ADR-014]
 ---
 
 # ADR-008: Reactive growth governed by a written membership/intake gate
+
+> **Amended by [ADR-013](ADR-013-confident-core-capability-domains.md)** (2026-06-18): the
+> membership-test classification below is amended for a **bounded confident-core** of five
+> capability domains (Python · TypeScript/JavaScript · Rust · Frontend & UI ·
+> Backend/Architecture), which move *reactive → build-now*. The intake gate and harden trigger
+> here remain **unchanged** for everything outside that core.
+>
+> **Amended by [ADR-014](ADR-014-quality-first-over-leanness.md) (2026-06-19):** the gate stays
+> verbatim, but its *reason* is **defer the UNPROVEN** (unproven machinery is maintenance/attention
+> cost), **not** "keep things small." Build the moment a real need proves out. "Lean" below means
+> *un-bloated by deferral*, never small-for-small's-sake.
 
 ## Context
 My workload is varied — Next.js full-stack, Python, Rust, knowledge-base and LLM-wiki
@@ -74,8 +86,10 @@ precise failure this ADR exists to prevent.
 
 ## Consequences
 - Adding any new skill/workflow is an **ask-first** action requiring the written intake entry.
-- `nxtlvl` stays lean by the intake gate **plus** dormant-ecc as the fallback
-  ([ADR-002](ADR-002-ecc-dormant-reference-backstop.md)) for genuine edge cases.
+- `nxtlvl` stays **focused (un-bloated) by deferring the unproven** — the intake gate **plus**
+  dormant-ecc as the fallback ([ADR-002](ADR-002-ecc-dormant-reference-backstop.md)) for genuine edge
+  cases. Focus is the goal, not smallness; a proven need is built at once
+  ([ADR-014](ADR-014-quality-first-over-leanness.md)).
 - Vendoring individual agent-skills skills, and a likely fourth "agent-building" workflow,
   both stay **reactive** rather than pre-built ([ADR-003](ADR-003-compose-not-reconstruct.md)).
 - The success metric and the growth engine share one substrate: the fallback log.

@@ -1,0 +1,62 @@
+# Repository labels, managed as code.
+# Applied by .github/workflows/labels.yml (EndBug/label-sync) on push to main.
+# Edit here, not in the GitHub UI — manual changes are overwritten on the next sync.
+
+# --- Type -------------------------------------------------------------------
+- name: bug
+  color: "d73a4a"
+  description: Something isn't working
+- name: enhancement
+  color: "a2eeef"
+  description: New feature or request
+- name: documentation
+  color: "0075ca"
+  description: Documentation, specs, and ADRs
+- name: refactor
+  color: "fbca04"
+  description: Code change that neither fixes a bug nor adds a feature
+- name: test
+  color: "c2e0c6"
+  description: Tests and test infrastructure
+- name: chore
+  color: "fef2c0"
+  description: Maintenance, tooling, and dependencies
+
+# --- Area -------------------------------------------------------------------
+- name: "area:nxtlvl"
+  color: "1d76db"
+  description: The nxtlvl plugin
+- name: "area:hooks"
+  color: "006b75"
+  description: Plugin hooks
+- name: "area:skills"
+  color: "5319e7"
+  description: Plugin skills
+- name: "area:docs"
+  color: "c5def5"
+  description: docs/ — specs, plans, and ADRs
+
+# --- Priority ---------------------------------------------------------------
+- name: "priority:high"
+  color: "b60205"
+  description: Urgent — do first
+- name: "priority:medium"
+  color: "d93f0b"
+  description: Normal priority
+- name: "priority:low"
+  color: "0e8a16"
+  description: Nice to have
+
+# --- Workflow ---------------------------------------------------------------
+- name: needs-triage
+  color: "ededed"
+  description: Not yet assessed
+- name: good first issue
+  color: "7057ff"
+  description: Good entry point for new contributors
+- name: blocked
+  color: "e11d21"
+  description: Blocked on something else
+- name: wontfix
+  color: "ffffff"
+  description: This will not be worked on
