@@ -40,4 +40,7 @@ Anchors these consume: [`../intent/personal-harness.md`](../intent/personal-harn
 > **Numbering note:** the git-workflows decisions are recorded as ADR-023 (skill + conventions,
 > superseded) and ADR-024 (the three-layer domain). They were originally drafted as ADR-012 →
 > 015 → 016 on a feature branch; each number was already taken by an unrelated decision accepted
-> on `main` first, so they were renumbered to 023–024 on merge to avoid collisions.
+> on `main` first, so they were renumbered to 023–024 on merge to avoid collisions. The six
+> agent-lifecycle decisions (ADR-017–022) were renumbered the same way — drafted as ADR-012–017
+> on the PR #4 branch, renumbered on merge because ADR-012–016 were already taken by other
+> decisions accepted on `main` first.

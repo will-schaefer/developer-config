@@ -279,9 +279,9 @@ gate (ADR-009), one fallback × quality north-star (ADR-005), native memory (ADR
 - **Reject:** autonomous self-direction (autonomous-agent-harness), the continuous-loop runtime,
   and the enterprise fleet-ops platform — on ADR-003 (don't reconstruct runtime), ADR-004 (no new
   memory), ADR-006/009 (fail-open + gated, human-in-loop), and single-operator scope.
-- **Adapt:** loop failure-modes + recovery → ADR-020/013/016; failure-class distribution →
+- **Adapt:** loop failure-modes + recovery → ADR-020/018/021; failure-class distribution →
   reactively shape the ADR-005 fallback log; cost-drift awareness → ADR-018 model-escalation.
-- **Keep (already decided):** kill switches (ADR-006), incident pattern (ADR-020/016),
+- **Keep (already decided):** kill switches (ADR-006), incident pattern (ADR-020/021),
   install+tag deployment (ADR-001), the single north-star metric (ADR-005); plus the
   consent/dry-run/credentials-out discipline as the guard on any future opted-in, native-rooted
   automation.
@@ -291,5 +291,5 @@ gate (ADR-009), one fallback × quality north-star (ADR-005), native memory (ADR
 ## Review complete
 
 All six phases reviewed (Design → Author → Evaluate → Debug → Orchestrate → Operate), each
-recorded as an ADR (012–017). The same adopt/adapt/reject method now applies to any future
+recorded as an ADR (017–022). The same adopt/adapt/reject method now applies to any future
 harness brought in as a reference.
