@@ -14,7 +14,7 @@ The six phases: **Design → Author → Evaluate → Debug → Orchestrate → O
 | 1 | Design | ✅ reviewed | [ADR-012](../decisions/ADR-012-agent-design-contract.md) |
 | 2 | Author | ✅ reviewed | [ADR-013](../decisions/ADR-013-agent-authoring-method.md) |
 | 3 | Evaluate | ✅ reviewed | [ADR-014](../decisions/ADR-014-agent-evaluation-model.md) |
-| 4 | Debug | ⏳ pending | — |
+| 4 | Debug | ✅ reviewed | [ADR-015](../decisions/ADR-015-agent-debugging-model.md) |
 | 5 | Orchestrate | ⏳ pending | — |
 | 6 | Operate | ⏳ pending | — |
 
@@ -141,3 +141,53 @@ formal eval-suite discipline, and a tool to compare agent products head-to-head.
 - **Result — a layered, non-overlapping quality model:** per-task self-check (advisory) → code
   via `review`, prose via stop-slop → promotion audit (the only block, ADR-009) → fallback ×
   quality north-star (ADR-005).
+
+---
+
+## Phase 4 — Debug
+
+**What "debug" means in ecc:** how a misbehaving agent is diagnosed and recovered — a
+runtime-agnostic self-debug workflow, and a full-stack architecture audit for built agent
+applications.
+
+**Sources read:**
+- `reference/ECC-main/skills/agent-introspection-debugging/SKILL.md` (origin: ecc)
+- `reference/ECC-main/skills/agent-architecture-audit/SKILL.md` (origin: oh-my-agent-check)
+
+### ecc's doctrine
+1. **`agent-introspection-debugging` — a self-debug workflow, not a hidden runtime.** Four
+   phases: Capture (record the failure precisely) → Diagnose (match to a known pattern: loop /
+   max-calls, context overflow, ECONNREFUSED, 429, stale file, tests-still-failing) → Contained
+   Recovery (the smallest discriminating action) → Introspection Report. Recovery heuristics:
+   restate the objective, verify world state, shrink scope, run one discriminating check, *then*
+   retry. Honesty rule: never claim auto-healing actions not actually performed through real
+   tools.
+2. **`agent-architecture-audit` — the 12-layer stack.** System prompt, session history, memory,
+   distillation, recall, tool selection/execution/interpretation, answer shaping, platform
+   rendering, hidden repair loops, persistence. Failure patterns: wrapper regression, memory
+   contamination, tool-discipline failure, rendering/transport corruption, hidden agent layers.
+   Output: severity-ranked findings + a typed JSON report; code-first (not prompt-first) fixes.
+   Built for a standalone agent *application* with its own wrapper/router/memory/transport.
+
+### Two things wear "audit"
+ecc's architecture audit is a **runtime, judgment-based diagnostic**; nxtlvl's promotion gate
+(ADR-009) is a **static, objective, binary, build-time gate**. They are different surfaces — the
+static-overlap items (dead refs, invalid frontmatter) belong to the gate; the behavioral items
+(memory contamination, hidden loops, tool discipline) are debugging. The "hidden repair loop"
+layer is already answered by nxtlvl's design: ADR-005 makes fallback logged and explicit, ADR-006
+keeps hooks fail-open.
+
+### nxtlvl decision → [ADR-015](../decisions/ADR-015-agent-debugging-model.md)
+- **Adopt:** `agent-introspection-debugging` as the in-session self-debug loop (the 4 phases,
+  pattern table, recovery heuristics, and no-fake-healing honesty rule); a caller-agnostic skill
+  (ADR-013) the orchestrator or a stuck executor invokes, pairing with ADR-013 stop-and-ask and
+  ADR-014 self-eval.
+- **Adapt:** `agent-architecture-audit` down to a scoped harness-debug lens over only the layers
+  nxtlvl owns (prompt-assembly conflict/bloat; context/memory injection per ADR-004/007;
+  delegation-not-firing per ADR-012; fallback visibility per ADR-005/006), keeping its
+  disciplines wholesale (severity, code/config-first fixes, evidence+confidence, falsify the
+  harness layer first).
+- **Reject:** the full 12-layer / JSON-envelope product audit on scope (ADR-003/004 — infra we
+  don't own).
+- **Boundary:** diagnostic, never a gate. Recurring failures route to the fallback log (ADR-005)
+  + intake gate (ADR-008), not a new standing audit.
