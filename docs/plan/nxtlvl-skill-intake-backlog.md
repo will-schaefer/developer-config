@@ -33,27 +33,45 @@
   endpoint per [ADR-002](../decisions/ADR-002-ecc-dormant-reference-backstop.md) once enough of it
   is vendored.
 
-## 2. `github-workflow` skill → `git-workflows` workflow domain (seed) — INTAKE (2026-06-18, realigned 2026-06-19)
+## 2. `github-workflow` (skill) — VENDORED (2026-06-18)
 
-- **Task that required it:** standardize the GitHub workflow *for agents* — one documented
-  `branch → commit → PR → review → CI → merge` loop instead of agents improvising branch names,
-  commit style, and PR shape differently every session.
+- **Task that required it:** standardize the GitHub workflow *for agents* — give nxtlvl one
+  documented `branch → commit → PR → review → CI → merge` loop instead of agents improvising branch
+  names, commit style, and PR shape differently every session.
 - **Existing thing that failed:** `git-workflow` + `github-ops` document the loop but leave three
-  conventions unresolved for nxtlvl — Conventional Commits vs this repo's sentence-case history,
-  attribution defaults disagree, and the bases re-derive review instead of reusing `nxtlvl:review`.
-- **Classification (domain map):** `git-workflows` is a **Layer-2 workflow domain** (a verb/entry
-  point, like `review`/`dev`/`research`), **not** a confident-core capability domain — so it is
-  *not* build-now; it enters via **this intake entry** ([ADR-008](../decisions/ADR-008-reactive-growth-intake-gate.md)).
-  Same posture as `agent-building` (a reactive workflow), admitted because the task above is real
-  and recurring.
-- **Action taken (seed only):** vendored `git-workflow` + `github-ops` into
+  conventions unresolved for nxtlvl — ECC mandates Conventional Commits while this repo's history is
+  sentence-case, attribution defaults disagree, and the bases re-derive review instead of reusing
+  `nxtlvl:review`. A thin call to either upstream left the conventions unresolved.
+- **Membership:** build-now. A standardized GitHub loop is task-independent machinery (it applies on
+  every project that touches GitHub), so it qualifies on the spot — no logged near-miss needed.
+- **Action taken:** vendored `git-workflow` + `github-ops` into
   [`plugins/nxtlvl/skills/github-workflow/SKILL.md`](../../plugins/nxtlvl/skills/github-workflow/SKILL.md),
-  refined for fit ([ADR-003](../decisions/ADR-003-compose-not-reconstruct.md)): Conventional Commits,
-  draft-PR-first, no attribution, full-loop scope; composes `nxtlvl:review` at the review step. This
-  is the **knowledge layer only** — the domain's thin command + isolated executor agent are still to
-  build as the §6 triad, with the agent **loading this skill as its single source of truth** (not
-  restating it) per [ADR-012](../decisions/ADR-012-agents-execute-skills-hold-knowledge.md), mirroring
-  `doc-keeper`. The domain decision is recorded by the build session as **ADR-015**. See
-  [`nxtlvl-git-workflows-domain-handoff.md`](nxtlvl-git-workflows-domain-handoff.md).
+  refined for fit ([ADR-003](../decisions/ADR-003-compose-not-reconstruct.md), [ADR-023](../decisions/ADR-023-github-workflow-skill-and-conventions.md), since superseded by [ADR-024](../decisions/ADR-024-git-workflows-domain-command-agent-skill.md)):
+  Conventional Commits, draft-PR-first, no attribution, full-loop scope. The skill runs in-context
+  and **composes** the existing `nxtlvl:review` agent at the review step rather than reconstructing
+  it; per the agent-vs-skill axis ([`ecc-agent-vs-skill-scoping.md`](../reference/ecc-agent-vs-skill-scoping.md) §5)
+  the write-and-push loop is a skill, not a standalone agent. Dropped the live upstream calls;
+  long-tail recipes stay a pointer into `reference/ECC-main/skills/git-workflow`.
+- **Upstream disposition:** `agent-skills`/ECC stay installed and untouched — dormant-not-deleted
+  per [ADR-002](../decisions/ADR-002-ecc-dormant-reference-backstop.md).
+
+## 3. `git-workflows` domain (command + agent) — BUILT (2026-06-19)
+
+- **Task that required it:** ship the standardized GitHub loop as a reusable `git-workflows` *domain* —
+  a `/git-workflow` entry that drives a change to a reviewed, mergeable PR with the noisy diff/CI/review
+  work off the main thread, not just a documented procedure the main thread runs inline.
+- **Existing thing that failed:** the single in-context `github-workflow` skill (entry #2, [ADR-023](../decisions/ADR-023-github-workflow-skill-and-conventions.md))
+  ran the whole loop on the main thread — no isolation, no model routing, and **no sandbox** stopping an
+  over-eager agent from editing source while "just committing." A skill *cannot* express a `tools:`
+  allowlist or a `model:` tier ([`ecc-agent-vs-skill-scoping.md`](../reference/ecc-agent-vs-skill-scoping.md) §2),
+  so the executor capability was inexpressible as a skill alone.
+- **Membership:** build-now. A standardized, isolated GitHub-loop executor is task-independent machinery
+  (it applies on every project that touches GitHub), so it qualifies on the spot.
+- **Action taken:** added agent [`git-workflow-runner`](../../plugins/nxtlvl/agents/git-workflow-runner.md)
+  (`tools: Read, Grep, Glob, Bash, Skill` — Bash but **no `Write`/`Edit`**; `model: sonnet`) and thin
+  command [`/git-workflow`](../../plugins/nxtlvl/commands/git-workflow.md); refined the
+  [`github-workflow`](../../plugins/nxtlvl/skills/github-workflow/SKILL.md) skill in place to stay
+  caller-agnostic. The executor composes `nxtlvl:review` at the review step. Recorded as
+  [ADR-024](../decisions/ADR-024-git-workflows-domain-command-agent-skill.md) (supersedes ADR-023).
 - **Upstream disposition:** `agent-skills`/ECC stay installed and untouched — dormant-not-deleted
   per [ADR-002](../decisions/ADR-002-ecc-dormant-reference-backstop.md).

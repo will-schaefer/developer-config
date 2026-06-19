@@ -32,3 +32,10 @@ Anchors these consume: [`../intent/personal-harness.md`](../intent/personal-harn
 | [020](ADR-020-agent-debugging-model.md) | Debugging = adopt the introspection self-debug loop; scope the architecture audit to owned layers; diagnostic, never a gate | Accepted |
 | [021](ADR-021-agent-orchestration-model.md) | Orchestration = adopt the gated delegate-don't-inline pipeline; own the composition, never the dispatch runtime; scoped roster | Accepted |
 | [022](ADR-022-agent-operation-model.md) | Operation = gated, interactive, single-operator sessions; reject autonomous/continuous/enterprise runtimes; reuse the existing metric, gate, and kill switches | Accepted |
+| [023](ADR-023-github-workflow-skill-and-conventions.md) | GitHub workflow standardized — a vendored skill composing `nxtlvl:review`; Conventional Commits, no attribution | Superseded by ADR-024 |
+| [024](ADR-024-git-workflows-domain-command-agent-skill.md) | git-workflows shipped as a three-layer `command → agent → skill` domain with an isolated, edit-less executor (`git-workflow-runner`) | Accepted |
+
+> **Numbering note:** the git-workflows decisions are recorded as ADR-023 (skill + conventions,
+> superseded) and ADR-024 (the three-layer domain). They were originally drafted as ADR-012 →
+> 015 → 016 on a feature branch; each number was already taken by an unrelated decision accepted
+> on `main` first, so they were renumbered to 023–024 on merge to avoid collisions.
