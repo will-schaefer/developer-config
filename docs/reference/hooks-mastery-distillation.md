@@ -244,7 +244,7 @@ independent check. Removing the capability makes "report pass/fail" the only ava
 the two distinct enforcement layers in play: **capability-withholding** (validator) and
 **post-mutation hooks** (builder's lint gate) — they compose.
 
-This maps directly onto nxtlvl's ideation agents: **`design-critic` and `context-scout` should be
+This maps directly onto nxtlvl's ideation agents: **`idea-critic` and `context-scout` should be
 capability-constrained read-only** (a Read/Grep/Glob allowlist, or `disallowedTools` on write
 tools), not merely instructed to be advisory. It also sharpens the scoping doctrine
 ([ecc-agent-vs-skill-scoping.md](ecc-agent-vs-skill-scoping.md)): read-only-ness is a *first-class
@@ -349,7 +349,7 @@ output" thesis (§2) made concrete; nxtlvl achieves the same via its spec/plan/A
 | From hooks-mastery | Verdict | nxtlvl surface → action |
 |--------------------|---------|--------------------------|
 | Hook flow-control reference (§3.2) | **Adopt** | This doc *is* the adoption — citable reference for hook work; prefer it over re-reading upstream, but heed the 8-vs-13 caveat. |
-| Read-only-by-withheld-tools (validator) | **Adopt** | Make `design-critic` + `context-scout` capability-constrained read-only (not instructed). Highest-value takeaway. **Verify the `disallowedTools` vs `disallowed-tools` spelling first (§4.1) or the constraint silently won't bind.** |
+| Read-only-by-withheld-tools (validator) | **Adopt** | Make `idea-critic` + `context-scout` capability-constrained read-only (not instructed). Highest-value takeaway. **Verify the `disallowedTools` vs `disallowed-tools` spelling first (§4.1) or the constraint silently won't bind.** |
 | Fail-open `exit 0` discipline | **Adopt (confirm)** | Confirms context-alert fail-toward-silence + dangerous-bash kill-switch posture. Keep. |
 | `additionalContext` injection channel (SessionStart/Setup) | **Adopt (pattern)** | The non-blocking "inform" channel if the context-alert FYI ever needs to *inject* a note, not just notify. |
 | `@`/`` ! `` eager-injection `prime` ritual | **Adapt** | C&M: a named "rehydrate" command; drop the TTS tail. |
@@ -391,7 +391,7 @@ locks), #3 only **if/when built**. None is a fresh standalone ADR to write today
    cross-cutting convention (every critic/scout/validator gets write tools *withheld*, not just
    instructed), record it — most naturally as an **amendment to the scoping doctrine**
    ([ecc-agent-vs-skill-scoping.md](ecc-agent-vs-skill-scoping.md): "read-only-ness is a first-class
-   scoping decision") applied in the **ideation domain spec** for `design-critic`/`context-scout`.
+   scoping decision") applied in the **ideation domain spec** for `idea-critic`/`context-scout`.
 2. **PreCompact Hook 2 design** — backup-before-compaction *timing* + `trigger` manual/auto branch,
    but emitting a **pointer/digest** rather than a transcript copy. Design for an unbuilt C&M
    component → feed into the **C&M lifecycle plan** (`docs/plan/nxtlvl-context-memory-lifecycle-plan.md`);
@@ -400,7 +400,7 @@ locks), #3 only **if/when built**. None is a fresh standalone ADR to write today
    decision; record only if/when built.
 
 **Concrete next actions:**
-- [ ] Apply read-only tool constraints to `design-critic` + `context-scout` (sandbox/ or plugin) —
+- [ ] Apply read-only tool constraints to `idea-critic` + `context-scout` (sandbox/ or plugin) —
   confirm the current CC `disallowedTools`/`disallowed-tools` spelling first (§4.1), or the
   constraint silently won't bind.
 - [ ] Fold the PreCompact findings into the C&M lifecycle plan (Hook 2 / Phase 2).
