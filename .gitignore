@@ -19,3 +19,6 @@ config/helix/
 
 # Packaged skill bundles — built artifacts; rebuild from source, don't track.
 *.skill
+
+# Skill-creator eval workspaces — throwaway run artifacts (benchmarks, desc-opt), not source.
+*-workspace/
