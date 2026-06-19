@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 'use strict';
 
-// nxtlvl SessionStart hook — auto-title each session as "<folder> · <branch>".
+// nxtlvl UserPromptSubmit hook — keep each session titled "<folder> · <branch>".
 //
-// Emits hookSpecificOutput.sessionTitle (same effect as /rename). The hooks.json
-// matcher restricts firing to source startup|resume, so Claude Code only ever
-// applies this on a fresh or resumed session (it ignores sessionTitle on
-// clear/compact anyway). Falls back to the folder name alone when the cwd is not
-// a git repo or HEAD is detached. Kill switch: NXTLVL_SESSION_TITLE=off.
+// Emits hookSpecificOutput.sessionTitle (same effect as /rename) on every prompt,
+// so the title tracks the current branch even when it changes mid-session. Falls
+// back to the folder name alone when the cwd is not a git repo or HEAD is detached.
+// Kill switch: NXTLVL_SESSION_TITLE=off.
 //
-// Must never break session startup: every failure path degrades silently to a
-// best-effort title (or no output) and exits 0.
+// Must never disrupt prompt submission: it never sets `decision`, so the prompt
+// always proceeds; every failure path degrades silently to a best-effort title
+// (or no output) and exits 0.
 
 const { execFileSync } = require('node:child_process');
 const path = require('node:path');
@@ -55,7 +55,7 @@ function main() {
   process.stdout.write(
     JSON.stringify({
       hookSpecificOutput: {
-        hookEventName: 'SessionStart',
+        hookEventName: 'UserPromptSubmit',
         sessionTitle: title,
       },
     }),

@@ -26,13 +26,12 @@
         "id": "post:context-alert"
       }
     ],
-    "SessionStart": [
+    "UserPromptSubmit": [
       {
-        "matcher": "startup|resume",
         "hooks": [
           { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}\"/hooks/session-title.js", "timeout": 10 }
         ],
-        "description": "Auto-title each session as \"<folder> · <branch>\" (folder-only when not on a branch). Fires on source startup|resume; ignored on clear/compact. Kill switch: NXTLVL_SESSION_TITLE=off.",
+        "description": "Auto-title each session as \"<folder> · <branch>\" (folder-only when not on a branch), refreshed on every prompt so the title tracks branch changes mid-session. Never blocks the prompt. Kill switch: NXTLVL_SESSION_TITLE=off.",
         "id": "session:title"
       }
     ]
