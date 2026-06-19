@@ -3,6 +3,16 @@
 > Continuity doc for a **fresh session** that has `agent-skills` + `/skill-creator` available
 > (this drafting session had neither). Read this first, then the anchors. Written 2026-06-19.
 
+> **Resolution (build session, 2026-06-19) — DONE.** The domain shipped as
+> `/git-workflow` (command) → `git-workflow-runner` (agent: `Bash` but no `Write`/`Edit`, `model: sonnet`,
+> composes `nxtlvl:review`) → `github-workflow` (skill, refined in place). **ADR renumber:** `main`
+> had meanwhile taken ADR-012–014, so this branch's `ADR-012-github-workflow…` was renumbered to
+> **ADR-015** (Superseded) and the domain decision recorded as **ADR-016** (supersedes 015) — *not*
+> the 012/013 the plan below names. Read the live state in
+> [ADR-016](../decisions/ADR-016-git-workflows-domain-command-agent-skill.md) and
+> [`../decisions/README.md`](../decisions/README.md); the steps below are the original plan, kept for
+> the record.
+
 ## Goal
 
 Build a **git-workflows domain** for `nxtlvl` in ECC's three-layer shape —
@@ -15,7 +25,8 @@ single-skill approach already on the branch (see "Where we are").
 1. **Agent-vs-skill doctrine (governs the whole shape):** `docs/reference/ecc-agent-vs-skill-scoping.md`
    — §3 the command→agent→skill pairing, §4 the worked `/go-review` trace, §5 the agent-vs-skill checklist, §6 smells.
 2. **Intent (anchor):** `docs/intent/personal-harness.md` — "compose, don't reconstruct"; agent-building is *reactive*; ECC is the dormant backstop.
-3. **Current decision being superseded:** `docs/decisions/ADR-012-github-workflow-skill-and-conventions.md`.
+3. **Current decision being superseded:** `docs/decisions/ADR-012-github-workflow-skill-and-conventions.md`
+   (renumbered to `ADR-015-…` during the build — see the Resolution note above).
 4. **The seed skill already built:** `plugins/nxtlvl/skills/github-workflow/SKILL.md`.
 5. **House ADR format + lifecycle:** `plugins/nxtlvl/skills/documentation-and-adrs/SKILL.md`.
 6. **Intake gate:** `docs/plan/nxtlvl-skill-intake-backlog.md` + `docs/decisions/ADR-008-reactive-growth-intake-gate.md`.

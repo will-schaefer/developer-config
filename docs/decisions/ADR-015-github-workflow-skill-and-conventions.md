@@ -1,11 +1,18 @@
 ---
-id: ADR-012
+id: ADR-015
 title: "Standardize the GitHub workflow as a vendored skill that composes the review agent — Conventional Commits, no attribution"
-status: Accepted
+status: Superseded
 date: 2026-06-18
+superseded-by: ADR-016
 ---
 
-# ADR-012: Standardize the GitHub workflow as a vendored skill that composes the review agent — Conventional Commits, no attribution
+> **Superseded by [ADR-016](ADR-016-git-workflows-domain-command-agent-skill.md).** The *conventions*
+> below (Conventional Commits, no attribution, full-loop scope, compose `nxtlvl:review`) carry forward
+> unchanged; what ADR-016 revisits is the *shape* — from a single in-context skill to a three-layer
+> `command → agent → skill` domain with an isolated executor. (Renumbered from ADR-012 when this branch
+> landed behind `main`'s ADR-012–014; the decision content is unchanged.)
+
+# ADR-015: Standardize the GitHub workflow as a vendored skill that composes the review agent — Conventional Commits, no attribution
 
 ## Context
 

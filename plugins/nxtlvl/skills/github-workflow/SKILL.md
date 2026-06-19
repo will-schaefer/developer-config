@@ -1,11 +1,11 @@
 ---
 name: github-workflow
-description: nxtlvl GitHub workflow — the standardized branch → commit → PR → review → CI → merge loop for agents. Vendored from agent-skills/ECC `git-workflow` + `github-ops` and refined for fit (Conventional Commits, draft-PR-first, no attribution, pointers-over-dumps). Use when starting work that will land on GitHub, committing, opening or updating a PR, or driving a change to merge. Runs in-context and spawns the `nxtlvl:review` agent at the review stage.
+description: nxtlvl GitHub workflow — the standardized branch → commit → PR → review → CI → merge loop for agents. Vendored from agent-skills/ECC `git-workflow` + `github-ops` and refined for fit (Conventional Commits, draft-PR-first, no attribution, pointers-over-dumps). Use when starting work that will land on GitHub, committing, opening or updating a PR, or driving a change to merge. Composes the `nxtlvl:review` reviewer at the review step rather than reconstructing it.
 ---
 
 # GitHub Workflow (nxtlvl)
 
-Vendored from `git-workflow` + `github-ops` and refined for fit (see `docs/decisions/ADR-012`). **Self-contained** for the everyday loop — it does *not* call the upstream skills. The exhaustive long-tail (GitFlow, mergetool, stash recipes, release tooling) stays a pointer into `reference/ECC-main/skills/git-workflow/SKILL.md`; this skill carries only the path agents actually walk.
+Vendored from `git-workflow` + `github-ops` and refined for fit (see `docs/decisions/ADR-016`). **Self-contained** for the everyday loop — it does *not* call the upstream skills. The exhaustive long-tail (GitFlow, mergetool, stash recipes, release tooling) stays a pointer into `reference/ECC-main/skills/git-workflow/SKILL.md`; this skill carries only the path agents actually walk.
 
 One coherent thing — the spine of every change that reaches GitHub:
 
@@ -22,7 +22,7 @@ branch → commit → PR (draft) → review → CI → merge
 
 ## 2. Commit — Conventional Commits
 
-The nxtlvl standard is **Conventional Commits** (chosen over this repo's historical sentence-case — see ADR-012):
+The nxtlvl standard is **Conventional Commits** (chosen over this repo's historical sentence-case — see ADR-016):
 
 ```
 <type>(<scope>): <subject>
@@ -44,8 +44,9 @@ The nxtlvl standard is **Conventional Commits** (chosen over this repo's histori
 | `ci` | CI/CD | `ci: add postgres service` |
 
 - Subject: imperative, no trailing period, ≤50 chars. Scope optional, lowercase.
-- **No attribution trailers.** Commits are clean — no `Co-Authored-By`, no agent signature (nxtlvl default; ADR-012).
+- **No attribution trailers.** Commits are clean — no `Co-Authored-By`, no agent signature (nxtlvl default; ADR-016).
 - One logical change per commit; link issues with `Closes #N` in the footer.
+- **Before each commit:** read the staged hunks (`git diff --staged`), scan for secrets, and run the project's tests / lint / typecheck — green local checks *before* the commit, not after the PR.
 
 ## 3. Pull request — draft first
 
@@ -72,7 +73,7 @@ Notable implementation choices worth a reviewer's attention.
 
 ## 4. Review — compose `nxtlvl:review`
 
-**Don't reconstruct review here.** Spawn the `nxtlvl:review` agent for the five-axis pass (correctness, readability, architecture, security, performance), pulling the **language-appropriate** reviewer for the changed files (Next.js / Python / Rust) rather than one generic pass — isolation lives in that read-only agent, not here. Self-review and resolve findings *before* requesting a human review. Surface any assumption you made about intent or environment so a wrong one is visible.
+**Don't reconstruct review here.** Run `nxtlvl:review` for the five-axis pass (correctness, readability, architecture, security, performance), pulling the **language-appropriate** reviewer for the changed files (Next.js / Python / Rust) rather than one generic pass — the isolated, read-only review work lives there, not here. Self-review and resolve findings *before* requesting a human review. Surface any assumption you made about intent or environment so a wrong one is visible.
 
 ## 5. CI — investigate, don't just re-run
 
@@ -93,7 +94,7 @@ Notable implementation choices worth a reviewer's attention.
 ## nxtlvl conventions
 
 - **Pointers over dumped content** — reference `file:line` and link the PR/issue; don't paste large diffs back.
-- **Surface assumptions** — state what you assumed about intent, target branch, or environment.
+- **Surface assumptions** — state what you assumed about intent, target branch, or environment. For a non-trivial change, summarize *what changed*, *what you deliberately left untouched* (scope discipline), and *any concern a reviewer should confirm* — a wrong assumption should be visible, not silent.
 - **Language-plural** — match the reviewer and the checks to the changed files, not a single generic pass.
 
 ## Verification
