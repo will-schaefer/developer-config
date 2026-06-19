@@ -46,14 +46,14 @@ Task arrives
     ├── Reviewing a diff before merge? ───────────→ ◆ review
     ├── Committing / branching / PR → merge? ─────→ ◆ github-workflow
     ├── Writing docs / recording a decision? ─────→ ◆ documentation-and-adrs
-    └── Reviewing an *external* harness for what nxtlvl should adopt? → ◆ harness-review
+    └── Analyzing an *external* harness (score it / audit one subsystem / mine to adopt)? → ◆ harness-review
 
 Any other phase — implementation detail, testing, debugging, security,
 performance, CI/CD, deprecation, observability, shipping, …:
     nxtlvl owns no skill. Handle it natively. (See "Dark at unowned phases".)
 ```
 
-That last ◆ branch is an off-ramp from the SDLC, not a phase within it. `◆ harness-review` is wholly native — it studies *someone else's* repo to mine patterns, which is not the same as `◆ review` (five-axis review of *our own* diff).
+That last ◆ branch is an off-ramp from the SDLC, not a phase within it. `◆ harness-review` is wholly native — it studies *someone else's* repo to understand it, score it, or mine it (three modes: general review · adopt/adapt/reject · single-component domain review), which is not the same as `◆ review` (five-axis review of *our own* diff).
 
 A feature still flows in sequence: `◆ brainstorming` → (its handoff) `‡ spec-driven-development` → `‡ planning-and-task-breakdown` → implement *natively* with `◆ doubt-driven-development` in-flight when stakes are high → `◆ review` → `◆ github-workflow` → `◆ documentation-and-adrs`. The implement/test/debug middle is currently native — nxtlvl owns no skill there yet.
 
@@ -121,7 +121,7 @@ These hold across every skill the router dispatches to — and across natively-h
 | Ship (git) | **github-workflow** — standardized GitHub loop (exec: `nxtlvl:git-workflow-runner` / `/git-workflow`) | ◆ nxtlvl |
 | Ship (everything else) | *CI/CD, deprecation, observability, shipping, …* | native — nxtlvl owns no skill yet |
 | Document | **documentation-and-adrs** — record the *why*, house ADR format (exec: `nxtlvl:doc-keeper`) | ◆ nxtlvl |
-| Build-method | **harness-review** — vendor an external harness → fan-out → distill adopt/adapt/reject | ◆ nxtlvl |
+| Build-method | **harness-review** — vendor an external harness → fan-out → general review · adopt/adapt/reject · domain review (3 modes) | ◆ nxtlvl |
 
 ## Verification
 

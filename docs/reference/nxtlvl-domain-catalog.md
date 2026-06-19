@@ -88,7 +88,7 @@ fan-out subagents and lands findings via the decision rule, rather than shipping
 
 | Type | Name | Native? | Purpose |
 |------|------|---------|---------|
-| skill | `harness-review` | native | Vendor a repo (disposable clone) → partition into independent domains → parallel fan-out analysis → synthesize → distill an adopt/adapt/reject judgment into `docs/reference/`. Full phase detail + worked example in the skill's `references/`. |
+| skill | `harness-review` | native | Vendor a repo (disposable clone) → partition → parallel fan-out analysis → synthesize, in one of three modes: (A) general review (scored quality + architecture), (B) adopt/adapt/reject ledger for a target, (C) single-component domain review (deep specialist audit of one subsystem — hooks/agents/skills/commands/tools/rules). Output into `docs/reference/`. Full phase detail + per-mode references in the skill's `references/`. |
 
 ---
 
