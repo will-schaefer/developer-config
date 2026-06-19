@@ -116,18 +116,19 @@ Applied to the standing size mechanisms:
   plugin-promoted, not version-controlled by this repo); this ADR is the repo's durable record and
   carries the verbatim text to mirror into the daily driver.
 
-## Follow-up (personal-harness.md read-through — confirm separately)
-The anchor is **not** edited. Read these spots through ADR-014 (size = backstop, not goal) and
-confirm each reading:
+## Follow-up (personal-harness.md read-through — confirmed 2026-06-19)
+The anchor is **not** edited. These spots were read through ADR-014 (size = backstop, not goal) and
+each line reference was re-checked against the anchor; the readings below are **confirmed** as the
+recorded interpretation:
 
 - **L9, L71–80** — "ecc = dormant reference + backstop"; "keeps its 271 skills / 67 agents out of my
   namespace and context" → defer-the-unproven + attention discipline, not "small."
 - **L38, L59–60, L133** — "a lean hook layer"; "Hooks … lean" → narrow because broader hooks are
   unproven/unearned (and must stay fail-open), not small-for-small's-sake.
-- **L64–69** — "a whitelist, not 'full'"; "Deferred / backstop-only until the fallback log proves
-  repeat-need"; "Core machinery first; scale machinery reactively" → defer-the-unproven (already
-  aligned; reason confirmed).
-- **L152–162** — "a budgeted injection policy (not a firehose)"; "every auto-injected block justifies
+- **L63–69** — "a whitelist, not 'full'" (the L63 heading); "Deferred / backstop-only until the
+  fallback log proves repeat-need"; "Core machinery first; scale machinery reactively" →
+  defer-the-unproven (already aligned; reason confirmed).
+- **L152–161** — "a budgeted injection policy (not a firehose)"; "every auto-injected block justifies
   its tokens or it's cut; prefer pointers" → soft backstop + cut-noise + consolidate; over-injection
   is the quality failure the budget guards against.
 - **L202** — "what keep `nxtlvl` from re-exploding to ecc scale" → defer-the-unproven.
