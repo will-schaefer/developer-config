@@ -34,5 +34,5 @@ sandbox+promote+pin; dashboard+tunnel+default-on-telemetry → CLI-first/local-o
 → file-based memory; "5590 skills" is ~870 real, much Anthropic-verbatim → curated-not-cataloged.
 False friend: CCT's `sandbox/` = remote execution isolation, NOT nxtlvl's staging tree.
 
-Fourth external voice for [[triangulate-three-harnesses-build-decisions]] (but a product, not a
+Fourth external voice for [[analyze-all-harnesses-build-decisions]] (but a product, not a
 harness). Mine the doc instead of re-scanning the 116M clone.

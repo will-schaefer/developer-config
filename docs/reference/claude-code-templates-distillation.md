@@ -261,6 +261,6 @@ surfaces when those surfaces are next touched, no decision required. Curate hard
    for the harness's own configuration; worth a deliberate decision rather than a drive-by edit.
 
 **Cross-run note:** this distillation is now the fourth external voice (alongside ecc, agent-skills,
-superpowers) for the `triangulate-three-harnesses-build-decisions` practice — but it is a **distribution/
+superpowers) for the `analyze-all-harnesses-build-decisions` practice — but it is a **distribution/
 catalog product**, not a peer harness, so weight its *contrasts* (it ratifies nxtlvl's curation and
 local-only choices) over its *content* (mostly reject).

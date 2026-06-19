@@ -28,4 +28,4 @@ Third breadth-branded mega-collection reviewed (with [[nxtlvl-cct-distillation]]
 all converge: **breadth-as-product is the inverse of nxtlvl's curated-depth thesis.** Expect a thin
 ledger from "comprehensive toolkit" repos; scope the pass small. The `/context load` vaporware also
 reinforces the docs-must-match-code / doc-keeper discipline. Mine this instead of re-scanning the
-clone. Related: [[triangulate-three-harnesses-build-decisions]], [[distill-reusable-to-doc-plus-memory]].
+clone. Related: [[analyze-all-harnesses-build-decisions]], [[distill-reusable-to-doc-plus-memory]].

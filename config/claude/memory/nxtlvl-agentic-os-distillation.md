@@ -26,7 +26,7 @@ continuous-learning-v2 instincts — REJECT as replacement, keep only the end-of
 **Top adopt:** the `Memory Scope` per-agent read-contract (every agent declares which files it reads)
 — cheap legibility win, composes with the read-only-by-withheld-tools pattern from
 [[nxtlvl-hooks-mastery-distillation]]; the two are the same idea (explicit agent I/O surface) from
-read + write sides → record together as a scoping-doctrine amendment (triangulate first per
-[[triangulate-three-harnesses-build-decisions]]). **Adapt:** no-migration schema rule (never rename,
+read + write sides → record together as a scoping-doctrine amendment (review across the references first per
+[[analyze-all-harnesses-build-decisions]]). **Adapt:** no-migration schema rule (never rename,
 add+deprecate) → C&M lifecycle plan; LaunchAgent cron recipe for durable scheduled jobs. Reader-test
 passed (citations valid). Mine the doc instead of re-reading the skill.

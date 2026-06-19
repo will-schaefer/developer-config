@@ -19,10 +19,14 @@
 
 ## 1. Objective
 
-Give the harness one coherent **ideation domain** instead of three loose upstream skills
-(`interview-me`, `idea-refine`, `spec-driven-development`) and no direction front door at all.
-The domain owns the arc from *raw idea* → *confirmed intent* → *approved direction*, and ends by
-feeding the existing `spec-driven-development → planning-and-task-breakdown` pipeline. It is a
+Give the harness one coherent **ideation domain** that owns a `brainstorming` orchestrator
+composing nxtlvl's intent skills (`interview-me` / `grill-me` / `idea-refine`) across the arc
+*raw idea* → *confirmed intent* → *approved direction*, ending by feeding the existing
+`spec-driven-development → planning-and-task-breakdown` pipeline. **How that front door
+adopts/adapts from the reference harnesses is a pending decision** — a harness-review across the
+reference set, resolved per the project's decision method, not concluded here.
+(`superpowers:brainstorming` is the most relevant prior art — the only reference shipping a
+brainstorming front door — but no reference is a default or fallback.) It is a
 **user-directed, proactive domain build** (the user asked for the whole ideation phase), in the
 same category as the confident-core ([ADR-016](../decisions/ADR-016-confident-core-capability-domains.md))
 and the C&M subsystem — not a reactive un-deferral under the intake gate
@@ -88,6 +92,13 @@ The **synthesis-vs-fork tension is resolved by ownership.** Because `interview-m
 nxtlvl-owned refined skill, `brainstorming` *composes* it rather than inlining a fork — one
 copy of the intent engine, consulted, not duplicated. The drift risk that made full-inlining
 unattractive only existed while `interview-me` was upstream; owning it dissolves it.
+
+**The `brainstorming` front-door design is pending a harness-review decision** — comprehensively
+analyzing how each reference harness handles the ideation/front-door phase, then adopt / adapt /
+reject. `agent-skills` is one reference, not a baseline; `superpowers:brainstorming` is the most
+relevant prior art (the only reference shipping a brainstorming front door). The current
+`SKILL.md` is a **provisional draft** — what it composes and how is settled by that review, not
+here.
 
 **Internals are out of scope here** — each skill's body is authored via `/skill-creator`
 (user-owned). This spec fixes only their *roles and boundaries*.
@@ -184,8 +195,10 @@ nearest relative.
 
 1. **Knowledge skills first** (`/skill-creator`, user-owned): `interview-me` → `grill-me` →
    `idea-refine`. Brainstorming composes them, so they precede it.
-2. **`brainstorming`** (`/skill-creator`): the orchestrator, last — refine the existing draft
-   at `plugins/nxtlvl/skills/brainstorming/SKILL.md` to *compose* the three rather than inline.
+2. **`brainstorming`** (`/skill-creator`): the orchestrator, last — **first run the harness-review
+   across the references to settle the front-door design**, then refine the provisional draft at
+   `plugins/nxtlvl/skills/brainstorming/SKILL.md` to *compose* the three intent skills rather
+   than inline.
 3. **Agents** (`context-scout`, `idea-critic`, `approach-explorer`) — lean executors, each
    pointing at the relevant skill as its source of truth (don't restate it; ADR-012/ADR-015).
 4. **Commands** (`/brainstorm` + aliases) — thin entries.
@@ -219,6 +232,9 @@ within ADR-026's recorded shape):
 
 **Still open (non-blocking):**
 
+- **Brainstorming front-door design** — pending a **harness-review** across the reference harnesses
+  (how each handles the ideation/front-door phase → adopt / adapt / reject). `superpowers:brainstorming`
+  is the relevant prior art; **no adoption is concluded**. The `SKILL.md` is a provisional draft.
 - Once `approach-explorer` is built: one agent per candidate approach (parallel fan-out) vs. one
   agent returning all candidates. Revisit when the parallelism need is real.
 - Brainstorming's **visual seam**: native `visualize` MCP vs. vendoring superpowers' local-server
