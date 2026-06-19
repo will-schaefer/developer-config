@@ -16,7 +16,7 @@ The six phases: **Design → Author → Evaluate → Debug → Orchestrate → O
 | 3 | Evaluate | ✅ reviewed | [ADR-014](../decisions/ADR-014-agent-evaluation-model.md) |
 | 4 | Debug | ✅ reviewed | [ADR-015](../decisions/ADR-015-agent-debugging-model.md) |
 | 5 | Orchestrate | ✅ reviewed | [ADR-016](../decisions/ADR-016-agent-orchestration-model.md) |
-| 6 | Operate | ⏳ pending | — |
+| 6 | Operate | ✅ reviewed | [ADR-017](../decisions/ADR-017-agent-operation-model.md) |
 
 ---
 
@@ -240,3 +240,56 @@ table, a `/orchestrate` chain-runner, or a Kanban board.
   (plan-orchestrate); the Kanban control-pane/card/integrator runtime (team-agent-orchestration);
   the interactive picker (team-builder) — all on ADR-003 (don't reconstruct orchestration) +
   single-operator scope.
+
+---
+
+## Phase 6 — Operate
+
+**What "operate" means in ecc:** how an agent system runs day to day once built — autonomous
+self-direction, continuous loops, and long-lived/fleet operations. nxtlvl is the deliberate
+opposite (single-operator, gated, interactive, fail-open), so this phase mostly rejects on scope
++ philosophy, and the rejection *is* the decision.
+
+**Sources read:**
+- `reference/ECC-main/skills/autonomous-agent-harness/SKILL.md`
+- `reference/ECC-main/skills/continuous-agent-loop/SKILL.md`
+- `reference/ECC-main/skills/enterprise-agent-ops/SKILL.md`
+
+### ecc's doctrine
+1. **`autonomous-agent-harness`** — a self-directing runtime: scheduled crons, webhook/CI
+   **dispatch**, **computer use**, a memory-persisted task queue, and an **MCP memory
+   knowledge-graph**. Pitched as a Hermes/AutoGPT replacement. Carries a strong consent/safety
+   boundary (explicit opt-in, dry-run first, credentials out of artifacts).
+2. **`continuous-agent-loop`** — a loop-selection runtime (continuous-pr / rfc-dag / infinite /
+   sequential) and a "production stack." Failure modes: churn without progress, retry on the same
+   root cause, merge-queue stalls, **cost drift from unbounded escalation**. Recovery: freeze →
+   reduce scope → replay with explicit acceptance criteria.
+3. **`enterprise-agent-ops`** — fleet operation: runtime lifecycle, observability (logs/metrics/
+   traces), change management (rollout/rollback/audit), **kill switches**, metrics (success rate,
+   mean retries, cost per successful task, failure-class distribution), an incident pattern, and
+   PM2/systemd/container integrations.
+
+### The line: nxtlvl is gated and single-operator by design
+All three remove the human and run long-lived/autonomous/fleet workloads. nxtlvl's operate-time
+posture is already fixed: fail-open hooks + kill switches (ADR-006), an invoked-not-continuous
+gate (ADR-009), one fallback × quality north-star (ADR-005), native memory (ADR-004), human gates
+(ADR-016). So the nuggets fold into decisions already made rather than spawning new machinery.
+
+### nxtlvl decision → [ADR-017](../decisions/ADR-017-agent-operation-model.md)
+- **Reject:** autonomous self-direction (autonomous-agent-harness), the continuous-loop runtime,
+  and the enterprise fleet-ops platform — on ADR-003 (don't reconstruct runtime), ADR-004 (no new
+  memory), ADR-006/009 (fail-open + gated, human-in-loop), and single-operator scope.
+- **Adapt:** loop failure-modes + recovery → ADR-015/013/016; failure-class distribution →
+  reactively shape the ADR-005 fallback log; cost-drift awareness → ADR-013 model-escalation.
+- **Keep (already decided):** kill switches (ADR-006), incident pattern (ADR-015/016),
+  install+tag deployment (ADR-001), the single north-star metric (ADR-005); plus the
+  consent/dry-run/credentials-out discipline as the guard on any future opted-in, native-rooted
+  automation.
+
+---
+
+## Review complete
+
+All six phases reviewed (Design → Author → Evaluate → Debug → Orchestrate → Operate), each
+recorded as an ADR (012–017). The same adopt/adapt/reject method now applies to any future
+harness brought in as a reference.
