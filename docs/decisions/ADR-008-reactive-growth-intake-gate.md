@@ -1,14 +1,24 @@
 ---
 id: ADR-008
 title: "Reactive growth governed by a written membership/intake gate"
-status: Accepted
+status: Superseded
 date: 2026-06-16
-amended-by: [ADR-013, ADR-014]
+superseded-by: ADR-013
+amended-by: [ADR-016, ADR-014]
 ---
+
+> **Superseded (2026-06-19) by [ADR-013](ADR-013-floor-on-demand-backbone.md).** ADR-013
+> un-defers continuous-learning and adopts it as the floor's distillation mechanism, reversing
+> this ADR's core conclusion that continuous-learning should remain deferred until the fallback
+> log demonstrates repeat need. The **intake-gate rule** (membership test + written backlog
+> entry for all other growth) is a sound standing convention and is restated in ADR-013's
+> Consequences; it does not go away with this supersession.
+
+
 
 # ADR-008: Reactive growth governed by a written membership/intake gate
 
-> **Amended by [ADR-013](ADR-013-confident-core-capability-domains.md)** (2026-06-18): the
+> **Amended by [ADR-016](ADR-016-confident-core-capability-domains.md)** (2026-06-18): the
 > membership-test classification below is amended for a **bounded confident-core** of five
 > capability domains (Python · TypeScript/JavaScript · Rust · Frontend & UI ·
 > Backend/Architecture), which move *reactive → build-now*. The intake gate and harden trigger

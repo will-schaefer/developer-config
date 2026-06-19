@@ -1,11 +1,11 @@
 ---
-id: ADR-013
+id: ADR-016
 title: "Pre-build a bounded confident-core of capability domains; intake gate governs the rest"
 status: Accepted
 date: 2026-06-18
 ---
 
-# ADR-013: Pre-build a bounded confident-core of capability domains; intake gate governs the rest
+# ADR-016: Pre-build a bounded confident-core of capability domains; intake gate governs the rest
 
 ## Context
 [ADR-008](ADR-008-reactive-growth-intake-gate.md) classified **all** capability-domain growth

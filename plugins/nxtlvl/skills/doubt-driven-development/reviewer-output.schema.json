@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nxtlvl.local/schemas/doubt-driven-development/reviewer-output.schema.json",
+  "title": "Doubt-Driven Reviewer Output",
+  "description": "Typed output contract for the fresh-context adversarial reviewer invoked in Step 3 (DOUBT) of the doubt-driven-development skill. Replaces freeform prose so RECONCILE, STOP, doubt-theater detection, and benchmarking become deterministic. The reviewer fills `class_hint`; the orchestrator assigns the binding class during RECONCILE — the reviewer suggests, the orchestrator decides.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "summary", "findings", "next_actions"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "description": "Overall verdict. `clean` = no issues after thorough examination. `issues_found` = at least one finding. `cannot_assess` = reviewer lacked enough of the artifact/contract to judge (drives a recovery path, NOT a pass).",
+      "enum": ["clean", "issues_found", "cannot_assess"]
+    },
+    "summary": {
+      "type": "string",
+      "description": "One-line verdict. Not a substitute for findings; a human-readable headline.",
+      "minLength": 1,
+      "maxLength": 240
+    },
+    "findings": {
+      "type": "array",
+      "description": "Zero or more issues. MUST be empty when status is `clean`; MUST be non-empty when status is `issues_found`.",
+      "items": { "$ref": "#/$defs/finding" }
+    },
+    "next_actions": {
+      "type": "array",
+      "description": "Reviewer-suggested follow-ups for the orchestrator. Advisory — the orchestrator owns the decision per RECONCILE precedence.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "fix-and-reloop",
+          "decompose",
+          "clarify-contract",
+          "accept-tradeoff",
+          "no-action"
+        ]
+      }
+    },
+    "cannot_assess_reason": {
+      "type": "string",
+      "description": "Required when status is `cannot_assess`. Root-cause hint feeding the recovery table (e.g. 'artifact truncated', 'contract omits the concurrency model').",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "clean" } } },
+      "then": { "properties": { "findings": { "maxItems": 0 } } }
+    },
+    {
+      "if": { "properties": { "status": { "const": "issues_found" } } },
+      "then": { "properties": { "findings": { "minItems": 1 } } }
+    },
+    {
+      "if": { "properties": { "status": { "const": "cannot_assess" } } },
+      "then": { "required": ["cannot_assess_reason"] }
+    }
+  ],
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "class_hint", "severity", "evidence"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable identifier within this review (e.g. 'F1'). Used to key the cross-cycle findings ledger so cycle N carries only open findings forward, and to set-diff single-model vs cross-model output.",
+          "pattern": "^[A-Za-z0-9._-]+$"
+        },
+        "title": {
+          "type": "string",
+          "description": "Short imperative description of the issue.",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "class_hint": {
+          "type": "string",
+          "description": "Reviewer's guess at the issue category. NON-BINDING. The orchestrator assigns the real RECONCILE class (contract-misread / actionable / trade-off / noise). Enumerated so it can be counted; the argument lives in `evidence`.",
+          "enum": [
+            "assumption",
+            "edge_case",
+            "coupling",
+            "contract_violation",
+            "convention",
+            "failure_mode"
+          ]
+        },
+        "severity": {
+          "type": "string",
+          "description": "Reviewer's severity. Drives the STOP condition: a cycle is 'trivial' (eligible to stop) when every finding is `minor`.",
+          "enum": ["blocker", "major", "minor"]
+        },
+        "location": {
+          "type": "string",
+          "description": "Where in the artifact (e.g. 'cache.go:142', or a region label for prose/decision artifacts). Optional — some findings are about an absence."
+        },
+        "evidence": {
+          "type": "string",
+          "description": "Free-text. WHY this fails the contract. Deliberately unconstrained so the adversarial reviewer can roam — structure the metadata, not the argument.",
+          "minLength": 1
+        },
+        "suggested_probe": {
+          "type": "string",
+          "description": "What would confirm or refute this finding (a test, an experiment, a question for the user). Turns issues-only output into actionable output."
+        }
+      }
+    }
+  }
+}
