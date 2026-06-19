@@ -13,7 +13,7 @@ The six phases: **Design → Author → Evaluate → Debug → Orchestrate → O
 |---|-------|--------|----------|
 | 1 | Design | ✅ reviewed | [ADR-012](../decisions/ADR-012-agent-design-contract.md) |
 | 2 | Author | ✅ reviewed | [ADR-013](../decisions/ADR-013-agent-authoring-method.md) |
-| 3 | Evaluate | ⏳ pending | — |
+| 3 | Evaluate | ✅ reviewed | [ADR-014](../decisions/ADR-014-agent-evaluation-model.md) |
 | 4 | Debug | ⏳ pending | — |
 | 5 | Orchestrate | ⏳ pending | — |
 | 6 | Operate | ⏳ pending | — |
@@ -102,3 +102,42 @@ it leans on — eval-first, model-routed, with knowledge injected from a caller-
 - **Reject:** ecc's per-task cost ledger (our metric is fallback × quality, ADR-005);
   re-deriving review/dev substance + gh-coupled command internals.
 - Formal eval suites deferred to Phase 3.
+
+---
+
+## Phase 3 — Evaluate
+
+**What "evaluate" means in ecc:** how output quality is measured — a per-task self-rating, a
+formal eval-suite discipline, and a tool to compare agent products head-to-head.
+
+**Sources read:**
+- `reference/ECC-main/skills/agent-self-evaluation/SKILL.md`
+- `reference/ECC-main/skills/eval-harness/SKILL.md`
+- `reference/ECC-main/skills/agent-eval/SKILL.md`
+
+### ecc's doctrine — three surfaces wearing one word
+1. **`agent-self-evaluation`** — a per-task reflection step. After non-trivial work the agent
+   scores its output 1-5 on *accuracy / completeness / clarity / actionability / conciseness*,
+   under an **evidence rule** ("show the gap, don't just name it") and sharp anti-patterns
+   (everything-is-5, penalizing un-requested scope, re-litigating settled design,
+   preference-as-evidence). Explicitly **not a pass/fail gate**.
+2. **`eval-harness`** — formal eval-driven development: capability + regression evals,
+   code/model/human graders, pass@k ≥ 0.90 / pass^3 = 1.00 thresholds, a `.claude/evals/`
+   artifact layout. Standing test-suite machinery for a product.
+3. **`agent-eval`** — a benchmark CLI comparing coding-agent *products* (Claude Code vs Aider vs
+   Codex) on pass-rate / cost / time / consistency in git worktrees.
+
+### nxtlvl decision → [ADR-014](../decisions/ADR-014-agent-evaluation-model.md)
+- **Adapt:** `agent-self-evaluation` as an *advisory* per-task done-condition check, scoped to
+  non-trivial work, evidence rule + anti-patterns adopted wholesale. It **defers** to `review`
+  (code) and stop-slop (prose) rather than introduce a third rubric, and is **never a gate** —
+  because ADR-009 already rejected a self-tunable score as a blocker, so using it as a gate would
+  be that rejected thing. This resolves the open question left by ADR-013.
+- **Defer (reactive):** `eval-harness` — the eval-first *principle* is already in ADR-013;
+  standing pass@k/regression suites are intake-gated machinery (ADR-008) bound to the promotion
+  audit (ADR-009), not built now.
+- **Reject:** `agent-eval` — a product bake-off, out of scope for one operator on Claude Code;
+  its consistency-across-runs nugget is covered by pass^k if ever needed.
+- **Result — a layered, non-overlapping quality model:** per-task self-check (advisory) → code
+  via `review`, prose via stop-slop → promotion audit (the only block, ADR-009) → fallback ×
+  quality north-star (ADR-005).

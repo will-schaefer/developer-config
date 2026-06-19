@@ -68,5 +68,6 @@ deterministic output, stop-and-ask guardrails.
   the skill at delegation.
 - Formal evals deferred to Phase 3; "done-condition first" is the lightweight stand-in.
 - ECC's cost-ledger and gh-coupled internals are not adopted — structural shape only.
-- Open (Phase 3): how the done-condition hardens into a quality gate/eval, and its relation to
-  the existing `review` skill and ADR-011 stop-slop.
+- Resolved in [ADR-014](ADR-014-agent-evaluation-model.md): the done-condition hardens into an
+  *advisory* per-task self-evaluation (never a gate), which defers to the existing `review` skill
+  (code) and ADR-011 stop-slop (prose); formal eval suites stay reactive.
