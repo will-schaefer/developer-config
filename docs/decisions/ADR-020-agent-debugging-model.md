@@ -91,5 +91,5 @@ misbehaving agent/skill without building audit machinery that overlaps the promo
 - Recurring failures route to the fallback log ([ADR-005](ADR-005-fallback-log-dual-metric.md))
   and intake gate ([ADR-008](ADR-008-reactive-growth-intake-gate.md)), feeding reactive growth
   rather than standing machinery.
-- Both surfaces are authored as caller-agnostic skills injected into the executor
+- Both surfaces are authored as caller-agnostic skills loaded by the executor that runs them
   ([ADR-018](ADR-018-agent-authoring-method.md)).

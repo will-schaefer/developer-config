@@ -24,7 +24,9 @@ nxtlvl already owns the adjacent surfaces: the `review` skill (five-axis code re
 [ADR-011](ADR-011-prose-quality-stop-slop.md) (prose quality),
 [ADR-009](ADR-009-objective-invoked-audit-gate.md) (the objective, binary, invoked promotion gate
 that blocks unconditionally and explicitly rejects a self-tunable quality score), and
-[ADR-005](ADR-005-fallback-log-dual-metric.md) (the fallback-rate x quality north-star).
+[ADR-005](ADR-005-fallback-log-dual-metric.md) (the fallback-log metric — amended by
+[ADR-013](ADR-013-floor-on-demand-backbone.md) to two automatic readouts, fallback-rate and
+instinct-confidence, with no session quality score).
 
 ## Decision
 1. **Adopt `agent-self-evaluation` as an advisory per-task done-condition check (adapted).**
@@ -80,11 +82,17 @@ that blocks unconditionally and explicitly rejects a self-tunable quality score)
   orchestrator (and the user) see them, without adding a gate or latency to the critical path.
 - The quality model is now layered and non-overlapping: per-task self-check (advisory) -> code
   via `review`, prose via stop-slop -> promotion audit (the only block,
-  [ADR-009](ADR-009-objective-invoked-audit-gate.md)) -> fallback x quality north-star
+  [ADR-009](ADR-009-objective-invoked-audit-gate.md)) -> the fallback-log readouts
   ([ADR-005](ADR-005-fallback-log-dual-metric.md)).
-- Self-evaluation scores can inform the "quality" half of
-  [ADR-005](ADR-005-fallback-log-dual-metric.md) over time, reactively.
+- Self-evaluation stays a per-task advisory signal; it does **not** feed a standing
+  session-quality score — [ADR-013](ADR-013-floor-on-demand-backbone.md) settled that nxtlvl keeps
+  none, and [ADR-005](ADR-005-fallback-log-dual-metric.md)'s metric is two automatic readouts
+  (fallback-rate + instinct-confidence). Recurring weak axes surface reactively through that
+  signal, not a score.
+- Complements [ADR-014](ADR-014-quality-first-over-leanness.md): the self-check optimizes
+  *quality of outcome*, never size — an axis is never marked down for staying within a budget, the
+  mirror of quality-first's rule that a gate may never encode "smaller is better."
 - Formal pass@k suites remain on the shelf, gated by intake
   ([ADR-008](ADR-008-reactive-growth-intake-gate.md)) and bound to the promotion audit.
-- The self-eval discipline is itself authored as a caller-agnostic skill injected into the
-  executor ([ADR-018](ADR-018-agent-authoring-method.md)), not baked into each agent.
+- The self-eval discipline is itself authored as a caller-agnostic skill loaded by the executor
+  that runs it ([ADR-018](ADR-018-agent-authoring-method.md)), not baked into each agent.
