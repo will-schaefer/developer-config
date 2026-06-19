@@ -192,6 +192,7 @@ the metric), then integration + promotion.
 **Description:** A budgeted SessionStart hook that injects a bounded **pointer** block; fail-open absolute.
 **Acceptance criteria:**
 - [ ] `plugins/nxtlvl/hooks/session-context.sh` emits, in priority order (cut lowest-value first if over budget): (1) git branch + dirty/clean flag, (2) current-task pointer (a *pointer*, never file content), (3) last N (default 3) fallback-log digest lines — all via `additionalContext`.
+- [ ] Emits a one-line **`nxtlvl-router` entry pointer** (e.g. *"Non-trivial task? consult `nxtlvl:nxtlvl-router` to pick the skill"*). A meta-router cannot self-fire via its frontmatter description (measured: 0% recall across the desc-opt sweep; see [PR #15](https://github.com/will-schaefer/developer-config/pull/15)), so its discoverability **must** live in this floor brief, not its description — consistent with [ADR-003](../decisions/ADR-003-compose-not-reconstruct.md) ("reconstruct only the plumbing, never the orchestration"). Highest-priority block (never cut), pointer-only.
 - [ ] Always `exit 0`, even on error; output never exceeds the token budget (OQ1 — propose ≤ ~300 tokens / ~20 lines).
 - [ ] `hooks.json` adds the `SessionStart` entry.
 **Verification:**

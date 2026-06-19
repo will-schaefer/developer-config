@@ -9,6 +9,8 @@ nxtlvl does not reconstruct the engineering lifecycle — it **composes on `agen
 
 It routes; it does not restate. Each skill holds its own knowledge (ADR-012) — this file sends you there, it doesn't duplicate what's inside. **Pointers over dumped content** applies to the router itself.
 
+This router *is* nxtlvl's analog of `agent-skills:using-agent-skills` — that upstream meta-skill is the one skill deliberately absent from the map below, because this file replaces it.
+
 ## The precedence rule
 
 For every phase below, resolve in this order — **first that exists wins:**
@@ -18,6 +20,8 @@ nxtlvl:<skill>   →   agent-skills:<skill>   →   native (handle it directly, 
 ```
 
 A nxtlvl-refined skill is **self-contained** — it does *not* call its upstream parent, it replaces it. So when the map marks a phase ◆, invoke the nxtlvl one and stop; don't also reach for the agent-skills version. Where there's no ◆, the upstream skill is the floor — use it directly. And not every task needs a skill: a one-line fix or a pure lookup is handled natively. Skills exist to prevent recurring mistakes, not to ceremonialize trivial work.
+
+**One naming wrinkle.** The labels below are the literal skill names — *except* `review`. Its upstream is the `agent-skills:code-review-and-quality` *skill* (`review` is only that skill's command alias). So `nxtlvl:review` supersedes `code-review-and-quality`, and the fallthrough for that one row is `code-review-and-quality`, not a skill literally named `review`. Every other row's label is both the map name and the resolved skill name.
 
 ## Discovery map
 
