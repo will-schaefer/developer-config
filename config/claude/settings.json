@@ -3,19 +3,26 @@
     "ECC_GATEGUARD": "off"
   },
   "permissions": {
-    "defaultMode": "bypassPermissions"
+    "defaultMode": "auto"
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "sh /Users/willschaefer/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
-    "auth0@claude-plugins-official": false,
+    "frontend-design@claude-plugins-official": false,
+    "explanatory-output-style@claude-plugins-official": true,
+    "ecc@ecc": false,
     "agent-skills@addy-agent-skills": true,
     "skill-creator@claude-plugins-official": true,
-    "ecc@ecc": false,
     "plugin-dev@claude-plugins-official": true,
-    "nxtlvl@nxtlvl-dev": true,
     "playground@claude-plugins-official": true,
-    "understand-anything@understand-anything": true,
-    "explanatory-output-style@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true
+    "nxtlvl@nxtlvl-dev": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "understand-anything@understand-anything": true
   },
   "extraKnownMarketplaces": {
     "addy-agent-skills": {
