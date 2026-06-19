@@ -36,6 +36,7 @@ Anchors these consume: [`../intent/personal-harness.md`](../intent/personal-harn
 | [024](ADR-024-git-workflows-domain-command-agent-skill.md) | git-workflows shipped as a three-layer `command → agent → skill` domain with an isolated, edit-less executor (`git-workflow-runner`) | Accepted |
 
 | [025](ADR-025-project-identity-observer-concurrency.md) | Project identity = git common directory; atomic writes (tmp + rename) + per-session single-flight observer guard | Accepted (impl. deferred) |
+| [026](ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md) | Ideation phase = three-layer domain with a main-thread orchestrator skill + isolated read-only agents (inverts [024](ADR-024-git-workflows-domain-command-agent-skill.md)) | Accepted |
 
 > **Numbering note:** the git-workflows decisions are recorded as ADR-023 (skill + conventions,
 > superseded) and ADR-024 (the three-layer domain). They were originally drafted as ADR-012 →

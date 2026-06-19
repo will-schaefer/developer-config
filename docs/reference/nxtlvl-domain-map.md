@@ -12,7 +12,9 @@
 > components into, and which stay dormant-in-ecc
 > ([ADR-002](../decisions/ADR-002-ecc-dormant-reference-backstop.md)).
 > **Purpose:** a *lens for filing and scoping*, not a build manifest — most cells below are
-> empty until the reactive loop earns them.
+> empty until the reactive loop earns them. For the **concrete inventory of what actually
+> ships** (which agents/skills/commands exist on disk today), see the companion
+> [`nxtlvl-domain-catalog.md`](nxtlvl-domain-catalog.md).
 
 ---
 
