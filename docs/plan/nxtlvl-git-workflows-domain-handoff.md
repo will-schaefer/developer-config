@@ -1,7 +1,10 @@
-# Session Handoff: nxtlvl `git-workflows` domain — build in ECC 3-layer structure
+# Session Handoff (✅ DONE): nxtlvl `git-workflows` domain — built as the ECC 3-layer triad
 
-> Continuity doc for a **fresh session** that has `agent-skills` + `/skill-creator` available
-> (this drafting session had neither). Read this first, then the anchors. Written 2026-06-19.
+> Continuity doc written 2026-06-19 for a fresh build session (which had `agent-skills` +
+> `/skill-creator`; this drafting session had neither). **That session has since completed the
+> work — see the Resolution banner below.** The plan body is kept for the record; for live state,
+> read [ADR-024](../decisions/ADR-024-git-workflows-domain-command-agent-skill.md) and intake
+> entry #3 in [`nxtlvl-skill-intake-backlog.md`](nxtlvl-skill-intake-backlog.md).
 
 > **Resolution (build session, 2026-06-19) — DONE.** The domain shipped as
 > `/git-workflow` (command) → `git-workflow-runner` (agent: `Bash` but no `Write`/`Edit`, `model: sonnet`,
