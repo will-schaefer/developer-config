@@ -81,10 +81,12 @@ of **pointers, not content** and injects it. Five blocks, highest-leverage first
 5. **`prior-context`** — the resume-pointer written by the write path at the end of the prior
    session / before compaction. Cross-session resume.
 
-**Budget:** default **≤ ~400 tokens** (raised from ADR-007's ~300 to fit the 5th block),
-env-tunable. When over budget, cut **lowest-value-first**:
-`fallback-digest → stack → prior-context → task → git`. Every block justifies its tokens or
-it is cut.
+**Budget:** default **≤ ~400 tokens** (raised from ADR-007's ~300 to fit the 5th block — a
+**soft backstop** lifted to keep a *proven* block, not a hard cap;
+[ADR-014](../decisions/ADR-014-quality-first-over-leanness.md)), env-tunable. When over budget,
+**densify/consolidate first**, then cut **lowest-value-first**:
+`fallback-digest → stack → prior-context → task → git`. Every block justifies its tokens or it is
+cut — the cut sheds non-earners (noise/stale), never a proven-valuable block to hit the number.
 
 ## 4. Write path (capture)
 
@@ -160,7 +162,8 @@ The full instinct→cluster→skill evolution pipeline is **not** built — reac
 
 ## 9. Defaults & knobs (all tunable; stated so they aren't silent)
 
-- **Read budget:** `~400 tokens` default; env-tunable. Cut order:
+- **Read budget:** `~400 tokens` default (soft backstop, not a hard cap — densify before dropping;
+  [ADR-014](../decisions/ADR-014-quality-first-over-leanness.md)); env-tunable. Cut order:
   `fallback-digest → stack → prior-context → task → git`.
 - **`fallback-digest` N:** last 3 entries (tunable).
 - **Capture event set:** corrections, repeat patterns, error→fix loops, explicit "remember",
