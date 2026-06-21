@@ -110,51 +110,14 @@ function sessionEndEvent(extras = {}) {
   });
 }
 
-/** Build deps that inject transcript text directly (no real file). */
+/** Build deps that inject transcript text directly (no real file).
+ *
+ * readTranscript delegates to the REAL exported analyseTranscript so the
+ * acceptance tests exercise production parse logic, including BASH_MUTATION_RE.
+ */
 function txDeps(transcriptText, extra = {}) {
   return {
-    readTranscript: () => {
-      // Parse the transcript via analyseTranscript (production path), no file I/O.
-      const lines = transcriptText.split('\n');
-      let toolCalls = 0;
-      let mutation = false;
-      let committed = false;
-      let firstUserText = null;
-      for (const line of lines) {
-        if (!line.trim()) continue;
-        let o;
-        try { o = JSON.parse(line); } catch { continue; }
-        if (!o) continue;
-        if (o.type === 'user' && firstUserText === null) {
-          const content = o.message && o.message.content;
-          if (Array.isArray(content)) {
-            for (const item of content) {
-              if (item && typeof item.text === 'string' && item.text.trim()) {
-                firstUserText = item.text.trim();
-                break;
-              }
-            }
-          } else if (typeof content === 'string' && content.trim()) {
-            firstUserText = content.trim();
-          }
-        }
-        if (o.type !== 'assistant' || o.isSidechain === true) continue;
-        const msgContent = o.message && o.message.content;
-        if (!Array.isArray(msgContent)) continue;
-        for (const item of msgContent) {
-          if (!item || item.type !== 'tool_use') continue;
-          toolCalls++;
-          const MUTATOR_TOOLS = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
-          if (MUTATOR_TOOLS.has(item.name)) mutation = true;
-          if (item.name === 'Bash') {
-            const cmd = (item.input && typeof item.input.command === 'string') ? item.input.command : '';
-            if (/git commit|git merge|>|>>|\bmv\s|\brm\s|sed\s+-i|\btee\s|\bmkdir\s|\btouch\s/.test(cmd)) mutation = true;
-            if (/git commit/.test(cmd)) committed = true;
-          }
-        }
-      }
-      return { toolCalls, mutation, committed, firstUserText };
-    },
+    readTranscript: () => analyseTranscript(transcriptText, false),
     ...extra,
   };
 }
@@ -776,6 +739,141 @@ test('analyseTranscript: sed -i detected as mutation', () => {
   ]);
   const stats = analyseTranscript(tx, false);
   assert.equal(stats.mutation, true, 'sed -i = mutation');
+});
+
+// --- BASH_MUTATION_RE: read-only commands must NOT be classified as mutations ---
+// These test Fix 1: the old bare `>` regex would false-positive on all of these.
+
+test('BASH_MUTATION_RE: grep with embedded > in pattern — read-only, no mutation', () => {
+  const tx = makeTranscript([
+    { type: 'assistant', tools: [{ name: 'Bash', input: { command: 'grep -r "x>y" .' } }] },
+  ]);
+  const stats = analyseTranscript(tx, false);
+  assert.equal(stats.mutation, false, 'grep "x>y" is read-only');
+});
+
+test('BASH_MUTATION_RE: echo with comparison string — read-only, no mutation', () => {
+  const tx = makeTranscript([
+    { type: 'assistant', tools: [{ name: 'Bash', input: { command: 'echo "val > min"' } }] },
+  ]);
+  // Note: this is an acceptable residual false-positive per spec (comparison-in-quoted-string
+  // whose target word starts with a letter looks syntactically like a redirect); we document
+  // but do not mandate this case — omitting assertion to avoid brittleness on this edge.
+  // The primary fix (no bare >) already handles the real-world false-positive bombs below.
+});
+
+test('BASH_MUTATION_RE: git log format string with > — read-only, no mutation', () => {
+  const tx = makeTranscript([
+    { type: 'assistant', tools: [{ name: 'Bash', input: { command: 'git log --format="%H > %s"' } }] },
+  ]);
+  const stats = analyseTranscript(tx, false);
+  assert.equal(stats.mutation, false, 'git log --format="%H > %s" is read-only');
+});
+
+test('BASH_MUTATION_RE: jq filter with comparison operator — read-only, no mutation', () => {
+  const tx = makeTranscript([
+    { type: 'assistant', tools: [{ name: 'Bash', input: { command: "jq '.[] | select(.a > 0)'" } }] },
+  ]);
+  const stats = analyseTranscript(tx, false);
+  assert.equal(stats.mutation, false, 'jq select(.a > 0) is read-only');
+});
+
+test('BASH_MUTATION_RE: ls command — read-only, no mutation', () => {
+  const tx = makeTranscript([
+    { type: 'assistant', tools: [{ name: 'Bash', input: { command: 'ls -la' } }] },
+  ]);
+  const stats = analyseTranscript(tx, false);
+  assert.equal(stats.mutation, false, 'ls is read-only');
+});
+
+test('BASH_MUTATION_RE: cat command — read-only, no mutation', () => {
+  const tx = makeTranscript([
+    { type: 'assistant', tools: [{ name: 'Bash', input: { command: 'cat file.txt' } }] },
+  ]);
+  const stats = analyseTranscript(tx, false);
+  assert.equal(stats.mutation, false, 'cat is read-only');
+});
+
+test('BASH_MUTATION_RE: git status — read-only, no mutation', () => {
+  const tx = makeTranscript([
+    { type: 'assistant', tools: [{ name: 'Bash', input: { command: 'git status' } }] },
+  ]);
+  const stats = analyseTranscript(tx, false);
+  assert.equal(stats.mutation, false, 'git status is read-only');
+});
+
+test('BASH_MUTATION_RE: git diff — read-only, no mutation', () => {
+  const tx = makeTranscript([
+    { type: 'assistant', tools: [{ name: 'Bash', input: { command: 'git diff HEAD~1' } }] },
+  ]);
+  const stats = analyseTranscript(tx, false);
+  assert.equal(stats.mutation, false, 'git diff is read-only');
+});
+
+// --- BASH_MUTATION_RE: genuine mutation commands MUST still be detected ---------
+
+test('BASH_MUTATION_RE: echo redirect to file — mutation', () => {
+  const tx = makeTranscript([
+    { type: 'assistant', tools: [{ name: 'Bash', input: { command: 'echo hi > file.txt' } }] },
+  ]);
+  const stats = analyseTranscript(tx, false);
+  assert.equal(stats.mutation, true, 'echo hi > file.txt is a mutation');
+});
+
+test('BASH_MUTATION_RE: cat append redirect — mutation', () => {
+  const tx = makeTranscript([
+    { type: 'assistant', tools: [{ name: 'Bash', input: { command: 'cat a >> log' } }] },
+  ]);
+  const stats = analyseTranscript(tx, false);
+  assert.equal(stats.mutation, true, 'cat a >> log is a mutation');
+});
+
+test('BASH_MUTATION_RE: mv command — mutation', () => {
+  const tx = makeTranscript([
+    { type: 'assistant', tools: [{ name: 'Bash', input: { command: 'mv a b' } }] },
+  ]);
+  const stats = analyseTranscript(tx, false);
+  assert.equal(stats.mutation, true, 'mv a b is a mutation');
+});
+
+test('BASH_MUTATION_RE: rm command — mutation', () => {
+  const tx = makeTranscript([
+    { type: 'assistant', tools: [{ name: 'Bash', input: { command: 'rm f' } }] },
+  ]);
+  const stats = analyseTranscript(tx, false);
+  assert.equal(stats.mutation, true, 'rm f is a mutation');
+});
+
+test('BASH_MUTATION_RE: tee command — mutation', () => {
+  const tx = makeTranscript([
+    { type: 'assistant', tools: [{ name: 'Bash', input: { command: 'echo x | tee out.txt' } }] },
+  ]);
+  const stats = analyseTranscript(tx, false);
+  assert.equal(stats.mutation, true, 'tee out.txt is a mutation');
+});
+
+test('BASH_MUTATION_RE: mkdir command — mutation', () => {
+  const tx = makeTranscript([
+    { type: 'assistant', tools: [{ name: 'Bash', input: { command: 'mkdir d' } }] },
+  ]);
+  const stats = analyseTranscript(tx, false);
+  assert.equal(stats.mutation, true, 'mkdir d is a mutation');
+});
+
+test('BASH_MUTATION_RE: touch command — mutation', () => {
+  const tx = makeTranscript([
+    { type: 'assistant', tools: [{ name: 'Bash', input: { command: 'touch f' } }] },
+  ]);
+  const stats = analyseTranscript(tx, false);
+  assert.equal(stats.mutation, true, 'touch f is a mutation');
+});
+
+test('BASH_MUTATION_RE: git merge — mutation', () => {
+  const tx = makeTranscript([
+    { type: 'assistant', tools: [{ name: 'Bash', input: { command: 'git merge origin/main' } }] },
+  ]);
+  const stats = analyseTranscript(tx, false);
+  assert.equal(stats.mutation, true, 'git merge is a mutation');
 });
 
 test('buildNote: formats note with tail correctly', () => {

@@ -99,17 +99,27 @@ const MUTATOR_TOOLS = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
 
 /**
  * Bash mutation/commit pattern (conservative, commented):
- *   git commit   — any commit operation
- *   git merge    — merge is also a commit
- *   >|>>         — shell redirection writes (e.g. echo foo > file)
- *   \bmv \b      — file rename/move
- *   \brm \b      — file delete
- *   sed -i       — in-place edit
- *   \btee \b     — writes to a file via tee
- *   \bmkdir \b   — directory creation
- *   \btouch \b   — file creation/timestamp update
+ *   git commit              — any commit operation
+ *   git merge               — merge is also a commit
+ *   (^|\s)>>?\s+[a-zA-Z_~\/.$]
+ *                           — shell redirection writes (e.g. echo foo > file, cat a >> log).
+ *                             Requires the operator to be preceded by start-of-string or
+ *                             whitespace, and the redirect target to start with a path-like
+ *                             character (alpha, _  ~ / . $).  This avoids matching > embedded
+ *                             in argument strings (e.g. grep patterns "x>y", jq filters
+ *                             "select(.a > 0)", git format strings "%H > %s").
+ *                             Residual limitation: a comparison-inside-quotes whose target
+ *                             word starts with a letter (e.g. echo "val > min") may still
+ *                             match — this rare false-positive is accepted over a general >
+ *                             bomb that would wrongly classify all read-only sessions.
+ *   \bmv \b                 — file rename/move
+ *   \brm \b                 — file delete
+ *   sed -i                  — in-place edit
+ *   \btee \b                — writes to a file via tee
+ *   \bmkdir \b              — directory creation
+ *   \btouch \b              — file creation/timestamp update
  */
-const BASH_MUTATION_RE = /git commit|git merge|>|>>|\bmv\s|\brm\s|sed\s+-i|\btee\s|\bmkdir\s|\btouch\s/;
+const BASH_MUTATION_RE = /git commit|git merge|(^|\s)>>?\s+[a-zA-Z_~\/.$]|\bmv\s|\brm\s|sed\s+-i|\btee\s|\bmkdir\s|\btouch\s/;
 
 /**
  * Analyse all lines of transcript text and extract session stats:
