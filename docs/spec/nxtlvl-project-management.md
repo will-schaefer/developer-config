@@ -5,7 +5,8 @@
 > **Scope: Phase 1 only** — the shared **state library**, the plan-file **status schema** (the
 > load-bearing contract), and the read-side **Status** capability. Phase 2 (standalone dashboard)
 > and Phase 3 (Backlog grooming) appear here as forward pointers, **not** contract.
-> **Status: DRAFT — awaiting human review before implementation.**
+> **Status: APPROVED — 2026-06-21.** All four open questions resolved (see *Resolved Decisions*)
+> and the **status schema is LOCKED** (the load-bearing contract). Ready for `/plan`.
 
 ## Objective
 
@@ -26,7 +27,11 @@ every existing plan parses unchanged.
 
 ---
 
-## The status schema (load-bearing contract)
+## The status schema (load-bearing contract) — 🔒 LOCKED 2026-06-21
+
+> **LOCKED.** This schema is the contract three Phase-2/3 consumers (`pm-reporter`, the dashboard
+> server, the `Backlog` command) depend on. Per *Boundaries → Ask first*, any change from here on
+> requires explicit sign-off and a spec revision — it is not editable in passing.
 
 The schema **extends** the existing house convention (`- [ ]` / `- [x]` checkboxes, **bold stable
 IDs**, `## Phase N — …` headings, glyph annotations 🤖/🧑/◇) — it does not replace it. The status
@@ -100,32 +105,42 @@ real current file proves this (see Testing Strategy).
   the parser is plain string/line work, no markdown-AST library.
 - **Input:** markdown under `docs/plan/*.md` (plans and their `*-todo.md` checklist companions).
 - **native Task tool** = the live in-session surface. Phase 1's durable truth is the **file**; any
-  Task-tool surfacing is a thin convenience, not a second source of truth (see Open Questions).
+  Task-tool surfacing is a thin convenience, not a second source of truth (Resolved Decision 2).
 
 ## Commands
 
 ```
-Test:        node --test plugins/nxtlvl/skills/project-management/lib/*.test.js
-Run Status:  /pm-status [plan-file]        # provisional name; default target = most-recently-
-                                           # modified docs/plan/*.md (reuses the Hook-2 D-docsel rule)
+Test:        node --test plugins/nxtlvl/lib/plan-parser.test.js
+Run Status:  /pm-status [plan-file]        # default target = most-recently-modified
+                                           # docs/plan/*.md (reuses the Hook-2 D-docsel rule)
 ```
 
 ## Project Structure
 
-Built **sandbox-first** per `CLAUDE.md` (staging tree off the discovery path; promote with
-`git mv`). Proposed layout — exact `lib/` home to be confirmed against the plugin (Open Question 1):
+Two build locations, by component kind (resolves Open Question 1 → **shared lib**):
 
 ```
+plugins/nxtlvl/lib/                → shared library — built DIRECTLY here (not sandbox-first)
+  plan-parser.js                   → markdown → parsed-plan shape (the read contract above)
+  plan-parser.test.js              → node --test fixtures (existing-format, new-glyphs, edge cases)
+  __fixtures__/                    → real-current-file + new-glyph + edge-case fixtures
+
 sandbox/skills/project-management/
-  SKILL.md                     → methodology: the status schema (this contract) + status-brief format
-  lib/plan-parser.js           → markdown → parsed-plan shape (the read contract above)
-  lib/plan-parser.test.js      → node --test fixtures (existing-format, new-glyphs, edge cases)
-sandbox/commands/pm-status.md  → the Status entry point (loads the library, prints the brief)
+  SKILL.md                         → methodology: the status schema (this contract) + brief format
+sandbox/commands/pm-status.md      → the Status entry point (loads the library, prints the brief)
 # pm-reporter agent deferred — Status runs inline in Phase 1; the isolated read-only agent earns
 # its keep at Portfolio / cross-plan scope (Phase 2).
 ```
 
-On promotion: `git mv sandbox/skills/project-management plugins/nxtlvl/skills/` (and the command).
+**Why two locations.** A `lib/*.js` module is never auto-discovered, routed to, or warned about by
+the live plugin (only skills/agents/commands/hooks are) — so the sandbox-first rule, which exists to
+keep work-in-progress *off the discovery path*, does not apply to it. It is placed directly in the
+**shared** `plugins/nxtlvl/lib/` so the non-skill Phase-2 dashboard server can import the one
+canonical parse/serialize module without reaching across a skill boundary (single-writer discipline,
+ADR-028 §4–5). This matches the existing precedent — the C&M Phase-1 stores (commit `07a69c4`) and
+`scrub.js` already live in `plugins/nxtlvl/lib/`. The **skill and command ARE discoverable**, so they
+stage in `sandbox/` and promote with `git mv sandbox/skills/project-management plugins/nxtlvl/skills/`
+(and the command) when ready.
 
 ## Code Style
 
@@ -158,8 +173,9 @@ collects warnings and returns what it can) — read-side reporting must degrade,
 
 - **Always:** keep parsing **total** (collect warnings, never throw); preserve the
   backward-compat guarantee (a real-file fixture enforces it); `node --test` green before promote.
-- **Ask first:** any change to the **status schema** itself (it is a contract three Phase-2/3
-  consumers depend on); adding a runtime dependency; the final `lib/` location and command name.
+- **Ask first:** any change to the **now-LOCKED status schema** (it is a contract three Phase-2/3
+  consumers depend on — see the lock note); adding a runtime dependency. *(The `lib/` location and
+  command name are resolved — see Resolved Decisions — and are no longer open.)*
 - **Never:** **write** to plan files in Phase 1 (read-only — writes are Phase 2 via the atomic,
   versioned path); synthesize stable IDs; couple to GitHub issues (rejected in ADR-028).
 
@@ -172,16 +188,23 @@ collects warnings and returns what it can) — read-side reporting must degrade,
 4. Malformed input yields a brief + warnings, never a crash.
 5. Built in `sandbox/`, off the discovery path, until explicitly promoted.
 
-## Open Questions
+## Resolved Decisions
 
-1. **`lib/` home** — under the skill (proposed, travels with the skill) vs. a shared
-   `plugins/nxtlvl/lib/` (if the dashboard server in Phase 2 should share it without depending on a
-   skill dir). Confirm against the plugin's existing layout.
-2. **native Task-tool integration depth in Phase 1** — surface live session tasks in the brief, or
-   keep Phase 1 strictly file-derived and add the Task-tool overlay in Phase 2 with the dashboard?
-   (Lean: file-only in Phase 1.)
-3. **Command name** — `/pm-status` vs. a verb (`/status` risks collision). Pin at Tasks time.
-4. **Deferred to Phase 2 (write side):** the atomic, **versioned** write path + optimistic
-   concurrency — this is where the [ADR-025](../decisions/ADR-025-project-identity-observer-concurrency.md)
-   atomic-write cross-link the doc-keeper flagged becomes load-bearing. If the write contract
-   diverges from ADR-025's model, amend ADR-025 or open a new ADR (per the doc-keeper's note).
+All four open questions are resolved as of **2026-06-21**. Recorded here so the `/plan` step inherits
+settled ground:
+
+1. **`lib/` home → shared `plugins/nxtlvl/lib/`** (not skill-local). The Phase-2 dashboard server is
+   not a skill and must import the one canonical parse/serialize module without crossing a skill
+   boundary; this is what makes ADR-028's single-writer discipline enforceable. Matches the existing
+   precedent (`plugins/nxtlvl/lib/` already holds the C&M Phase-1 stores and `scrub.js`). See
+   *Project Structure* for the lib-direct / skill-sandbox split.
+2. **native Task-tool depth → file-only in Phase 1.** The durable truth is the plan file; a
+   live-session Task overlay is a Phase-2 concern that rides with the dashboard. Phase 1 stays a pure,
+   testable function: markdown → parsed shape.
+3. **Command name → `/pm-status`** (not `/status`). Domain-namespaced, matches `/pm-dashboard`
+   (ADR-028), no collision risk.
+4. **Write side stays deferred to Phase 2.** The atomic, **versioned** write path + optimistic
+   concurrency is *not* in Phase 1 (read-only). This is where the
+   [ADR-025](../decisions/ADR-025-project-identity-observer-concurrency.md) atomic-write cross-link
+   the doc-keeper flagged becomes load-bearing. If the Phase-2 write contract diverges from ADR-025's
+   model, amend ADR-025 or open a new ADR (per the doc-keeper's note).
