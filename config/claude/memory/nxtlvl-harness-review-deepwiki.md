@@ -32,6 +32,9 @@ the pre-existing manual map; DeepWiki is never a hard dependency.
 **Verification status (2026-06-21):** post-promote, the live MCP smoke test PASSED
 (`read_wiki_structure` returned a full public-repo wiki). The first dogfood spawn caught the
 namespace bug above (scout fell back to WebFetch, still produced a valid zero-citation brief). Fix
-landed; **native-MCP-path re-verification awaits a fresh `/plugin` promote** (see
-[[nxtlvl-install-promotion]] — installed plugin is a SHA-pinned cache snapshot). Contract + caveats:
+landed and **native MCP path RE-VERIFIED post-promote** — scout reported all three
+`mcp__plugin_nxtlvl_deepwiki__*` tools available, ran 1 `read_wiki_structure` + 4 `ask_question`
+natively (no WebFetch fallback), every claim LEAD-stamped with a clone pointer. Accelerator is
+fully verified end-to-end (see [[nxtlvl-install-promotion]] for the promote-gating mechanics).
+Contract + caveats:
 `plugins/nxtlvl/skills/harness-review/references/deepwiki-orientation.md`.

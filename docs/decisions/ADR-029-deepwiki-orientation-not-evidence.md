@@ -96,7 +96,10 @@ formats are untouched.
   plugin-bundled MCP server is namespaced `mcp__plugin_nxtlvl_deepwiki__*`, so the grant resolved to
   nothing and the scout fell back to `WebFetch`. This *validated graceful degradation* (the fallback
   produced a correct lead-stamped brief with zero artifact citations) and was fixed by granting the
-  namespaced tool ids. Re-verification of the native MCP path is gated on a fresh `/plugin` promote.
+  namespaced tool ids. **Re-verified post-fix:** after a fresh promote, the scout reported all three
+  `mcp__plugin_nxtlvl_deepwiki__*` tools available and used the native MCP path end-to-end (one
+  `read_wiki_structure` + four `ask_question`, no WebFetch fallback), every claim `LEAD`-stamped with
+  a clone pointer. The native path is now confirmed working.
 - Recorded per the global decision rule ([ADR-010](ADR-010-global-decision-rule.md)). Reuses the
   isolated read-only-agent pattern of [ADR-026](ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md)
   ([`context-scout`](../../plugins/nxtlvl/agents/context-scout.md) is the sibling).
