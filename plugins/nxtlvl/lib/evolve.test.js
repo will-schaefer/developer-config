@@ -332,6 +332,40 @@ test('domains: distinct sorted ascending from member instincts', () => {
   assert.deepStrictEqual(cand.domains, ['shell', 'workflow']);
 });
 
+test('domains: ascending sort holds on a skill cluster too (not just agents)', () => {
+  // The domains-sort assertion above only exercised an agent cluster (size 3).
+  // Verify the same ordering on a size-2 SKILL cluster, with domains seeded in
+  // reverse order so the ascending sort is genuinely exercised.
+  const env = freshEnv();
+  seedAll([
+    inst('sd-a', 'ship release', 0.9, 'workflow'),
+    inst('sd-b', 'ship release', 0.85, 'shell'),
+  ], env);
+  const result = evolve({ projectId: 'test-proj', now: T0 }, env, HOME);
+  assert.equal(result.candidates.length, 1);
+  assert.equal(result.candidates[0].type, 'skill');
+  assert.deepStrictEqual(result.candidates[0].domains, ['shell', 'workflow']);
+});
+
+test('instinctIds: ascending sort holds when the store seeds ids in reverse order', () => {
+  // instinctIds is `members.map(m => m.id).sort()`. Seed ids in descending order
+  // so the .sort() must reorder them — guards against the sort being silently
+  // unnecessary (and thus untested) because upstream already returned them sorted.
+  const env = freshEnv();
+  seedAll([
+    inst('zulu-id', 'cluster me', 0.9),
+    inst('mike-id', 'cluster me', 0.88),
+    inst('alpha-id', 'cluster me', 0.87),
+  ], env);
+  const result = evolve({ projectId: 'test-proj', now: T0 }, env, HOME);
+  assert.equal(result.candidates.length, 1);
+  assert.deepStrictEqual(
+    result.candidates[0].instinctIds,
+    ['alpha-id', 'mike-id', 'zulu-id'],
+    'instinctIds must be ascending regardless of store insertion order',
+  );
+});
+
 // =============================================================================
 // evolve — total ordering
 // =============================================================================

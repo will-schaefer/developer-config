@@ -136,6 +136,28 @@ test('no-bookmark case renders gracefully (no crash)', () => {
   assert.ok(ctx.includes('No saved bookmark'), 'no-bookmark message present');
 });
 
+test('no-bookmark + stale obs renders the ⚠ marker (consistent with the bookmark-exists path)', () => {
+  // When there is no saved bookmark BUT the observation log has activity, the
+  // briefing must flag it with the same ⚠ marker used when a bookmark exists —
+  // a reader scanning for ⚠ should not miss this signal.
+  const deps = fakeDeps({
+    bookmarks: {
+      groupKeyFor: () => 'main',
+      readNewest: () => null,        // no bookmark
+      isStale: () => true,           // but obs log has newer activity
+    },
+    obsLog: {
+      readAll: () => [{ id: '1', seq: 0, ts: '2026-01-11T08:00:00.000Z', event: 'tool_start', tool: 'Read' }],
+    },
+  });
+
+  const out = run(sessionEvent(), mkEnv(freshTmp()), deps);
+  const ctx = parseContext(out);
+  assert.ok(ctx.includes('No saved bookmark'), 'no-bookmark message present');
+  assert.ok(ctx.includes('⚠'), 'stale ⚠ marker present even without a bookmark');
+  assert.ok(ctx.includes('a bookmark may be missing'), 'missing-bookmark hint present');
+});
+
 test('no-instincts case renders gracefully (no crash)', () => {
   const deps = fakeDeps(); // recall returns injected: [] total: 0
 

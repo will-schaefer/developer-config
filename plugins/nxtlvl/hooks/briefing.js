@@ -131,7 +131,7 @@ function renderBookmarkBlock(projectId, groupKey, bookmarks, obsLog, opts) {
   if (!newest) {
     const noNote = 'No saved bookmark for this branch yet.';
     return stale
-      ? `${noNote}\n  (Observation log has activity — bookmark may be missing.)`
+      ? `${noNote}\n  ⚠ Observation log has activity — a bookmark may be missing.`
       : noNote;
   }
 

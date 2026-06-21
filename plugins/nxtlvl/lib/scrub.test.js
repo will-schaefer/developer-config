@@ -255,6 +255,19 @@ test('FAIL-CLOSED: null obs does not crash — drops gracefully', () => {
   assert.equal(res.record, undefined);
 });
 
+test('FAIL-CLOSED: a circular-reference field drops the observation, never hangs or leaks', () => {
+  // scrubValue recurses into objects; a cyclic reference would recurse until the
+  // stack overflows (RangeError). The fail-closed boundary must convert that throw
+  // into a drop — never an unbounded hang, never a raw passthrough.
+  const cyclic = { command: `export TOKEN=${GH_TOKEN}` };
+  cyclic.self = cyclic; // introduce the cycle
+  const obs = { tool: 'Bash', input: cyclic, output: null };
+  const res = safeScrubObservation(obs);
+  assert.equal(res.dropped, true, 'circular reference must drop, not hang');
+  assert.equal(res.record, undefined, 'nothing persisted on drop');
+  assert.ok(!JSON.stringify(res).includes(GH_TOKEN), 'raw token must not leak via the drop path');
+});
+
 test('scrubObservation itself throws on failure (boundary is the safe wrapper)', () => {
   // null obs is a hard failure: the record is not an object at all.
   assert.throws(() => scrubObservation(null), TypeError);
