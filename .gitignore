@@ -26,3 +26,6 @@ config/helix/
 
 # Skill-creator eval workspaces — throwaway run artifacts (benchmarks, desc-opt), not source.
 *-workspace/
+
+# Subagent-driven-development progress ledger — git-ignored scratch (recovery map, not source).
+.superpowers/
