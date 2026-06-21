@@ -161,16 +161,32 @@ test('open-files: de-duplicates and returns most-recent-first', () => {
   const tx = fakeTranscript([
     { name: 'Read',  filePath: '/a.js' },
     { name: 'Read',  filePath: '/b.js' },
-    { name: 'Edit',  filePath: '/a.js' }, // /a.js again — duplicate
+    { name: 'Edit',  filePath: '/a.js' }, // /a.js re-touched — must move to most-recent
     { name: 'Write', filePath: '/c.js' },
   ]);
-  // extractOpenFiles scan order: /a.js, /b.js (a already seen, skip), /c.js
-  // after dedupe ordered = [/a.js, /b.js, /c.js] → reversed = [/c.js, /b.js, /a.js]
+  // Scan order: /a.js (t=0), /b.js (t=1), /a.js re-touch (t=2 → moves to front), /c.js (t=3)
+  // After dedup, ordered (oldest-first) = [/b.js, /a.js, /c.js]
+  // reversed (most-recent-first) = [/c.js, /a.js, /b.js]
   const files = extractOpenFiles(tx);
-  assert.equal(files[0], '/c.js', 'most recent first');
-  assert.equal(files[1], '/b.js');
-  assert.equal(files[2], '/a.js');
+  assert.deepEqual(files, ['/c.js', '/a.js', '/b.js'],
+    'full ordered list: /c.js most-recent, /a.js (re-touched) second, /b.js oldest');
   assert.equal(files.length, 3, 'no duplicate /a.js');
+});
+
+test('open-files: re-touched-in-the-middle file moves to most-recent position', () => {
+  // Explicit "re-touched in the middle" case to lock the semantics.
+  // Scan: Read /x.js, Read /y.js, Read /z.js, Edit /x.js (re-touch)
+  // After dedup ordered (oldest-first): [/y.js, /z.js, /x.js]
+  // reversed (most-recent-first): [/x.js, /z.js, /y.js]
+  const tx = fakeTranscript([
+    { name: 'Read', filePath: '/x.js' },
+    { name: 'Read', filePath: '/y.js' },
+    { name: 'Read', filePath: '/z.js' },
+    { name: 'Edit', filePath: '/x.js' }, // re-touch — x was earliest, now most-recent
+  ]);
+  const files = extractOpenFiles(tx);
+  assert.deepEqual(files, ['/x.js', '/z.js', '/y.js'],
+    're-touched /x.js is at index 0 (most-recent); /y.js is last (oldest)');
 });
 
 test('open-files: sidechain tool_use blocks are ignored', () => {
@@ -203,6 +219,36 @@ test('open-files: NotebookEdit uses notebook_path key', () => {
   const tx = lines.join('\n');
   const files = extractOpenFiles(tx);
   assert.ok(files.includes('/nb.ipynb'), 'NotebookEdit notebook_path extracted');
+});
+
+test('open-files: bare path input key is extracted', () => {
+  // Covers the inp.path branch (file_path || path || notebook_path).
+  const lines = [JSON.stringify({
+    type: 'assistant',
+    isSidechain: undefined,
+    message: {
+      content: [{ type: 'tool_use', name: 'Read', input: { path: '/some.js' } }],
+      usage: { input_tokens: 50 },
+    },
+  })];
+  const tx = lines.join('\n');
+  const files = extractOpenFiles(tx);
+  assert.ok(files.includes('/some.js'), 'bare path key extracted');
+});
+
+test('open-files: notebook_path input key is extracted (standalone check)', () => {
+  // Covers the inp.notebook_path branch independently of tool name.
+  const lines = [JSON.stringify({
+    type: 'assistant',
+    isSidechain: undefined,
+    message: {
+      content: [{ type: 'tool_use', name: 'NotebookEdit', input: { notebook_path: '/standalone-nb.ipynb' } }],
+      usage: { input_tokens: 50 },
+    },
+  })];
+  const tx = lines.join('\n');
+  const files = extractOpenFiles(tx);
+  assert.ok(files.includes('/standalone-nb.ipynb'), 'notebook_path key extracted');
 });
 
 test('open-files: MultiEdit uses file_path key', () => {

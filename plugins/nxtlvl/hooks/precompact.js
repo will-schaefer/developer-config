@@ -83,27 +83,24 @@ function readTail(filePath, maxBytes) {
 
 /**
  * Default bounded transcript reader.
- * Returns the full text (may be tail-cut on very long transcripts).
- * Never throws — returns '' on any error.
+ * Returns { text, dropFirst } — text is tail-bounded (never full-file),
+ * dropFirst=true when the tail was cut so extractOpenFiles can skip the
+ * potentially-truncated first line. Never throws — returns { text: '', dropFirst: false }
+ * on any error.
  */
 function readTranscriptDefault(transcriptPath) {
-  if (!transcriptPath || typeof transcriptPath !== 'string') return '';
+  if (!transcriptPath || typeof transcriptPath !== 'string') return { text: '', dropFirst: false };
   try {
     fs.statSync(transcriptPath);
   } catch {
-    return '';
+    return { text: '', dropFirst: false };
   }
   try {
-    const { text, full } = readTail(transcriptPath, TAIL_BYTES);
-    if (full) return text;
-    // Tail was cut — use the full file to avoid missing early tool calls.
-    try {
-      return fs.readFileSync(transcriptPath, 'utf8');
-    } catch {
-      return text; // best effort: return what we have
-    }
+    const { text, partial } = readTail(transcriptPath, TAIL_BYTES);
+    // When partial, the first line may be truncated — signal extractOpenFiles to skip it.
+    return { text, dropFirst: partial };
   } catch {
-    return '';
+    return { text: '', dropFirst: false };
   }
 }
 
@@ -145,10 +142,15 @@ function extractOpenFiles(text, dropFirst = false) {
       const inp = item.input || {};
       const filePath = inp.file_path || inp.path || inp.notebook_path;
       if (filePath && typeof filePath === 'string') {
-        if (!seen.has(filePath)) {
+        // Move the file to the most-recent position on every touch.
+        // A file touched early and re-touched later must rank as most-recent.
+        if (seen.has(filePath)) {
+          const idx = ordered.indexOf(filePath);
+          if (idx !== -1) ordered.splice(idx, 1);
+        } else {
           seen.add(filePath);
-          ordered.push(filePath);
         }
+        ordered.push(filePath);
       }
     }
   }
@@ -243,15 +245,15 @@ function run(rawInput, env = process.env, deps = {}) {
     // Read newest bookmark (read-only — never write)
     const bookmark = bookmarks.readNewest(projectId, groupKey);
 
-    // Extract recently-touched files from the transcript (read-only)
-    const transcriptText = readTranscript(transcriptPath);
-    const openFiles = extractOpenFiles(transcriptText, false);
-
-    // If there is genuinely nothing to say, emit ''
-    if (!bookmark && openFiles.length === 0) {
-      // Still emit the preserve-task instruction — it is always useful.
-      // Only skip entirely if there is nothing at all (no text will land).
-    }
+    // Extract recently-touched files from the transcript (read-only).
+    // readTranscript returns { text, dropFirst } when using the default reader,
+    // or a plain string when injected by tests (legacy compat: accept both).
+    const raw = readTranscript(transcriptPath);
+    const transcriptText = typeof raw === 'string' ? raw : raw.text;
+    const dropFirst      = typeof raw === 'string' ? false : (raw.dropFirst || false);
+    // Still emit the preserve-task instruction when there is no bookmark or open
+    // files — it is always useful and the hook is never a no-op by design.
+    const openFiles = extractOpenFiles(transcriptText, dropFirst);
 
     const additionalContext = buildSteer(bookmark, openFiles, trigger);
 
