@@ -27,6 +27,8 @@ const {
   forProject,
   reinforce,
   effectiveConfidence,
+  remove,
+  promote,
 } = require('./instincts.js');
 const { layout } = require('./paths.js');
 
@@ -349,4 +351,129 @@ test('list without minConfidence returns everything regardless of decay', () => 
   const farFuture = Date.now() + 3650 * DAY;
   const ids = list({ projectId: 'projY', scope: 'project', now: farFuture }, env, HOME).map((i) => i.id).sort();
   assert.deepEqual(ids, ['a', 'b']);
+});
+
+// =============================================================================
+// --- remove -----------------------------------------------------------------
+// =============================================================================
+
+test('remove: deletes the correct project-scoped file; returns true', () => {
+  const env = freshEnv();
+  const inst = projectInstinct({ id: 'rm-target', project_id: 'projRm' });
+  const filepath = write(inst, env, HOME);
+  assert.equal(fs.existsSync(filepath), true, 'file should exist before remove');
+  const result = remove(inst, env, HOME);
+  assert.equal(result, true, 'remove returns true when file existed');
+  assert.equal(fs.existsSync(filepath), false, 'file should be gone after remove');
+});
+
+test('remove: returns false for an absent instinct (idempotent)', () => {
+  const env = freshEnv();
+  const inst = projectInstinct({ id: 'not-written', project_id: 'projRm2' });
+  const result = remove(inst, env, HOME);
+  assert.equal(result, false, 'remove returns false when file did not exist');
+});
+
+test('remove: works for a global-scoped instinct', () => {
+  const env = freshEnv();
+  const inst = projectInstinct({ id: 'global-rm', scope: 'global', project_id: undefined });
+  const filepath = write(inst, env, HOME);
+  assert.equal(fs.existsSync(filepath), true, 'global file should exist before remove');
+  const result = remove(inst, env, HOME);
+  assert.equal(result, true, 'remove returns true for global instinct');
+  assert.equal(fs.existsSync(filepath), false, 'global file should be gone after remove');
+});
+
+test('remove: throws on a hostile id (path traversal blocked)', () => {
+  const env = freshEnv();
+  for (const badId of HOSTILE_IDS) {
+    const inst = projectInstinct({ id: badId });
+    assert.throws(
+      () => remove(inst, env, HOME),
+      /id/i,
+      `remove should throw for hostile id ${JSON.stringify(badId)}`,
+    );
+  }
+});
+
+// =============================================================================
+// --- promote -----------------------------------------------------------------
+// =============================================================================
+
+test('promote: project→global moves the file (global readById succeeds; project readById → null)', () => {
+  const env = freshEnv();
+  const inst = projectInstinct({ id: 'promote-me', project_id: 'projPr1' });
+  write(inst, env, HOME);
+
+  const { promoted, from, to } = promote(inst, env, HOME);
+  assert.equal(promoted, true, 'promoted should be true');
+
+  // Old project file is gone.
+  assert.equal(fs.existsSync(from), false, 'original project file should be removed');
+  // New global file exists.
+  assert.equal(fs.existsSync(to), true, 'global file should exist');
+
+  // readById confirms the move.
+  const globalGot = readById('promote-me', { scope: 'global' }, env, HOME);
+  assert.ok(globalGot, 'global readById should find the promoted instinct');
+  assert.equal(globalGot.scope, 'global', 'promoted instinct should be global-scoped');
+  assert.equal('project_id' in globalGot, false, 'promoted instinct should have no project_id');
+
+  const projectGot = readById('promote-me', { scope: 'project', projectId: 'projPr1' }, env, HOME);
+  assert.equal(projectGot, null, 'project readById should return null after promotion');
+});
+
+test('promote: preserves confidence, reinforcements, and created on the promoted copy', () => {
+  const env = freshEnv();
+  const created = '2026-05-01T12:00:00.000Z';
+  const inst = projectInstinct({
+    id: 'preserve-fields',
+    project_id: 'projPr2',
+    confidence: 0.91,
+    reinforcements: 7,
+    created,
+  });
+  write(inst, env, HOME);
+
+  promote(inst, env, HOME);
+
+  const globalGot = readById('preserve-fields', { scope: 'global' }, env, HOME);
+  assert.ok(globalGot, 'should find promoted instinct');
+  assert.equal(globalGot.confidence, 0.91, 'confidence preserved');
+  assert.equal(globalGot.reinforcements, 7, 'reinforcements preserved');
+  assert.equal(globalGot.created, created, 'created preserved');
+});
+
+test('promote: scope=global input is a no-op (promoted:false, original file untouched)', () => {
+  const env = freshEnv();
+  const inst = projectInstinct({ id: 'already-global', scope: 'global', project_id: undefined });
+  const filepath = write(inst, env, HOME);
+
+  const { promoted, from, to } = promote(inst, env, HOME);
+  assert.equal(promoted, false, 'promoted should be false for already-global input');
+  assert.equal(from, to, 'from and to should be the same path');
+  // File still intact.
+  assert.equal(fs.existsSync(filepath), true, 'global file should still exist after no-op promote');
+  const got = readById('already-global', { scope: 'global' }, env, HOME);
+  assert.ok(got, 'global instinct should still be readable');
+});
+
+test('promote: list({scope:"global"}) includes it; list({scope:"project"}) no longer does', () => {
+  const env = freshEnv();
+  const inst = projectInstinct({ id: 'list-move', project_id: 'projPr3' });
+  write(inst, env, HOME);
+
+  // Before: appears in project list, not global.
+  const beforeProject = list({ projectId: 'projPr3', scope: 'project' }, env, HOME).map((i) => i.id);
+  assert.ok(beforeProject.includes('list-move'), 'should be in project list before promote');
+  const beforeGlobal = list({ scope: 'global' }, env, HOME).map((i) => i.id);
+  assert.ok(!beforeGlobal.includes('list-move'), 'should NOT be in global list before promote');
+
+  promote(inst, env, HOME);
+
+  // After: appears in global list, not project.
+  const afterGlobal = list({ scope: 'global' }, env, HOME).map((i) => i.id);
+  assert.ok(afterGlobal.includes('list-move'), 'should appear in global list after promote');
+  const afterProject = list({ projectId: 'projPr3', scope: 'project' }, env, HOME).map((i) => i.id);
+  assert.ok(!afterProject.includes('list-move'), 'should NOT appear in project list after promote');
 });
