@@ -86,7 +86,7 @@ Dry run — lists graduation candidates, writes nothing. Safe to run any time.
 ```
 Authors each candidate via the evolver subagent. Artifacts written to `.claude/evolved/<type>s/…` for review.
 
-## What this does
+## How it works
 
 The `lib/evolve` engine is deterministic: same instinct store → same candidates every time. The evolver writes real artifacts (not stubs) by distilling the cluster's `action` and `evidence` into a coherent body. Artifacts stay in `.claude/evolved/` until you decide to promote them.
 
