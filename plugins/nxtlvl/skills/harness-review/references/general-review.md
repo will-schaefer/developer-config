@@ -35,9 +35,11 @@ overall assessment in Phase 4. Score **1–5**, and **justify each score in one 
 - **Tools / MCP** → robustness + composition (interface design, error surfaces).
 - **Rules / docs / context** → clarity + effectiveness (does the guidance actually shape behavior).
 
-**For a deep single-component audit, these one-liners bloom into full specialist rubrics** — see Mode
-C ([`domain-review.md`](domain-review.md) §2 registry → `domains/<component>.md`). Those rubrics are
-the canonical per-component criteria; this table is their one-line summary for the whole-harness pass.
+**For a deep single-domain audit, these one-liners bloom into full specialist rubrics** — see Mode
+C ([`domain-review.md`](domain-review.md) §2 registry → `domains/<domain>.md`), which now spans more
+than these component types (also `scripts`, subsystems like `memory`/`marketplace`, and composed
+concerns like `capability`/`orchestration`). Those rubrics are the canonical criteria; this table is
+their one-line summary for the whole-harness pass.
 
 Note in the digest which dimensions you weighted up and why — the synthesis needs that to roll a
 fair overall score rather than a flat average.

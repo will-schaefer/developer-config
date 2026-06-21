@@ -1,4 +1,4 @@
-# Mode C — Domain Review (deep single-component specialist audit)
+# Mode C — Domain Review (deep single-domain specialist audit)
 
 > Per-mode reference for the **`harness-review` skill**, Mode C. `SKILL.md` is the shared spine
 > (vendor → map → fan-out → reader-test → land); this file owns the **fork**: the `DOMAIN` contract
@@ -30,18 +30,18 @@ specialist rubrics cite nxtlvl's own hard-won lessons (inform-don't-force, singl
 fail-open-for-session-hooks) as **rationale for why a checkpoint matters** — never as the bar a
 reviewed harness is scored against. *Judge the harness, not its resemblance to nxtlvl.*
 
-**When the ask names a *feature*, not a component type.** Sometimes the subsystem the user wants
-audited (e.g. "the brainstorm/ideation domain", "the memory subsystem") is a **capability that spans
-several component types** — a skill *and* a behavioral rule *and* a command *and* an agent. Don't
-force-fit it to one registry row. Instead: pick the **capability-bearing component as the scoring
-spine** (the artifact that actually delivers the capability — usually the skill or agent) and score it
-on that domain's rubric; **assess the supporting components via their own rubrics' dominant
-dimensions** (the rule via `rules.md`'s activation dimension, the command via `commands.md`'s
-does-it-do-what-it-says dimension), without full separate scorecards; and **treat the cross-wiring
-between them — or its absence — as the central composition finding.** A feature encoded four times
-with no single source of truth and no routing between the copies is itself the headline judgment, and
-this is how you surface it. State the spanning set in the header's Scope line (`DOMAIN=<spine> ·
-FOCUS=<feature>`).
+**When the ask names a *capability*, not a component type.** Sometimes what the user wants audited is
+a **capability that spans several component types** — "the brainstorm/ideation capability", "the
+planning flow" — delivered by a skill *and* a rule *and* a command *and* an agent together. That has
+its own first-class rubric: [`domains/capability.md`](domains/capability.md), which composes the
+per-component rubrics around a spine and scores the cross-wiring (or its absence) as the headline.
+Don't force-fit a capability to one component-type row — set `DOMAIN=capability` and state the
+spanning set in the header Scope line (`DOMAIN=<spine> · FOCUS=<capability>`). Two reviews that used
+to be handled as feature-spanning special cases are now their own registry rows: a **memory/state**
+subsystem → [`domains/memory.md`](domains/memory.md); a **multi-plugin marketplace** →
+[`domains/marketplace.md`](domains/marketplace.md). For the harness-wide task lifecycle (entry →
+routing → handoff → termination) rather than one feature's flow, use
+[`domains/orchestration.md`](domains/orchestration.md).
 
 **Phase 2 forks here.** Instead of partitioning the *whole harness* into domains, Mode C partitions
 **within** the chosen domain so the fan-out still parallelizes:
@@ -66,23 +66,36 @@ prompt MUST add:
 
 ## 2. The domain registry
 
-The six component types Mode C reviews. Each row maps a `DOMAIN` value to its specialist rubric, what
-it covers, and where it typically lives. **These rubrics are the canonical per-component-type
-criteria** — Mode A's "weighting by component type" table ([`general-review.md`](general-review.md)
-§1) is the one-line summary; the depth lives here.
+The `DOMAIN` values Mode C reviews, in three **kinds**:
+- **component** — one artifact class, scored on a flat dimension table (the original six + `scripts`);
+- **subsystem** — one capability area that spans several artifact classes but is scored as a whole
+  (`memory`, `marketplace`);
+- **composed** — a review that *composes other rubrics* rather than using a flat table (`capability`
+  picks a spine and scores cross-wiring; `orchestration` scores the task-flow spine).
 
-| `DOMAIN` | Rubric | What it audits | Typical location |
-|----------|--------|----------------|------------------|
-| `hooks` | [`domains/hooks.md`](domains/hooks.md) | Event-driven automation: gates, guards, lifecycle handlers | `hooks/`, `hooks.json`, `settings.json` |
-| `agents` | [`domains/agents.md`](domains/agents.md) | Subagents: system prompts, tool grants, isolation, return shape | `agents/`, `*.md` with agent frontmatter |
-| `skills` | [`domains/skills.md`](domains/skills.md) | Skills: descriptions-as-triggers, factoring, composition | `skills/**/SKILL.md` |
-| `commands` | [`domains/commands.md`](domains/commands.md) | Slash commands: argument design, naming, thin-wrapper discipline | `commands/`, `*.md` with command frontmatter |
-| `tools` | [`domains/tools.md`](domains/tools.md) | Tools / MCP: input schemas, output shapes, error surfaces | `mcp/`, tool/server definitions |
-| `rules` | [`domains/rules.md`](domains/rules.md) | Rules / docs / context: guidance that shapes behavior | `CLAUDE.md`, `rules/`, `docs/`, context files |
+Each row maps a `DOMAIN` to its specialist rubric, what it covers, and where it lives. **These rubrics
+are the canonical criteria** — Mode A's "weighting by component type" table
+([`general-review.md`](general-review.md) §1) is the one-line summary for the component rows; the
+depth lives here.
+
+| `DOMAIN` | Kind | Rubric | What it audits | Typical location |
+|----------|------|--------|----------------|------------------|
+| `hooks` | component | [`domains/hooks.md`](domains/hooks.md) | Event-driven automation: gates, guards, lifecycle handlers | `hooks/`, `hooks.json`, `settings.json` |
+| `agents` | component | [`domains/agents.md`](domains/agents.md) | Subagents: system prompts, tool grants, isolation, return shape | `agents/`, `*.md` with agent frontmatter |
+| `skills` | component | [`domains/skills.md`](domains/skills.md) | Skills: descriptions-as-triggers, factoring, composition | `skills/**/SKILL.md` |
+| `commands` | component | [`domains/commands.md`](domains/commands.md) | Slash commands: argument design, naming, thin-wrapper discipline | `commands/`, `*.md` with command frontmatter |
+| `tools` | component | [`domains/tools.md`](domains/tools.md) | Tools / MCP: input schemas, output shapes, error surfaces | `mcp/`, tool/server definitions |
+| `rules` | component | [`domains/rules.md`](domains/rules.md) | Rules / docs / context: guidance that shapes behavior | `CLAUDE.md`, `rules/`, `docs/`, context files |
+| `scripts` | component | [`domains/scripts.md`](domains/scripts.md) | Executable code *as code*: contracts, exits, side-effects, injection-safety | `hooks/`, `scripts/`, `tools/`, `bin/`, hook/MCP bodies |
+| `memory` | subsystem | [`domains/memory.md`](domains/memory.md) | Memory/state: recall fitness, degraded-mode honesty, provenance, eviction | `~/.claude/.../memory/`, `*.jsonl` logs, instinct/state stores |
+| `marketplace` | subsystem | [`domains/marketplace.md`](domains/marketplace.md) | Multi-plugin structure: count honesty, manifest-vs-disk, archetype split | `.claude-plugin/marketplace.json`, `plugins/` |
+| `capability` | composed | [`domains/capability.md`](domains/capability.md) | A feature spanning component types: spine + supporting + cross-wiring | grep the feature across `skills/`/`agents/`/`commands/`/`rules` |
+| `orchestration` | composed | [`domains/orchestration.md`](domains/orchestration.md) | Task-flow end-to-end: entry → routing → handoff → termination | the flow across components + the manifest/loader |
 
 **Adding a domain** is the extension contract: author a `domains/<name>.md` from the §6 template,
-add one row here, and (if it overlaps a Mode A component type) cross-link Mode A's weighting table.
-That's the whole move — no spine changes.
+add one row here (with its **kind**), and (if it overlaps a Mode A component type) cross-link Mode A's
+weighting table. That's the whole move — no spine changes. A **composed**-kind domain adapts the
+template's §2 from a flat rubric table to a composition method (see [`domains/capability.md`](domains/capability.md) §2 for the worked shape).
 
 ---
 
@@ -160,7 +173,11 @@ scored as craft.
 
 Every `domains/<name>.md` follows the **same five-part shape** so any fan-out agent can consume it
 and the scores roll up cleanly. To add a domain, copy this skeleton, fill it for the component type,
-add a §2 registry row, and cross-link Mode A's weighting table if it overlaps.
+add a §2 registry row (with its **kind**), and cross-link Mode A's weighting table if it overlaps.
+**Component** and **subsystem** kinds use the §2 rubric table as written. A **composed** kind
+(`capability`, `orchestration`) keeps the same five sections but replaces §2's flat table with a
+**composition method** — pick a spine, score supporting slices on their own rubrics' dominant
+dimensions, and score the cross-wiring as the capping judgment ([`domains/capability.md`](domains/capability.md) §2 is the worked example).
 
 ```markdown
 # Domain Review — <Component type> (Mode C rubric)

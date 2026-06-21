@@ -1,6 +1,6 @@
 ---
 name: harness-review
-description: Vendor an agent harness and analyze it via parallel read-only fan-out, in one of three modes — (A) a neutral deep-dive quality + architecture report (its domains, skills, agents, commands, hooks, tools, strategy, and workflow, scored against a rubric), or (B) an adopt/adapt/reject ledger that judges what a target harness should borrow from it, or (C) a deep single-component specialist audit of one subsystem — its hooks, agents, skills, commands, tools, or rules — scored against a domain-expert rubric. USE THIS whenever an agent harness, Claude Code plugin, .claude/-style repo, subagent collection, or agent framework comes up to be understood, evaluated, or mined — phrases like "review this harness", "analyze how <repo> works", "how good is this agent setup", "deep dive into <plugin>", "what should we adopt from <repo>", "vendor and distill X", "should we copy how they do Y", "review the hooks of <repo>", "how good is X's hook system", "audit the <component> of <harness>". This analyzes someone else's harness — NOT a code review of your own diff (use a code-review skill for that), and NOT building a harness.
+description: Vendor an agent harness and analyze it via parallel read-only fan-out, in one of three modes — (A) a neutral deep-dive quality + architecture report (its domains, skills, agents, commands, hooks, tools, strategy, and workflow, scored against a rubric), or (B) an adopt/adapt/reject ledger that judges what a target harness should borrow from it, or (C) a deep specialist audit of one domain — a component type (hooks, agents, skills, commands, tools, rules, scripts), a subsystem (memory/state, plugin marketplace), or a cross-cutting concern (a feature-spanning capability, or task-flow orchestration) — scored against a domain-expert rubric. USE THIS whenever an agent harness, Claude Code plugin, .claude/-style repo, subagent collection, or agent framework comes up to be understood, evaluated, or mined — phrases like "review this harness", "analyze how <repo> works", "how good is this agent setup", "deep dive into <plugin>", "what should we adopt from <repo>", "vendor and distill X", "should we copy how they do Y", "review the hooks/scripts of <repo>", "how good is X's hook system / memory / orchestration", "audit the <component> of <harness>", "review the planning capability of <repo>", "how honest is X's plugin marketplace". This analyzes someone else's harness — NOT a code review of your own diff (use a code-review skill for that), and NOT building a harness.
 ---
 
 # Harness Review — vendor → fan-out → (general review | adopt/adapt/reject | domain review)
@@ -22,10 +22,11 @@ you synthesize, and what you write:
   **target** harness you build or maintain and renders a borrow verdict per finding. Answers *"what
   should `<target>` adopt, adapt, or reject from this?"* → detail in
   [`references/adopt-adapt-reject.md`](references/adopt-adapt-reject.md).
-- **Mode C — Domain Review** *(neutral, single-component)*: a deep specialist audit of **one
-  component type** (its hooks, *or* agents, *or* skills, *or* commands, *or* tools, *or* rules),
-  scored against a **domain-expert rubric** tuned to that component's real failure modes — the depth
-  Mode A's whole-harness pass can't reach. Answers *"how good is this harness's `<component>`
+- **Mode C — Domain Review** *(neutral, one domain in depth)*: a deep specialist audit of **one
+  domain** — a *component type* (`hooks`/`agents`/`skills`/`commands`/`tools`/`rules`/`scripts`), a
+  *subsystem* (`memory`/`marketplace`), or a *cross-cutting concern* (`capability`/`orchestration`) —
+  scored against a **domain-expert rubric** tuned to that domain's real failure modes — the depth
+  Mode A's whole-harness pass can't reach. Answers *"how good is this harness's `<domain>`
   specifically?"* → framework in [`references/domain-review.md`](references/domain-review.md), rubrics
   in [`references/domains/`](references/domains/).
 
@@ -38,9 +39,9 @@ Choose from the user's intent:
 
 - *"How does X work / how good is it / analyze its architecture / deep dive on X"* → **Mode A**.
 - *"What should `<target>` borrow from X / should we copy how they do Y / adopt-adapt-reject X / vendor and distill X for `<target>`"* → **Mode B**.
-- *"Review the hooks of X / how good is X's agents / audit the `<component>` of X / deep-dive just the `<component>`"* → **Mode C** (the ask names one component type to go deep on).
+- *"Review the hooks/scripts of X / how good is X's agents or memory / audit the `<domain>` of X / how good is X's planning capability / how honest is X's marketplace"* → **Mode C** (the ask names one domain — a component type, a subsystem, or a cross-cutting concern — to go deep on).
 
-Disambiguate by what the ask is *about*: one **component type** to audit in depth → **Mode C**; a
+Disambiguate by what the ask is *about*: one **domain** (component type, subsystem, or cross-cutting concern) to audit in depth → **Mode C**; a
 **target harness to improve** by borrowing → **Mode B**; the **whole reviewed harness** on its own
 terms → **Mode A**. (Mode A's `FOCUS` can still narrow attention to a component, but it keeps the
 generic rubric; reach for **Mode C** when you want the domain-expert rubric and a focused audit.)
@@ -77,10 +78,12 @@ there instead.
   judgment. State it before any work and **ask if it's unclear** — don't guess a lens.
 
 **Mode C also takes**
-- **`DOMAIN`** (required) — the component type to audit: one of `hooks`, `agents`, `skills`,
-  `commands`, `tools`, `rules` (the registry in
-  [`references/domain-review.md`](references/domain-review.md) §2). It selects the specialist rubric
-  and tells the run where to look.
+- **`DOMAIN`** (required) — the domain to audit, one of the registry values in
+  [`references/domain-review.md`](references/domain-review.md) §2, across three **kinds**: a
+  *component* type (`hooks`, `agents`, `skills`, `commands`, `tools`, `rules`, `scripts`), a
+  *subsystem* (`memory`, `marketplace`), or a *composed* concern (`capability`, `orchestration`). It
+  selects the specialist rubric and tells the run where to look. (For a `capability` review, also
+  state the spanning set as `DOMAIN=<spine> · FOCUS=<capability>`.)
 - **`FOCUS`** (optional) — a narrowing *within* the domain (e.g. "just the `PreToolUse` hooks"). Mode
   C is neutral — there is **no `TARGET`/`LENS`**; it judges the domain on the harness's own terms
   (borrow judgments are Mode B's job).
@@ -95,7 +98,9 @@ Work the phases in order. Phases 0–2 and 6–7 are shared; Phases 3–5 fork b
 
 **Phase 0 — Frame & select.** State `REPO`, pick the **mode** (above), and state the mode's extra
 inputs (`FOCUS`; or `TARGET` + `LENS`; or `DOMAIN` + optional `FOCUS`). Apply the good/poor-target
-test and decide go/skip.
+test and decide go/skip. **Set the DeepWiki gate:** if `REPO` is a public GitHub repo, a DeepWiki
+orientation pass is available for Phase 2; if it's a local path or private, DeepWiki is skipped
+silently and Phase 2 runs exactly as it did before (never a hard dependency).
 
 **Phase 1 — Vendor.** Clone shallow into a gitignored scratch location and measure:
 ```
@@ -106,17 +111,28 @@ du -sh reference/<repo>-main             # capture size
 The clone needs network egress, so **run it with the sandbox disabled** — a permission action; if
 you can't toggle it yourself, ask the user. The `rm -rf` only ever deletes the *fresh clone's own*
 `.git`, so it is safe. Clones land under a gitignored path (`reference/` is local-only by
-convention) — they are disposable; the analysis is the durable artifact, so don't track the clone.
+convention) — they are disposable; the analysis is the durable artifact, so don't track the clone. A
+local-path `REPO` skips the clone here — and, per the Phase-0 gate, the DeepWiki pass below too.
 
-**Phase 2 — Structural map & partition.** `find reference/<repo>-main -maxdepth 3` + read the README
+**Phase 2 — Structural map & partition.** **DeepWiki sub-step (when the Phase-0 gate is on — public
+GitHub `REPO`):** open by spawning the read-only [`deepwiki-scout`](../../agents/deepwiki-scout.md)
+agent with `REPO` (+ the mode and any `FOCUS`/`DOMAIN`). It returns a lead-stamped orientation brief —
+a proposed partition + 3–5 seeded fan-out questions — that *informs* the partition and *seeds* Phase
+3, and nothing more: **DeepWiki gives leads, not evidence — zero DeepWiki claims reach any artifact**
+(see [`references/deepwiki-orientation.md`](references/deepwiki-orientation.md); recorded as ADR-029).
+Verify every lead against the clone below; if DeepWiki is off or unreachable, just skip this and map
+manually. Then — always — `find reference/<repo>-main -maxdepth 3` + read the README
 intro. Inventory the components, then **partition the harness into independently analyzable domains**
 (no shared state) so they can run in parallel. A `.claude/`-style harness partitions naturally into
 roughly: (1) hooks/automation, (2) agents/orchestration, (3) skills/commands/rules + docs/periphery.
 Adjust to the repo's real shape; 2–4 domains is typical. This partition is the key design choice of
 the run, and it is the same for Modes A and B. **Mode C forks here:** instead of partitioning the
 whole harness, it partitions *within* the chosen `DOMAIN` — one agent per artifact (hook script,
-agent, …) when there are many, or a single deep agent when there are few (see
-[`references/domain-review.md`](references/domain-review.md) §1).
+agent, …) when there are many, or a single deep agent when there are few. **Composed**-kind domains
+partition differently: `capability` fans out by *surface* (a spine agent + one per supporting
+component type, cross-wiring synthesized on the main thread); `orchestration` is *one end-to-end task
+trace on the main thread + per-stage slices*. Each `domains/<DOMAIN>.md` carries its own partition
+hint (see [`references/domain-review.md`](references/domain-review.md) §1).
 
 **Phase 3 — Parallel fan-out analysis.** Dispatch one `general-purpose` agent per domain, **all in
 one message** (compose `superpowers:dispatching-parallel-agents`). Every agent prompt — in any of the three
@@ -137,7 +153,11 @@ Then add the **mode-specific payload** — what the agent must produce:
   ([`references/domains/`](references/domains/)`<domain>.md` §2) and **score each domain-specific
   dimension 1–5 with `file:line` justification**, judged on general best practice (nxtlvl's lessons
   are rationale, not the bar — see [`references/domain-review.md`](references/domain-review.md) §1).
-  Output: what's there, how it works, strengths, weaknesses/risks, specialist scores.
+  Output: what's there, how it works, strengths, weaknesses/risks, specialist scores. For a
+  **composed**-kind domain (`capability`/`orchestration`) the rubric's §2 is a *composition method*,
+  not a flat table: the spine agent scores its component rubric in full, each supporting-slice agent
+  scores only its own rubric's dominant dimension(s), and the **cross-wiring is scored on the main
+  thread** as the capping judgment.
 
 Agents return *conclusions, not file dumps* — that preserves the main thread's context for synthesis.
 
@@ -177,6 +197,19 @@ decision-recording process `TARGET` uses; curate hard — most findings are note
 `FOCUS`). Per-run knobs: domain partition (2–4, or within-domain for Mode C), fan-out agent count,
 signal-vs-demo filter, and artifact depth. Full knobs tables live in each mode's reference (Mode C: §4).
 
+**Right-size the run to the target.** The phase sequence is fixed; the *effort* inside it is not.
+Scale reference-loading, fan-out width, and artifact depth to how much harness is actually there. A
+few-artifact subsystem — a five-hook set, a handful of agents, a small rules folder — warrants **one
+lean pass**: load the one rubric it needs (for Mode C, just `references/domains/<DOMAIN>.md` — you
+already know the spine, so don't re-read the whole framework), do the single deep agent the partition
+rule already allows, and write a **tight** scorecard. Reserve the heavy treatment — wide fan-out,
+every reference, deep per-component dives, long artifacts — for harnesses big enough to repay it.
+This is not a shortcut around rigor: the scored verdict and its evidence are non-negotiable at any
+size. It is matching *spend* to *substance* — full ceremony on a thin subsystem buys a verdict a
+leaner pass would have reached, at real token and latency cost, and tends to pad the artifact with
+length that dilutes rather than sharpens the judgment. Spend where the harness is rich; stay lean
+where it is thin.
+
 ## Gotchas worth knowing before you start
 
 The phases carry the recurring traps (the spine and signal-vs-demo split are Phase 4; claims-vs-wiring
@@ -189,5 +222,7 @@ is Phase 3). Two that live outside the flow, in all modes:
 
 ## Composes (don't reconstruct)
 
+- Phase 2 → [`deepwiki-scout`](../../agents/deepwiki-scout.md) (read-only DeepWiki orientation;
+  public GitHub only; leads-not-evidence — see [`references/deepwiki-orientation.md`](references/deepwiki-orientation.md)).
 - Phase 3 & 6 → `superpowers:dispatching-parallel-agents` (independent-domain fan-out; fresh-context
   reader for the cold read).
