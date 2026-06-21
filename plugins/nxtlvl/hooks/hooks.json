@@ -14,6 +14,14 @@
         ],
         "description": "Block high-confidence catastrophic shell commands (rm -rf /, force-push to main, curl|sh, dd to disk, mkfs, chmod -R 777, fork bomb); warn on git reset --hard / git clean -f. Kill switch: NXTLVL_DANGEROUS_BASH=off.",
         "id": "pre:dangerous-bash"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}\"/hooks/capture.js", "timeout": 10 }
+        ],
+        "description": "C&M write path: record the START of every tool call (truncate ~5k, scrub secrets fail-closed, append to the observation log). Silent + fail-open. Skips subagents/the observer's own runs. Kill switch: NXTLVL_CM_CAPTURE=off.",
+        "id": "pre:cm-capture"
       }
     ],
     "PostToolUse": [
@@ -24,6 +32,22 @@
         ],
         "description": "Two-stage context awareness: a primary FYI when live context crosses NXTLVL_CONTEXT_ALERT_TOKENS (default 200k), then a notify-only backstop at NXTLVL_CONTEXT_ALERT_BACKSTOP_TOKENS (default 325k). NXTLVL_CONTEXT_ALERT_NOTIFY=off suppresses the macOS notification; NXTLVL_CONTEXT_ALERT=off disables entirely.",
         "id": "post:context-alert"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}\"/hooks/capture.js", "timeout": 10 }
+        ],
+        "description": "C&M write path: record the COMPLETION of every tool call (truncate ~5k, scrub secrets fail-closed, append to the observation log). Silent + fail-open. Skips subagents/the observer's own runs. Kill switch: NXTLVL_CM_CAPTURE=off.",
+        "id": "post:cm-capture"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}\"/hooks/observe.js", "timeout": 10 }
+        ],
+        "description": "C&M distillation trigger: when >=20 observations have accrued, a per-session single-flight guard spawns one DETACHED claude-sonnet-4-6 observer that distills instincts in the background. Returns immediately; never blocks. Fail-open. Kill switch: NXTLVL_CM_OBSERVE=off.",
+        "id": "post:cm-observe"
       }
     ],
     "UserPromptSubmit": [
