@@ -68,7 +68,9 @@ with a "may be stale" caveat.
 
 ## Output contract — a cited brief
 
-Return Markdown, scannable, where **every claim is `CITE`-stamped**:
+Return Markdown, scannable. Use **one of two shapes** depending on whether you grounded anything.
+
+**Grounded** — the library resolved and you have cited facts (every claim `CITE`-stamped):
 
 ```
 ## Grounding: <library> @ <resolved /org/project[@version]>  ·  Context7  ·  CITED
@@ -81,12 +83,22 @@ Return Markdown, scannable, where **every claim is `CITE`-stamped**:
 
 ## Confidence / caveats
 - <where Context7 mis-ranked, returned adjacent-not-exact, or the version looked off>
+```
 
-## If unavailable
-- <one line: "Context7 unreachable / no library match — fall back to model knowledge (may be stale)."> 
+**Unavailable** — Context7 was unreachable, the library didn't resolve, or calls errored. The
+header reads `· UNAVAILABLE` (never `· CITED` when nothing was cited); omit the `Findings` section
+entirely — there is nothing to cite:
+
+```
+## Grounding: <library> @ unresolved  ·  Context7  ·  UNAVAILABLE
+<one line: "Context7 unreachable / no library match — fall back to model knowledge (may be stale)."> 
+
+## Confidence / caveats
+- <why it didn't resolve: unreachable, no match, only unrelated results, errored — and any next step.>
 ```
 
 Rules for the brief:
+- **Pick the right header.** `· CITED` only when there are cited findings; `· UNAVAILABLE` otherwise.
 - **Every bullet carries `CITE — …`** with a doc URL + version. No uncited assertions.
 - **Cite the URL, never "Context7."** The courier is not the witness.
 - **No pasted doc dumps.** Summarize + link.
@@ -97,4 +109,4 @@ Rules for the brief:
 - [ ] Every claim is stamped `CITE — /org/project@version + doc URL` — no bare facts, no "Context7" as source.
 - [ ] I made one `resolve-library-id` call and **≤3** `query-docs` calls, no more; no doc dumps.
 - [ ] I version-pinned, and flagged any mis-ranking / adjacent-not-exact / uncertain version in caveats.
-- [ ] If Context7 was unavailable or the library didn't resolve, I said so in one line and returned — I never blocked the caller.
+- [ ] If Context7 was unavailable or the library didn't resolve, I used the `· UNAVAILABLE` header (not `· CITED`), said so in one line, and returned — I never blocked the caller.
