@@ -29,3 +29,7 @@ config/helix/
 
 # Subagent-driven-development progress ledger — git-ignored scratch (recovery map, not source).
 .superpowers/
+llm-wiki/
+
+# Local tool config with machine-specific absolute paths — not shared source.
+.grok/

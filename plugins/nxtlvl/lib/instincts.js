@@ -349,6 +349,49 @@ function effectiveConfidence(instinct, now = Date.now()) {
   return raw * Math.pow(0.5, ageDays / halfLifeDays());
 }
 
+// remove(instinct, env?, home?) -> boolean.
+// Deletes the instinct file. Returns true if the file existed and was deleted,
+// false if it did not exist (idempotent). Throws on a hostile id — the delete
+// MUST NOT escape the instinct directory (same trust boundary as write).
+function remove(instinct, env, home) {
+  const filepath = fileFor(instinct, env, home); // throws on hostile id via safeFileIn
+  const existed = fs.existsSync(filepath);
+  fs.rmSync(filepath, { force: true });
+  return existed;
+}
+
+// promote(instinct, env?, home?) -> { promoted, from, to }.
+// Re-scopes a project-scoped instinct to global. Pure mechanic — no confidence-bar
+// policy (the /promote command enforces ≥0.8 before calling this).
+//
+// If the instinct is already global, returns { promoted: false, from, to } with
+// both pointing to the (single) global file path — no-op, no throw, no duplicate.
+//
+// Order of operations: write the global copy FIRST, then remove the project file.
+// A crash between the two leaves a duplicate (recoverable: same id → write overwrites)
+// rather than data loss. If a global instinct with the same id already exists,
+// write overwrites it — acceptable, as same id = same instinct identity.
+function promote(instinct, env, home) {
+  if (instinct.scope === 'global') {
+    // Already global — nothing to do. Compute the path for the caller's reference.
+    const filepath = fileFor(instinct, env, home);
+    return { promoted: false, from: filepath, to: filepath };
+  }
+
+  // Build the global copy: drop project_id, set scope=global, preserve everything else.
+  // write will stamp `updated`; `created` is preserved from the original.
+  const globalCopy = { ...instinct, scope: 'global', project_id: undefined };
+
+  // Step 1: write the global copy (safe even if the global already exists — overwrites).
+  const to = write(globalCopy, env, home);
+
+  // Step 2: remove the project-scoped original.
+  const from = fileFor(instinct, env, home);
+  remove(instinct, env, home);
+
+  return { promoted: true, from, to };
+}
+
 module.exports = {
   write,
   read,
@@ -357,4 +400,6 @@ module.exports = {
   forProject,
   reinforce,
   effectiveConfidence,
+  remove,
+  promote,
 };
