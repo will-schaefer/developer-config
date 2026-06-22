@@ -1,0 +1,20 @@
+{
+  "name": "nxtlvl-agents-lab",
+  "version": "0.1.0",
+  "private": true,
+  "description": "agents-lab — the nxtlvl agent-capability incubation pipeline (cells incubate, then graduate into the nxtlvl plugin).",
+  "type": "commonjs",
+  "scripts": {
+    "new-cell": "node bin/new-cell.js",
+    "eval": "node bin/eval.js",
+    "graduate": "node bin/graduate.js",
+    "ledger": "node bin/ledger.js",
+    "test": "node --test 'bin/*.test.js'"
+  },
+  "dependencies": {
+    "js-yaml": "4.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

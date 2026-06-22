@@ -1,0 +1,12 @@
+name: gamma-broken
+type: widget
+stage: develop
+intent: Gamma — an intentionally-invalid fixture (unknown type) to exercise the ⚠ flag.
+intake:
+  task: needed a broken fixture
+  failed: valid manifests do not exercise the warning path
+graduation_criteria:
+  - id: behavioral
+    bar: all behavioral eval cases pass
+deps: []
+target: plugins/nxtlvl/skills/gamma-broken

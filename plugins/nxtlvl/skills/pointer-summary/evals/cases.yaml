@@ -1,0 +1,26 @@
+# Eval cases for the pointer-summary cell, keyed by graduation_criteria id.
+# The stub engine echoes `stub_result`; the real evals-lab engine will COMPUTE these from the
+# case definitions below (the prompts/expected behaviors) while keeping this same shape.
+
+trigger-accuracy:
+  stub_result: pass
+  score: 0.93
+  detail: "13/14 trigger cases classified correctly (fires on multi-file report asks; abstains on single-file edits)"
+  # Real-engine inputs (used once evals-lab exists):
+  should_fire:
+    - "summarize the files in src/auth and tell me what each does"
+    - "review this directory and point me at where validation happens"
+    - "map how logging flows across these modules"
+  should_not_fire:
+    - "rename the variable in src/auth/login.ts"
+    - "show me lines 10-20 of foo.ts"
+
+behavioral:
+  stub_result: pass
+  score: 1.0
+  detail: "all behavioral cases pass — output is path:line pointers with one-line whys, zero pasted code blocks"
+  # Real-engine assertions (used once evals-lab exists):
+  asserts:
+    - "output contains path:line pointers"
+    - "output contains no fenced code blocks pasting file contents"
+    - "each pointer has a one-line why"

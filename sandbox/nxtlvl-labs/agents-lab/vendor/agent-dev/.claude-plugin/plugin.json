@@ -1,0 +1,4 @@
+{
+  "name": "agent-dev",
+  "description": "Agent-development domain carved from ECC: skills, agents, and commands for building agent harnesses, autonomous loops, GAN-style build/eval, instinct-based learning, and LLM pipeline optimization."
+}

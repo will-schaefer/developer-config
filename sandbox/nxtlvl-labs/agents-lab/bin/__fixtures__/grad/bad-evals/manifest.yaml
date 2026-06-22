@@ -1,0 +1,12 @@
+name: bad-evals-cell
+type: skill
+stage: graduation-ready
+intent: Fixture whose ONLY defect is a failing declared-evals scorecard.
+intake:
+  task: needed a cell that fails declared-evals alone
+  failed: clean fixture passes everything
+graduation_criteria:
+  - id: behavioral
+    bar: all behavioral eval cases pass
+deps: []
+target: plugins/nxtlvl/skills/bad-evals-cell

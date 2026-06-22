@@ -1,0 +1,12 @@
+name: bad-intake-cell
+type: skill
+stage: graduation-ready
+intent: Fixture whose ONLY defect is a missing (incomplete) intake record.
+intake:
+  task: ""
+  failed: ""
+graduation_criteria:
+  - id: behavioral
+    bar: all behavioral eval cases pass
+deps: []
+target: plugins/nxtlvl/skills/bad-intake-cell

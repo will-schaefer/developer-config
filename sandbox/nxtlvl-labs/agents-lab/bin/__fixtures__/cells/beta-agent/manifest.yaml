@@ -1,0 +1,12 @@
+name: beta-agent
+type: agent
+stage: pressure-test
+intent: Beta — a fixture agent cell at a later stage for the ledger golden test.
+intake:
+  task: needed a second fixture at a different stage
+  failed: alpha alone did not exercise sorting
+graduation_criteria:
+  - id: behavioral
+    bar: all behavioral eval cases pass
+deps: []
+target: plugins/nxtlvl/agents/beta-agent

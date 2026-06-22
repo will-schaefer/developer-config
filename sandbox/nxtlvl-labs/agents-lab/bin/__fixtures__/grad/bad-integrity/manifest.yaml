@@ -1,0 +1,12 @@
+name: bad-integrity-cell
+type: skill
+stage: graduation-ready
+intent: Fixture whose ONLY defect is an integrity failure (a committed secret).
+intake:
+  task: needed a cell that fails integrity alone
+  failed: clean fixture passes everything
+graduation_criteria:
+  - id: behavioral
+    bar: all behavioral eval cases pass
+deps: []
+target: plugins/nxtlvl/skills/bad-integrity-cell
