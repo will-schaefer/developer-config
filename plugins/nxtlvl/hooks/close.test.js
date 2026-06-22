@@ -23,6 +23,7 @@ const {
   isObserverRun,
   resolveCloseMin,
   analyseTranscript,
+  readTranscriptDefault,
   buildNote,
   DEFAULT_CLOSE_MIN,
   NOTE_CORE_MAX,
@@ -911,4 +912,126 @@ test('buildNote: scrub fail-open — throwing scrubFn uses generic core', () => 
   const note = buildNote(stats, 'main', () => { throw new Error('scrub failed'); });
   assert.ok(note.includes('Session on'), 'generic core on scrub throw');
   assert.ok(!note.includes('secret prompt'), 'raw text not in note on scrub throw');
+});
+
+// ---------------------------------------------------------------------------
+// readTranscriptDefault — bounded-read policy (T4.1)
+//
+// The whole-file re-read on a cut tail is gated on whether the bounded tail
+// already settles the close gate. We prove the branch taken with a sentinel: the
+// session's opening user prompt sits at the FILE HEAD, outside the tail window,
+// so firstUserText === SENTINEL can only come from a full read.
+// ---------------------------------------------------------------------------
+
+const OPENING = 'OPENING-PROMPT-SENTINEL';
+
+/** Write a transcript to a real temp file and return its path. */
+function writeTranscriptFile(text) {
+  const dir = freshTmp();
+  const p = path.join(dir, 'transcript.jsonl');
+  fs.writeFileSync(p, text);
+  return p;
+}
+
+test('readTranscriptDefault: small file (no tail cut) reads whole file accurately', () => {
+  const text = makeTranscript([
+    { type: 'user', text: OPENING },
+    { type: 'assistant', tools: [{ name: 'Read' }] },
+    { type: 'assistant', tools: [{ name: 'Grep' }] },
+  ]);
+  const p = writeTranscriptFile(text);
+  // maxBytes far exceeds the file → full read, accurate stats.
+  const stats = readTranscriptDefault(p, 10, 4 * 1024 * 1024);
+  assert.equal(stats.toolCalls, 2, 'full tool-call count');
+  assert.equal(stats.firstUserText, OPENING, 'opening prompt captured on full read');
+});
+
+test('readTranscriptDefault: cut tail with gate already open SKIPS the whole-file re-read', () => {
+  // 30 assistant tool-use turns after the opening prompt; a tiny tail window keeps
+  // the opening line out of view. closeMin=1 → the tail alone settles the gate.
+  const events = [{ type: 'user', text: OPENING }];
+  for (let i = 0; i < 30; i++) events.push({ type: 'assistant', tools: [{ name: 'Read' }] });
+  const p = writeTranscriptFile(makeTranscript(events));
+
+  const stats = readTranscriptDefault(p, 1, 600);
+  assert.ok(stats.toolCalls >= 1, 'tail shows gate-opening activity');
+  assert.ok(stats.toolCalls < 30, 'count is the tail subset, not the full file');
+  assert.equal(stats.firstUserText, null, 'no full read → opening prompt NOT recovered');
+});
+
+test('readTranscriptDefault: cut tail with mutation in the tail also SKIPS the re-read', () => {
+  // A mutator tool in the tail settles the gate even with a high closeMin.
+  const events = [{ type: 'user', text: OPENING }];
+  for (let i = 0; i < 20; i++) events.push({ type: 'assistant', tools: [{ name: 'Read' }] });
+  events.push({ type: 'assistant', tools: [{ name: 'Write', input: { file_path: '/x' } }] });
+  const p = writeTranscriptFile(makeTranscript(events));
+
+  const stats = readTranscriptDefault(p, 1000, 400); // closeMin high; mutation decides
+  assert.equal(stats.mutation, true, 'mutation seen in tail');
+  assert.equal(stats.committed, false, 'mutation is not a commit');
+  assert.ok(stats.toolCalls < 21, 'count is the tail subset, not the full 21 calls');
+  assert.equal(stats.firstUserText, null, 'no full read → opening prompt NOT recovered');
+});
+
+test('readTranscriptDefault: cut tail with gate UNDECIDED falls back to the full read', () => {
+  // Few tool calls + high closeMin → the tail cannot settle the gate, so the
+  // whole file is read and the opening prompt is recovered.
+  const events = [{ type: 'user', text: OPENING }];
+  for (let i = 0; i < 20; i++) events.push({ type: 'assistant', tools: [{ name: 'Read' }] });
+  const p = writeTranscriptFile(makeTranscript(events));
+
+  const stats = readTranscriptDefault(p, 1000, 400); // closeMin unreachable from tail
+  assert.equal(stats.toolCalls, 20, 'full count via whole-file read');
+  assert.equal(stats.firstUserText, OPENING, 'opening prompt recovered via full read');
+});
+
+test('readTranscriptDefault: a gate-opening mutation ONLY in the truncated head is still caught (full-read fallback)', () => {
+  // The natural false-negative scenario: the only mutation is early in the session
+  // (outside the tail window) and the tail is otherwise quiet. The tail cannot
+  // settle the gate, so the full read must fire and recover the mutation — else a
+  // substantive session would wrongly skip its bookmark.
+  const events = [
+    { type: 'user', text: OPENING },
+    { type: 'assistant', tools: [{ name: 'Write', input: { file_path: '/x' } }] }, // head-only mutation
+  ];
+  for (let i = 0; i < 15; i++) events.push({ type: 'assistant', tools: [{ name: 'Read' }] });
+  const p = writeTranscriptFile(makeTranscript(events));
+
+  const stats = readTranscriptDefault(p, 1000, 400); // tail quiet + closeMin unreachable
+  assert.equal(stats.mutation, true, 'head-only mutation recovered by the full read');
+  assert.equal(stats.firstUserText, OPENING, 'full read fired (opening prompt recovered)');
+  assert.equal(stats.toolCalls, 16, 'full count: 1 Write + 15 Read');
+});
+
+test('readTranscriptDefault: missing / invalid path returns null', () => {
+  assert.equal(readTranscriptDefault(null), null);
+  assert.equal(readTranscriptDefault('/no/such/transcript/file.jsonl'), null);
+});
+
+test('run() threads the env-resolved closeMin into the transcript reader', () => {
+  // Guards the contract that the SAME closeMin used for the bookmark gate is the
+  // one handed to readTranscriptDefault's read-gating decision. A spy records the
+  // arg while delegating to the real reader; XDG isolation keeps the bookmark/
+  // metrics writes off the real store.
+  let receivedCloseMin;
+  const p = writeTranscriptFile(makeTranscript([
+    { type: 'user', text: OPENING },
+    { type: 'assistant', tools: [{ name: 'Read' }] },
+  ]));
+  const deps = {
+    readTranscript: (txPath, closeMin, maxBytes) => {
+      receivedCloseMin = closeMin;
+      return readTranscriptDefault(txPath, closeMin, maxBytes);
+    },
+  };
+  const tmp = freshTmp();
+  const origXdg = process.env.XDG_STATE_HOME;
+  process.env.XDG_STATE_HOME = tmp;
+  try {
+    run(sessionEndEvent({ transcript_path: p }), mkEnv(tmp, { NXTLVL_CM_CLOSE_MIN: '2' }), deps);
+  } finally {
+    if (origXdg === undefined) delete process.env.XDG_STATE_HOME;
+    else process.env.XDG_STATE_HOME = origXdg;
+  }
+  assert.equal(receivedCloseMin, 2, 'run() passes the env-resolved closeMin (2) to the reader');
 });

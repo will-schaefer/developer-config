@@ -198,11 +198,25 @@ function analyseTranscript(text, dropFirst = false) {
 }
 
 /**
- * Read and analyse a transcript file (bounded by TAIL_BYTES).
- * Falls back to a full read when a tail cut may have missed data.
+ * Read and analyse a transcript file, bounded by `maxBytes` read from the tail.
+ *
+ * When the file is larger than `maxBytes` the tail is cut. A full re-read of the
+ * whole file is expensive — a long session's transcript can be tens of MB — so we
+ * pay for it ONLY when the bounded tail leaves the close-gate decision uncertain:
+ * no mutation/commit was seen AND toolCalls is still below `closeMin`. When the
+ * tail already shows the gate is open, a full read cannot change the decision
+ * (the tail's stats are a lower bound on the whole file's), so the bounded result
+ * is kept. This is the "if toolCalls is low" intent the original comment described
+ * but did not actually enforce — it unconditionally re-read on every cut tail.
+ *
+ * Trade for >`maxBytes` transcripts whose gate is decided by the tail: the
+ * reported toolCalls is the tail count (a lower bound) and firstUserText is the
+ * first user message within the tail, not necessarily the session's opening
+ * prompt. The gate DECISION (whether a bookmark is written) is unaffected.
+ *
  * Returns analyseTranscript result, or null on any error.
  */
-function readTranscriptDefault(transcriptPath) {
+function readTranscriptDefault(transcriptPath, closeMin = DEFAULT_CLOSE_MIN, maxBytes = TAIL_BYTES) {
   if (!transcriptPath || typeof transcriptPath !== 'string') return null;
   try {
     fs.statSync(transcriptPath);
@@ -210,12 +224,15 @@ function readTranscriptDefault(transcriptPath) {
     return null;
   }
   try {
-    const { text, partial, full } = readTail(transcriptPath, TAIL_BYTES);
-    let stats = analyseTranscript(text, partial);
-    // If toolCalls is suspiciously low and the tail was cut, do a full read.
-    if (!full) {
+    const { text, partial, full } = readTail(transcriptPath, maxBytes);
+    const stats = analyseTranscript(text, partial);
+    // The tail is a subset of the file, so its counts are a lower bound: if the
+    // tail already clears the gate, the whole file does too. Re-read the whole
+    // file only when the tail was cut AND the gate is still undecided.
+    const gateDecidedByTail = stats.mutation || stats.committed || stats.toolCalls >= closeMin;
+    if (!full && !gateDecidedByTail) {
       const whole = fs.readFileSync(transcriptPath, 'utf8');
-      stats = analyseTranscript(whole, false);
+      return analyseTranscript(whole, false);
     }
     return stats;
   } catch {
@@ -298,8 +315,13 @@ function run(rawInput, env = process.env, deps = {}) {
     const scrub      = deps.scrubText    || scrubText;
     const readTx     = deps.readTranscript || readTranscriptDefault;
 
-    // Analyse the transcript
-    const stats = readTx(transcriptPath);
+    // Resolve the close gate threshold up front: readTranscriptDefault uses it to
+    // decide whether a bounded tail already settles the gate (avoiding a costly
+    // whole-file re-read when it does).
+    const closeMin = resolveCloseMin(env);
+
+    // Analyse the transcript (bounded; see readTranscriptDefault for the read policy).
+    const stats = readTx(transcriptPath, closeMin);
     const toolCalls  = (stats && stats.toolCalls)  || 0;
     const mutation   = (stats && stats.mutation)   || false;
     const committed  = (stats && stats.committed)  || false;
@@ -312,7 +334,6 @@ function run(rawInput, env = process.env, deps = {}) {
 
     // --- Size gate (LOCKED spec X1 / D2): write bookmark when: ---
     //   toolCalls >= N  OR  mutation/commit occurred
-    const closeMin = resolveCloseMin(env);
     const gateOpen = toolCalls >= closeMin || mutation || committed;
 
     // Always record the metrics line (regardless of bookmark gate).
@@ -382,6 +403,7 @@ module.exports = {
   isObserverRun,
   resolveCloseMin,
   analyseTranscript,
+  readTranscriptDefault,
   buildNote,
   DEFAULT_CLOSE_MIN,
   NOTE_CORE_MAX,
