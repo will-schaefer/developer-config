@@ -24,7 +24,12 @@ You should receive a **focus** — the idea/topic being brainstormed (a sentence
 
 ## Input: a pre-gathered snapshot (optional)
 
-The orchestrator may also hand you a **`## Pre-gathered snapshot`** block — deterministic, mechanical signals already collected by `project-snapshot.sh` before you were spawned: repo identity (branch, clean/dirty, ahead/behind), recent commits + `git diff --stat`, the `docs/spec/` + `docs/decisions/` inventory, largest source files, TODO/FIXME/HACK markers, the next collision-safe ADR number, language/size shape, and test-harness presence.
+The orchestrator may also hand you a **`## Pre-gathered snapshot`** block — deterministic, mechanical signals already collected by `project-snapshot.sh` before you were spawned: repo identity (branch, clean/dirty, ahead/behind), recent commits + `git diff --stat`, the `docs/spec/` + `docs/decisions/` inventory, largest files, TODO/FIXME/HACK markers, the next collision-safe ADR number, language/size shape, and test-harness presence.
+
+It arrives in one of **two shapes**, keyed to the *tree* (not the idea):
+
+- a **full** snapshot for a code tree (all of the above); or
+- a **neutral** snapshot for a non-code tree (notes, prose, a git repo of markdown) — the same signals minus the pure-code probes (test harness, code markers), with domain-neutral labels ("Largest files", "File types & size shape"). A `_Non-code tree: neutral snapshot…_` subtitle marks it. A neutral snapshot is *not* a signal that the idea is shallow or that you should narrow your sweep — it just reflects what the tree contains.
 
 When it is present:
 
@@ -59,11 +64,12 @@ Shape:
 ## Headline
 <1–2 sentences: the most useful orientation — what this overlaps, the relevant convention, what's absent>
 
-## Prior art / related code
+## Prior art / related work
 - `src/foo/bar.ts:88` — existing X this would extend; note its shape
+- `docs/notes/strategy.md:12` — a prior take on this the new idea overlaps
 
 ## Conventions & patterns
-- `…:NN` — how the repo does <thing>; a new piece should match it
+- `…:NN` — how the project does <thing> (code idiom, or the established format/voice); a new piece should match it
 
 ## Docs & decisions
 - `docs/decisions/ADR-0NN-….md` — constrains <…>

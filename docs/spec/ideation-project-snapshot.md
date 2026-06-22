@@ -90,7 +90,8 @@ If the "orchestrator-runs-script → passes to read-only-scout" pattern later re
 Run:        bash plugins/nxtlvl/scripts/project-snapshot.sh
 Lint:       shellcheck plugins/nxtlvl/scripts/project-snapshot.sh
 Smoke (this repo):     bash plugins/nxtlvl/scripts/project-snapshot.sh        # expect next ADR = 031
-Smoke (non-code):      ( cd "$TMPDIR" && bash <path>/project-snapshot.sh )    # expect one-line "not a code repo", exit 0
+Smoke (neutral):       ( cd "$TMPDIR" && mkdir notes && echo x > notes/a.md && bash <path>/project-snapshot.sh )  # expect neutral snapshot (no test-harness/markers, "Largest files" heading)
+Smoke (empty):         ( cd "$TMPDIR/empty" && bash <path>/project-snapshot.sh )  # expect one-line "empty tree — nothing to snapshot", exit 0
 ```
 
 ## Project Structure
@@ -151,8 +152,10 @@ No unit harness exists for prompt artifacts; the script itself is concretely tes
 1. **`shellcheck` clean** — zero warnings.
 2. **In-repo smoke** — run here; assert every section prints, next ADR = **031** (max is ADR-030),
    repo identity shows `main` + dirty.
-3. **Non-code degradation** — run in a fresh `$TMPDIR` dir; assert the one-line
-   "not a code repo — nothing to snapshot" and **exit 0**.
+3. **Non-code degradation** — (a) a non-code tree *with content* (a dir of `.md`) emits the neutral
+   snapshot: code-only probes absent, "Largest files" / "File types & size shape" headings, neutral
+   subtitle; (b) a *truly empty* dir emits the one-line "empty tree — nothing to snapshot" and
+   **exit 0**.
 4. **Fail-open** — with the script absent / `chmod 000` / a repo with no remote: the orchestrator
    still spawns the scout, which falls back to its current Grep/Glob gather; no-remote run notes the
    ADR degradation rather than undercounting.
@@ -164,7 +167,9 @@ No unit harness exists for prompt artifacts; the script itself is concretely tes
 ## Boundaries
 
 - **Always:** fail-open (snapshot is an accelerator, never a dependency); emit raw signal the scout
-  digests; honest exit codes; code-conditional (one-liner for non-code trees); fully deterministic
+  digests; honest exit codes; **tree-shape conditional** — a code tree gets the full snapshot, a
+  non-code tree *with content* gets a neutral snapshot (code-only probes omitted, neutral labels),
+  only a truly empty tree gets the one-line bail (see Revision 2026-06-21); fully deterministic
   (no model calls, no randomness, no network beyond `git ls-remote`).
 - **Ask first:** adding any probe that reaches the network beyond `git ls-remote`; changing the
   scout's *output* contract; raising default N for top-lists.
@@ -181,7 +186,12 @@ No unit harness exists for prompt artifacts; the script itself is concretely tes
    `node_modules`); **TODO/FIXME/HACK** count + top-N files; **next collision-safe ADR number**
    (committed+remote+working union); **language/size shape** (file count, top dirs, primary
    extensions); **test-harness presence**.
-3. In a non-code tree it emits the one-line "not a code repo — nothing to snapshot" and exits 0.
+3. Tree-shape conditional (see Revision 2026-06-21): a **code** tree gets the full snapshot; a
+   **non-code tree with content** (notes, prose, a git repo of markdown) gets a **neutral** snapshot
+   — repo identity, recent commits, docs inventory, largest *files*, file-types/size shape, and
+   next-ADR *only if* `docs/decisions/` exists — omitting the pure-code probes (test harness,
+   TODO/FIXME/HACK markers) and labeling file shape neutrally; only a **truly empty** tree emits the
+   one-line "empty tree — nothing to snapshot" and exits 0.
 4. `context-scout.md` documents the `## Pre-gathered snapshot` input: **digest, don't relay**;
    **don't re-derive** the mechanical signals; *output* contract unchanged (pointers-over-content);
    self-check updated.
@@ -200,3 +210,21 @@ Settled at approval (2026-06-21):
 3. **Largest-files metric** — **lines** (best reflects the size-as-smell heuristic), not bytes. ✅
 4. **Untracked files** — **include a short `git status --porcelain` untracked count**, since
    work-in-flight is exactly the live state the scout wants. ✅
+
+## Revision 2026-06-21 — neutral snapshot for non-code trees
+
+**What changed:** the original "code-conditional" boundary (a non-code tree emits one line and
+exits 0) is superseded by a **tree-shape conditional**: a code tree still gets the full snapshot; a
+non-code tree *with content* now gets a **neutral** snapshot (the lean set — repo identity, recent
+commits, docs inventory, largest *files*, file-types/size shape, next-ADR only when
+`docs/decisions/` exists — with the pure-code probes omitted and domain-neutral labels); only a
+*truly empty* tree gets the one-line bail (now "empty tree — nothing to snapshot").
+
+**Why the original call is honored, not ignored:** the original rationale for bailing on non-code
+trees was that a *code-shaped* snapshot would "narrow context-scout's domain-agnostic mandate." A
+**neutral** snapshot removes that objection at the root — it carries no code framing — while still
+handing the scout a deterministic head start on a non-code idea, which is squarely in the
+brainstorming front door's mandate (software, writing, strategy, research, a decision). The change
+is small and reversible (one middle branch + two parameterized probe labels); code-mode output is
+**byte-identical** to before (verified by diff), so no code-tree session is affected. Still not
+ADR-worthy by the original reasoning above.
