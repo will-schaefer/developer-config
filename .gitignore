@@ -27,6 +27,9 @@ config/helix/
 # Skill-creator eval workspaces — throwaway run artifacts (benchmarks, desc-opt), not source.
 *-workspace/
 
+# Scratch harness explorations — local-only pulls of external skill repos, not our source.
+ai-engineering-from-scratch/
+
 # Subagent-driven-development progress ledger — git-ignored scratch (recovery map, not source).
 .superpowers/
 llm-wiki/
