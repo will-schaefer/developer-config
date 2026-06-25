@@ -1,5 +1,9 @@
 # agent-dev
 
+> **Status: dormant / unpublished.** This plugin is intentionally *not* listed in
+> `.claude-plugin/marketplace.json` — it is a vendored ECC carve-out kept as reference
+> material, not a published `nxtlvl-dev` plugin. Re-add it to the marketplace to activate.
+
 The **agent-development domain** carved out of [ECC](https://github.com/affaan-m/ECC) as a
 standalone, self-contained Claude Code plugin — skills, agents, and commands for *building agents*,
 without the rest of ECC's 271-skill surface.

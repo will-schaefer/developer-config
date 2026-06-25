@@ -1,9 +1,0 @@
-# ── Project picker (fzf) ──────────────────────────
-# Bound to cmd+p in kitty.conf — picks a project and cds into it.
-# Use tool keybindings (cmd+e/g/y etc.) to open panes manually.
-dev-workspace() {
-  local project
-  project=$(find ~/dev -maxdepth 1 -type d -not -name "dev" | sort | fzf --prompt="Project > " --height=40% --reverse)
-  [ -z "$project" ] && return
-  cd "$project"
-}

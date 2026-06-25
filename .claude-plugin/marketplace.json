@@ -2,7 +2,6 @@
   "name": "nxtlvl-dev",
   "owner": { "name": "will-schaefer" },
   "plugins": [
-    { "name": "nxtlvl", "source": "./plugins/nxtlvl", "description": "Personal agent harness." },
-    { "name": "agent-dev", "source": "./plugins/agent-dev", "description": "Agent-development domain carved from ECC: skills, agents, and commands for building agent harnesses, autonomous loops, GAN-style build/eval, instinct-based learning, and LLM pipeline optimization." }
+    { "name": "nxtlvl", "source": "./plugins/nxtlvl", "description": "Personal agent harness." }
   ]
 }
