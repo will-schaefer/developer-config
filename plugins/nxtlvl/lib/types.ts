@@ -167,8 +167,12 @@ export interface SessionStartInput extends CommonHookFields {
 }
 
 /**
- * PreCompact — `trigger` ('manual' | 'auto') drives precompact's steer text;
- * `custom_instructions` is present (nullable) on a manual compact.
+ * PreCompact — a real platform INPUT event (it fires), but nxtlvl no longer
+ * registers a hook for it: PreCompact has NO output channel that can inject
+ * context (see PreCompactOutput note below). The open-files re-surfacing that
+ * once lived here moved to the SessionStart `source: 'compact'` path
+ * (briefing.js + lib/open-files.js). `trigger` and `custom_instructions` are
+ * kept as documentation of the event's shape.
  */
 export interface PreCompactInput extends CommonHookFields {
   hook_event_name: 'PreCompact';
@@ -235,25 +239,14 @@ export interface SessionStartOutput {
   additionalContext?: string;
 }
 
-/**
- * PreCompact.
- *
- * NOTE (precompact divergence — RESOLVE in the Phase-2 precompact conversion):
- * the LIVE precompact.js emits `{ hookEventName: 'PreCompact', additionalContext }`,
- * but the platform's PreCompact output validator has been observed to REJECT
- * `hookSpecificOutput.additionalContext` for this event (additionalContext is
- * documented for SessionStart/PostToolUse/UserPromptSubmit, not PreCompact;
- * PreCompact's documented levers are the compaction summary, not context
- * injection). We deliberately do NOT bake the rejected field in as required.
- * `additionalContext` is typed optional below so existing code type-checks
- * during migration, but the Phase-2 precompact conversion MUST verify what the
- * platform actually accepts and either drop this field or switch precompact to a
- * supported channel. Do not treat this member as proof the field works.
- */
-export interface PreCompactOutput {
-  hookEventName: 'PreCompact';
-  additionalContext?: string;
-}
+// NOTE (RESOLVED 2026-06-25): PreCompact has NO output channel. The suspicion
+// flagged here previously was confirmed by reading the installed validator
+// (Claude Code 2.1.191): the `hookSpecificOutput` discriminated union has no
+// `PreCompact` (or `PostCompact`) branch, so `{ hookEventName: 'PreCompact',
+// additionalContext }` always fails output validation with "Invalid input".
+// The old precompact.js hook was retired and its open-files extraction moved to
+// the SessionStart `source: 'compact'` path. There is therefore no
+// PreCompactOutput type — a PreCompact hook cannot emit hookSpecificOutput.
 
 /** Stop / SubagentStop. */
 export interface StopOutput {
@@ -266,7 +259,6 @@ export type HookSpecificOutput =
   | UserPromptSubmitOutput
   | PostToolUseOutput
   | SessionStartOutput
-  | PreCompactOutput
   | StopOutput;
 
 /**

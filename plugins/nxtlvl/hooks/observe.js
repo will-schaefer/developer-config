@@ -57,7 +57,7 @@ const path = require('node:path');
 
 const obsLog = require('../lib/obs-log.js');
 const { projectIdentity } = require('../lib/project-identity.js');
-const { layout } = require('../lib/paths.js');
+const { layout } = require('../lib/paths.ts');
 
 // --- Constants ----------------------------------------------------------------
 

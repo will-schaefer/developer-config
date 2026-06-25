@@ -78,15 +78,6 @@
         "description": "C&M lifecycle close: at session end, if the session was non-trivial (tool-calls ≥ 10 OR a commit/file-mutation occurred), write a dated \"where I left off\" bookmark for the current branch; always record a session-close metrics line. Derives counts/effect from the transcript (works with capture off). Side-effecting only; absolute fail-open; skips the observer/subagents. Kill switch: NXTLVL_CM_CLOSE=off.",
         "id": "session:cm-close"
       }
-    ],
-    "PreCompact": [
-      {
-        "hooks": [
-          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}\"/hooks/precompact.js", "timeout": 10 }
-        ],
-        "description": "C&M compaction steer: before a /compact or auto-compaction, emit summary-steer text only — preserve the current task + immediate next step, the active bookmark, and the key open files — so the task thread survives the summary. Writes nothing (no bookmark). additionalContext channel; absolute fail-open; skips the observer/subagents. Kill switch: NXTLVL_CM_PRECOMPACT=off.",
-        "id": "precompact:cm-steer"
-      }
     ]
   }
 }

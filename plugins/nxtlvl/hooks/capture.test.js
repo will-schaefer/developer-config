@@ -15,7 +15,7 @@ const path = require('node:path');
 
 const { run, isOffLike, truncateField, MAX_FIELD_CHARS } = require('./capture.js');
 const obsLog = require('../lib/obs-log.js');
-const { layout } = require('../lib/paths.js');
+const { layout } = require('../lib/paths.ts');
 const { projectIdentity } = require('../lib/project-identity.js');
 
 // ---------------------------------------------------------------------------

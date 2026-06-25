@@ -325,6 +325,68 @@ test('isSidechain=true returns ""', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Block 4: key open files — ONLY on source === 'compact'
+// (the supported replacement for the retired PreCompact hook)
+// ---------------------------------------------------------------------------
+
+test('source=compact appends the key-open-files block from the transcript', () => {
+  const deps = fakeDeps({
+    readTranscript: () => ({ text: 'IGNORED-BY-FAKE-EXTRACTOR', dropFirst: false }),
+    extractOpenFiles: () => ['/repo/bar.js', '/repo/foo.js'],
+  });
+  const out = run(sessionEvent({ source: 'compact', transcript_path: '/fake/t.jsonl' }), mkEnv(freshTmp()), deps);
+  const ctx = parseContext(out);
+  assert.ok(ctx.includes('Key open files'), 'open-files heading present on compact');
+  assert.ok(ctx.includes('/repo/bar.js'), 'first open file listed');
+  assert.ok(ctx.includes('/repo/foo.js'), 'second open file listed');
+});
+
+test('non-compact source (startup) does NOT append the open-files block', () => {
+  const deps = fakeDeps({
+    // If these were consulted on startup it would be a bug — make them loud.
+    readTranscript: () => { throw new Error('transcript should not be read on startup'); },
+    extractOpenFiles: () => { throw new Error('extract should not run on startup'); },
+  });
+  let out;
+  assert.doesNotThrow(() => {
+    out = run(sessionEvent({ source: 'startup', transcript_path: '/fake/t.jsonl' }), mkEnv(freshTmp()), deps);
+  });
+  const ctx = parseContext(out);
+  assert.ok(!ctx.includes('Key open files'), 'no open-files block off the compact path');
+});
+
+test('source=compact with no open files omits the block (no empty heading)', () => {
+  const deps = fakeDeps({
+    readTranscript: () => ({ text: '', dropFirst: false }),
+    extractOpenFiles: () => [],
+  });
+  const out = run(sessionEvent({ source: 'compact' }), mkEnv(freshTmp()), deps);
+  const ctx = parseContext(out);
+  assert.ok(!ctx.includes('Key open files'), 'block omitted entirely when there are no files');
+});
+
+test('source=compact accepts a plain-string transcript reader (legacy/injected shape)', () => {
+  const deps = fakeDeps({
+    readTranscript: () => 'plain-string-transcript',
+    extractOpenFiles: (text) => (text === 'plain-string-transcript' ? ['/seen.js'] : []),
+  });
+  const out = run(sessionEvent({ source: 'compact' }), mkEnv(freshTmp()), deps);
+  const ctx = parseContext(out);
+  assert.ok(ctx.includes('/seen.js'), 'plain-string reader handled');
+});
+
+test('fail-open: throwing transcript reader on compact returns "", never throws', () => {
+  const deps = fakeDeps({
+    readTranscript: () => { throw new Error('reader exploded'); },
+  });
+  let out;
+  assert.doesNotThrow(() => {
+    out = run(sessionEvent({ source: 'compact' }), mkEnv(freshTmp()), deps);
+  });
+  assert.equal(out, '', 'returns "" when the transcript reader throws on compact');
+});
+
+// ---------------------------------------------------------------------------
 // Fail-open: throwing dep returns '', never throws
 // ---------------------------------------------------------------------------
 

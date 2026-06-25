@@ -15,7 +15,7 @@ const observe = require('./observe.js');
 const runner = require('../lib/observer-runner.js');
 const obsLog = require('../lib/obs-log.js');
 const { projectIdentity } = require('../lib/project-identity.js');
-const { layout } = require('../lib/paths.js');
+const { layout } = require('../lib/paths.ts');
 
 let tmpDir;
 

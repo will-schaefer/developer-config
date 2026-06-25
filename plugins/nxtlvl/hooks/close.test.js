@@ -31,7 +31,7 @@ const {
 
 const bookmarks = require('../lib/bookmarks.js');
 const { projectIdentity } = require('../lib/project-identity.js');
-const { layout } = require('../lib/paths.js');
+const { layout } = require('../lib/paths.ts');
 
 // ---------------------------------------------------------------------------
 // Shared tmp root — each test gets an isolated sub-dir.

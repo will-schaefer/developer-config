@@ -33,7 +33,7 @@ const path = require('node:path');
 const bookmarksLib    = require('../lib/bookmarks.js');
 const { scrubText }   = require('../lib/scrub.js');
 const { appendLine }  = require('../lib/atomic.js');
-const { layout, ensureDir } = require('../lib/paths.js');
+const { layout, ensureDir } = require('../lib/paths.ts');
 const { projectIdentity } = require('../lib/project-identity.js');
 
 // --- Constants ----------------------------------------------------------------

@@ -14,6 +14,11 @@
  *   3. instincts  — quality-gated instincts from recall(), named by trigger/id with
  *                   a one-line action gist each. When the ceiling truncates some,
  *                   the missed names are called out explicitly.
+ *   4. open files — ONLY when source === 'compact': the key recently-touched files
+ *                   pulled from the transcript, so the post-compaction summary
+ *                   doesn't lose them. (This is the supported replacement for the
+ *                   retired PreCompact hook — PreCompact has no additionalContext
+ *                   output channel; SessionStart/source:compact is the only one.)
  *
  * Injection channel (proven by Phase-0 Spike 0.2):
  *   emit JSON { hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext } }
@@ -35,6 +40,7 @@ const recallLib      = require('../lib/recall.js');
 const bookmarksLib   = require('../lib/bookmarks.js');
 const obsLogLib      = require('../lib/obs-log.js');
 const projIdentLib   = require('../lib/project-identity.js');
+const openFilesLib   = require('../lib/open-files.js');
 
 // --- Constants ----------------------------------------------------------------
 
@@ -182,6 +188,17 @@ function renderInstinctsBlock(recallResult) {
   return lines.join('\n');
 }
 
+/**
+ * Render the "key open files" block from a list of paths.
+ * Returns '' when there are no files (caller omits the block entirely).
+ * @param {string[]} openFiles - most-recent-first
+ * @returns {string}
+ */
+function renderOpenFilesBlock(openFiles) {
+  if (!openFiles || openFiles.length === 0) return '';
+  return ['**Key open files (most-recent first):**', ...openFiles.map(f => `- ${f}`)].join('\n');
+}
+
 // --- Core --------------------------------------------------------------------
 
 /**
@@ -205,13 +222,17 @@ function run(rawInput, env = process.env, deps = {}) {
     if (input.isSidechain === true) return '';
 
     const cwd = input.cwd || process.cwd();
+    const source = input.source || null;
+    const transcriptPath = input.transcript_path || null;
 
     // Resolve injectable deps (default to real modules).
-    const gitLine      = deps.gitLine      || defaultGitLine;
-    const recall       = deps.recall       || recallLib.recall;
-    const bookmarks    = deps.bookmarks    || bookmarksLib;
-    const obsLog       = deps.obsLog       || obsLogLib;
-    const projectId_fn = deps.projectIdentity || projIdentLib.projectIdentity;
+    const gitLine          = deps.gitLine          || defaultGitLine;
+    const recall           = deps.recall           || recallLib.recall;
+    const bookmarks        = deps.bookmarks        || bookmarksLib;
+    const obsLog           = deps.obsLog           || obsLogLib;
+    const projectId_fn     = deps.projectIdentity  || projIdentLib.projectIdentity;
+    const readTranscript   = deps.readTranscript   || openFilesLib.readTranscriptDefault;
+    const extractOpenFiles = deps.extractOpenFiles || openFilesLib.extractOpenFiles;
 
     // Build store opts — thread env so obs-log reads from the injected store.
     const storeOpts = { env };
@@ -233,8 +254,20 @@ function run(rawInput, env = process.env, deps = {}) {
     const recallResult = recall({ projectId }, env);
     const instinctsStr = renderInstinctsBlock(recallResult);
 
+    // --- Block 4: key open files (post-compaction only) ---
+    // PreCompact cannot inject context (no additionalContext output channel),
+    // so the open-files re-surfacing rides the SessionStart compact path instead.
+    let openFilesStr = '';
+    if (source === 'compact') {
+      const raw = readTranscript(transcriptPath);
+      // The default reader returns { text, dropFirst }; tests may inject a plain string.
+      const transcriptText = typeof raw === 'string' ? raw : (raw && raw.text) || '';
+      const dropFirst      = typeof raw === 'string' ? false : !!(raw && raw.dropFirst);
+      openFilesStr = renderOpenFilesBlock(extractOpenFiles(transcriptText, dropFirst));
+    }
+
     // --- Assemble ---
-    const additionalContext = [
+    const parts = [
       '## nxtlvl — where you left off',
       '',
       '**Git:** ' + gitLineStr,
@@ -244,7 +277,11 @@ function run(rawInput, env = process.env, deps = {}) {
       '',
       '**Instincts loaded:**',
       instinctsStr,
-    ].join('\n');
+    ];
+    if (openFilesStr) {
+      parts.push('', openFilesStr);
+    }
+    const additionalContext = parts.join('\n');
 
     return JSON.stringify({
       hookSpecificOutput: {
@@ -284,4 +321,5 @@ module.exports = {
   defaultGitLine,
   renderBookmarkBlock,
   renderInstinctsBlock,
+  renderOpenFilesBlock,
 };
