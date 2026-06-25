@@ -296,7 +296,7 @@ test('confidenceDistribution uses effective (decayed) confidence, not raw', () =
 
   // Instinct 2: raw 0.9, old updated (2 half-lives) → effective ≈ 0.225 → bottom bin [0.0–0.2]
   // Write it fresh first (write() stamps updated), then patch the file to backdate updated.
-  const { layout } = require('./paths.js');
+  const { layout } = require('./paths.ts');
   const instPath = writeInstinct({
     id: 'stale-would-be-high',
     trigger: 't2',

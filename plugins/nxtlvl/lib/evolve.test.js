@@ -23,7 +23,7 @@ const path = require('node:path');
 
 const { evolve, normalizeTrigger } = require('./evolve.js');
 const { write } = require('./instincts.js');
-const { layout } = require('./paths.js');
+const { layout } = require('./paths.ts');
 const { atomicWrite } = require('./atomic.js');
 
 // --- Hermetic tmp store -------------------------------------------------------

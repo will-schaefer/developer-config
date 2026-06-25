@@ -16,7 +16,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const { layout, ensureDir } = require('./paths.js');
+const { layout, ensureDir } = require('./paths.ts');
 const { appendLine } = require('./atomic.js');
 const { branchOrFolderKey } = require('./project-identity.js');
 

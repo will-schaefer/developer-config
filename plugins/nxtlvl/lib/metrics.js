@@ -17,7 +17,7 @@ const fs   = require('node:fs');
 const path = require('node:path');
 const os   = require('node:os');
 
-const { storageRoot }        = require('./paths.js');
+const { storageRoot }        = require('./paths.ts');
 const { list, effectiveConfidence } = require('./instincts.js');
 
 // ---------------------------------------------------------------------------

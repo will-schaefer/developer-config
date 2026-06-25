@@ -60,7 +60,7 @@ const cp = require('node:child_process');
 const obsLog = require('./obs-log.js');
 const instincts = require('./instincts.js');
 const atomic = require('./atomic.js');
-const { layout } = require('./paths.js');
+const { layout } = require('./paths.ts');
 
 const MODEL = 'claude-sonnet-4-6';
 

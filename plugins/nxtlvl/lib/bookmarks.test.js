@@ -23,7 +23,7 @@ const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 
 const { groupKeyFor, append, readNewest, readTrail, isStale } = require('./bookmarks.js');
-const { layout } = require('./paths.js');
+const { layout } = require('./paths.ts');
 
 const GIT_ENV = {
   ...process.env,

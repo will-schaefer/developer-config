@@ -1,3 +1,6 @@
+# Node dependencies — root dev tooling (typecheck + test)
+node_modules/
+
 # Secrets — loaded at runtime from 1Password; never commit raw keys
 .envrc
 
@@ -36,3 +39,8 @@ llm-wiki/
 
 # Local tool config with machine-specific absolute paths — not shared source.
 .grok/
+
+# Generated ADR dependency map — `node scripts/adr/graph.ts --html` opt-in artifact for
+# manual review. Decision B keeps the default `adr graph` render in-session (--json, no
+# repo file); the HTML viewer is regenerated on demand, never tracked.
+docs/decisions/graph.html

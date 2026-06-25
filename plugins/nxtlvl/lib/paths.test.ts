@@ -7,25 +7,23 @@
 //
 // Hermetic: only writes under os.tmpdir() via fs.mkdtempSync; cleaned up in after().
 
-'use strict';
+import { test, after } from 'node:test';
+import assert from 'node:assert/strict';
+import * as os from 'node:os';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
-const { test, after } = require('node:test');
-const assert = require('node:assert/strict');
-const os = require('node:os');
-const fs = require('node:fs');
-const path = require('node:path');
-
-const {
+import {
   storageRoot,
   isSafeRoot,
   resolveStorageRoot,
   ensureDir,
   layout,
-} = require('./paths.js');
+} from './paths.ts';
 
 // Track temp dirs created during the run so the suite leaves no residue.
-const _tmpDirs = [];
-function mkTmp() {
+const _tmpDirs: string[] = [];
+function mkTmp(): string {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'cm-paths-'));
   _tmpDirs.push(d);
   return d;

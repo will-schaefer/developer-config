@@ -35,7 +35,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const { atomicWrite } = require('./atomic.js');
-const { layout } = require('./paths.js');
+const { layout } = require('./paths.ts');
 
 const DAY_MS = 86400000;
 const REINFORCE_RATE = 0.2;

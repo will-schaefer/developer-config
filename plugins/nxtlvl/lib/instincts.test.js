@@ -30,7 +30,7 @@ const {
   remove,
   promote,
 } = require('./instincts.js');
-const { layout } = require('./paths.js');
+const { layout } = require('./paths.ts');
 
 // --- Hermetic tmp store -----------------------------------------------------
 const _tmpDirs = [];

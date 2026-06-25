@@ -10,15 +10,27 @@
 // (Spike 0.5). layout() composes the authoritative directory tree the other
 // five modules depend on; it is PURE — it only computes paths, never touches disk.
 
-'use strict';
+import * as os from 'node:os';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
-const os = require('node:os');
-const fs = require('node:fs');
-const path = require('node:path');
+// --- Layout return type -------------------------------------------------------
+
+export interface Layout {
+  root: string;
+  globalInstinctsDir: string;
+  projectDir: string;
+  observationsLog: string;
+  obsCursor: string;
+  obsArchiveDir: string;
+  projectInstinctsDir: string;
+  bookmarksDir: string;
+  livenessLog: string;
+}
 
 // --- Storage root -----------------------------------------------------------
 // ${XDG_STATE_HOME:-~/.local/state}/nxtlvl  (D1, locked).
-function storageRoot(env = process.env, home = os.homedir()) {
+export function storageRoot(env: NodeJS.ProcessEnv = process.env, home: string = os.homedir()): string {
   const base = env.XDG_STATE_HOME && env.XDG_STATE_HOME.trim()
     ? env.XDG_STATE_HOME
     : path.join(home, '.local', 'state');
@@ -36,7 +48,7 @@ const UNSAFE_FRAGMENTS = [
   `${path.sep}.Trash${path.sep}`,
 ];
 
-function isSafeRoot(p) {
+export function isSafeRoot(p: string): boolean {
   const norm = path.resolve(p) + path.sep;
   for (const frag of UNSAFE_FRAGMENTS) {
     if (norm.includes(frag)) return false;
@@ -45,7 +57,7 @@ function isSafeRoot(p) {
 }
 
 // storageRoot()'d path, guarded: throws rather than hand back an unsafe root.
-function resolveStorageRoot(env = process.env, home = os.homedir()) {
+export function resolveStorageRoot(env: NodeJS.ProcessEnv = process.env, home: string = os.homedir()): string {
   const root = storageRoot(env, home);
   if (!isSafeRoot(root)) {
     throw new Error(`unsafe storage root: ${root}`);
@@ -56,7 +68,7 @@ function resolveStorageRoot(env = process.env, home = os.homedir()) {
 // --- Directory creation -----------------------------------------------------
 // Idempotent recursive mkdir; returns the dir. Never throws on the happy path
 // (recursive:true treats an existing dir as success).
-function ensureDir(dir) {
+export function ensureDir(dir: string): string {
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 }
@@ -64,7 +76,7 @@ function ensureDir(dir) {
 // --- Layout -----------------------------------------------------------------
 // The authoritative on-disk tree the other five modules depend on. PURE:
 // computes absolute paths only, creates nothing.
-function layout(projectId, env = process.env, home = os.homedir()) {
+export function layout(projectId: string, env: NodeJS.ProcessEnv = process.env, home: string = os.homedir()): Layout {
   const root = storageRoot(env, home);
   const globalInstinctsDir = path.join(root, 'instincts');
   const projectDir = path.join(root, 'projects', projectId);
@@ -80,11 +92,3 @@ function layout(projectId, env = process.env, home = os.homedir()) {
     livenessLog: path.join(projectDir, 'liveness.jsonl'),
   };
 }
-
-module.exports = {
-  storageRoot,
-  isSafeRoot,
-  resolveStorageRoot,
-  ensureDir,
-  layout,
-};

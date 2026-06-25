@@ -13,7 +13,7 @@ const os = require('node:os');
 const path = require('node:path');
 
 const obsLog = require('./obs-log.js');
-const { layout } = require('./paths.js');
+const { layout } = require('./paths.ts');
 
 let tmpDir;
 

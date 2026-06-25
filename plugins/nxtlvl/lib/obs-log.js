@@ -27,7 +27,7 @@
 const fs = require('node:fs');
 const crypto = require('node:crypto');
 
-const { layout, ensureDir } = require('./paths.js');
+const { layout, ensureDir } = require('./paths.ts');
 const { atomicWrite, appendLine } = require('./atomic.js');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
