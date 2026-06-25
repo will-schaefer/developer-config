@@ -2,8 +2,8 @@
   "compilerOptions": {
     "strict": true,
     "noEmit": true,
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "preserve",
+    "moduleResolution": "bundler",
     "target": "es2024",
     "lib": ["es2024"],
     "types": ["node"],

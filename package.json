@@ -5,7 +5,7 @@
   "description": "nxtlvl personal Claude Code harness — root dev tooling (typecheck + test) for the TypeScript migration.",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node --test plugins/nxtlvl/"
+    "test": "node --test 'plugins/nxtlvl/**/*.test.ts' 'plugins/nxtlvl/**/*.test.js'"
   },
   "devDependencies": {
     "typescript": "^6.0.3",
