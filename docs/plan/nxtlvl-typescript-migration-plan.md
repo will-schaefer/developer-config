@@ -83,8 +83,10 @@ lets `.ts` and `.js` coexist during the transition; it is flipped off only at th
 - **T0.2 🤖 Add repo-root `package.json`** with devDeps `typescript` + `@types/node` (D7); add
   `typecheck` (`tsc --noEmit`) and `test` (`node --test`) scripts.
 - **T0.3 🤖 Add repo-root `tsconfig.json`**: `strict`, `noEmit`, `allowJs: true`, `checkJs: false`,
-  `module`/`moduleResolution` = `nodenext`, `target` matching Node 24, `verbatimModuleSyntax` (guards
-  against accidental non-erasable syntax), `include` scoped to owned paths, `exclude` =
+  `module`/`moduleResolution` = `nodenext`, `target` matching Node 24, `erasableSyntaxOnly: true`
+  (the flag that actually rejects non-erasable syntax — enums, namespaces-with-runtime-code,
+  parameter properties; **`verbatimModuleSyntax` does NOT — it silently passes `enum`**),
+  `include` scoped to owned paths, `exclude` =
   `reference/`, `**/vendor/`, `*-workspace/`, `node_modules/`.
 - **T0.4 🤖 Author the hook I/O type contracts** — `plugins/nxtlvl/lib/types.ts`: the per-event stdin
   payload shapes (`PreToolUse`/`PostToolUse` `tool_input`, `SessionStart`, `UserPromptSubmit`,
@@ -150,7 +152,7 @@ stay `#!/usr/bin/env node` (Node strips types). Update lab-local docs/READMEs th
 | `require('./x')` won't resolve `.ts` | **T0.1 spike resolves before breadth**; fallback = explicit extensions or `.cts`. |
 | `node --test` misses `*.test.ts` | T0.1 confirms; fallback = explicit test glob in the `test` script. |
 | Live hook left broken at a promotable commit | Each hook + its `hooks.json` entry flipped **atomically** with a smoke test (Phase 2); promote only after T5.1 full-green. |
-| Non-erasable syntax sneaks in (enum/decorator) | `tsc --noEmit` + `verbatimModuleSyntax` catch it; `--experimental-transform-types` is an **ask-first / amend-ADR-034** escape hatch, never a default. |
+| Non-erasable syntax sneaks in (enum/decorator) | `tsc --noEmit` + `erasableSyntaxOnly: true` catch it (**`verbatimModuleSyntax` does not — it silently passes `enum`**); `--experimental-transform-types` is an **ask-first / amend-ADR-034** escape hatch, never a default. |
 | Parallel epitaxy automation commits mid-migration | Verify landed bytes with `git show HEAD:<path>`; never amend/rebase/force while it may be active (per repo git-workflow convention). |
 | Debugging line numbers | Type-stripping replaces types with whitespace → stack-trace lines stay 1:1; no source maps needed. |
 
