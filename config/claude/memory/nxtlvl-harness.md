@@ -17,6 +17,11 @@ metadata:
 
 **Core decisions (full detail in the doc, don't duplicate):** reconstruct the *plumbing* (packaging, context assembly, memory extending native CC, lean hooks, audit) — that's the learning target; *compose* the SDLC workflows on agent-skills (vendor-and-refine); keep *orchestration native* (never rebuild routing/dispatch). ecc demoted to **dormant** opt-in fallback. Success metric = **fallback-rate by session** (not audit-delta). Repo = workbench, installed `~/.claude` = daily driver; promotion = local-marketplace install gated by an invoked `nxtlvl:audit`.
 
+**Hook stdin field shapes (M0 spike, verified 2026-06-17):** in PreToolUse payloads the invoked-name
+field is tool-specific — `Skill` tool → `tool_input.skill`; the subagent tool is named **`Agent`** (not
+`Task` as specs often assume) → `tool_input.subagent_type`; both carry the `ecc:`-style namespaced name.
+Branch on which field is present, not on `tool_name`.
+
 **Why:** The learning target is *agent-harness architecture itself*, not the substance of how-to-review/develop — a boundary that keeps scope from re-expanding to ecc size.
 
 **How to apply:** Before nxtlvl work, read the anchor doc. Relates to [[disable-ecc-active-hooks-dev]] and [[compose-on-native-quality-first]]; the user's domain is [[user-builder-domain]].

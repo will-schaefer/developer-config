@@ -49,6 +49,8 @@ One line per memory — detail lives in the topic file. Grouped for fast orienta
 - [Ideation domain status](nxtlvl-ideation-domain-status.md) — front door (idea→approved direction), WIDE-SPECTRUM not software-only; executor=main-thread skill; pass-1 agents/commands BUILT, refined skills + router pending.
 - [Context7 grounding status](nxtlvl-context7-grounding-status.md) — Context7 docs-grounding BUILT (T1–T4) + merged to main, promote-gated; ADR-030 (Context7 testifies: CITE doc URL@version); T5 manual smoke pending.
 - [harness-review DeepWiki accelerator](nxtlvl-harness-review-deepwiki.md) — /harness-review command + DeepWiki Phase-2 orientation accelerator (ADR-029: leads-not-evidence, public-GitHub-only); dogfood promote-gated.
+- [Signal-vs-noise landscape](nxtlvl-signal-noise-landscape.md) — 3-stream initiative (doctrine/audit/subsystem) tracked in nxtlvl-harness#25; doctrine diving first (displacement-cost measure, just-in-time default, ADR-worthy); audit + subsystem queued.
+- [ADR knowledge graph](nxtlvl-adr-knowledge-graph.md) — SEMANTIC understand-anything graph of the 35 ADRs at docs/decisions/.understand-anything/ (44 nodes/197 edges/8 layers); complements bespoke structural scripts/adr/graph.ts→graph.html; update via /understand docs/decisions/ --full.
 
 ## Reference: ECC
 - [ECC component map](ecc-component-map.md) — full 589-item map of reference/ECC-main at docs/reference/ecc-main-map.md; mine it instead of re-scanning.
