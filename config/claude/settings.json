@@ -22,7 +22,8 @@
     "feature-dev@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
-    "understand-anything@understand-anything": true
+    "understand-anything@understand-anything": true,
+    "project-artifact@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "addy-agent-skills": {
