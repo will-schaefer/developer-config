@@ -114,6 +114,20 @@ The quality contract: `tsc --noEmit` + `node --test` are the green bar before an
 - **`tsconfig.json` is type-check-only.** Node ignores it at runtime, so path aliases and
   syntax down-leveling are unavailable — imports use real, runtime-resolvable specifiers
   (e.g. `./paths.ts`), not aliases.
+- **Module system — ESM, not CommonJS** *(amended 2026-06-24, from the JS→TS migration grill;
+  verified by spike on Node 24.12 / TypeScript 6.0.3)*. The migration plan originally kept
+  CommonJS (rename + type only); the grill overturned that. **All nxtlvl-owned code converts to
+  ESM** (`import`/`export`), because CommonJS forfeits exactly the safety this ADR exists to buy:
+  `require('./x.ts')` types every cross-module import as `any` (a `string`→`number` mismatch
+  passes silently), while ESM `import` catches it (`TS2322`). The typed-CJS escape
+  `import x = require()` *is* type-checked but is **non-erasable** — Node throws
+  `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX` — so only ESM is **both** type-safe and erasable, the two
+  non-negotiables here. CJS↔ESM interop holds in both directions on Node 24, so the tree converts
+  incrementally and executes safely throughout. The mid-transition mechanics (a typeless
+  repo-root `package.json` until a final `"type": "module"` gate; `erasableSyntaxOnly` rather than
+  `verbatimModuleSyntax`, which silently passed an `enum`; explicit `.ts` import specifiers) are
+  task-level detail in the [migration plan](../plan/nxtlvl-typescript-migration-plan.md). This
+  **supersedes the plan's D4** ("keep CommonJS").
 - **`tsc --noEmit` + `node --test` are the per-module green bar.** The migration is incremental
   with `allowJs` during the transition so `.ts` and `.js` coexist; the heavy co-located test
   culture is preserved (tests become `*.test.ts`, run by `node --test`). See the master plan at

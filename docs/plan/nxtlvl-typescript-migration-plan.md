@@ -12,14 +12,17 @@
 [ADR-034](../decisions/ADR-034-typescript-default-native-type-stripping.md) makes **TypeScript
 the default harness language** and chooses **native Node type-stripping** as the runtime (no build
 step; `node hook.ts` runs directly on Node 24.12). This plan converts the existing JavaScript to
-TypeScript without changing any runtime behaviour.
+TypeScript without changing any runtime behaviour. Per the grill (2026-06-24, spiked on Node
+24.12 / TS 6.0.3), the conversion also moves the code from CommonJS to **ESM** (`import`/`export`,
+see D4) — the only module system that is both type-safe across modules *and* erasable by native
+stripping.
 
 **Scope — all nxtlvl-owned code:**
 
 | Area | Path | Files (≈) | Notes |
 |---|---|---|---|
 | Production lib | `plugins/nxtlvl/lib/` | 11 + 11 tests | Pure modules, dependency-ordered |
-| Production hooks | `plugins/nxtlvl/hooks/` | 8 + 8 tests + 1 adapter | Invoked by `hooks.json` as `node …/X.js` |
+| Production hooks | `plugins/nxtlvl/hooks/` | 8 + 7 tests + 1 adapter | Invoked by `hooks.json` as `node …/X.js`; `session-title` is the lone untested hook (gains a test, T2.8) |
 | evals-lab | `sandbox/nxtlvl-labs/evals-lab/bin/` | 4 + 4 tests + fixture | Own `package.json`; `node bin/X.js` |
 | harness-lab | `sandbox/nxtlvl-labs/harness-lab/bin/` | 5 + 5 tests + fixtures | Own `package.json`; `node bin/X.js` |
 | Skill scripts | `config/claude/skills/brainstorming/scripts/` | `helper.js`, `server.cjs` | Lower priority; `server.cjs` stays explicit CJS |
@@ -44,7 +47,10 @@ TypeScript without changing any runtime behaviour.
   ([ADR-006](../decisions/ADR-006-hook-fail-open-gated-blocking.md)).
 
 **Strategy:** incremental, **tests-green per module**, dependency-ordered (leaves first). `allowJs`
-lets `.ts` and `.js` coexist during the transition; it is flipped off only at the end.
+lets `.ts` and `.js` coexist during the transition; CJS↔ESM interop (Node 24) lets the
+half-converted tree run in both directions, and a **typeless repo-root `package.json`** keeps both
+`tsc` and `node --test` green at every step (D10). `allowJs` is flipped off — and `"type":
+"module"` flipped on — only at the end.
 
 ---
 
@@ -57,17 +63,18 @@ lets `.ts` and `.js` coexist during the transition; it is flipped off only at th
 | D1 | Runtime | **Native Node type-stripping** — `node X.ts`, no build (ADR-034). |
 | D2 | Scope | **All nxtlvl-owned code** (table above); throwaway + vendored excluded. |
 | D3 | Sequencing | **Incremental, tests-green per module**, dependency-ordered. |
-| D4 | Module system | **Keep CommonJS** (`require`/`module.exports`). Codebase is CJS today; converting to ESM is a separate, out-of-scope change. Rename + type only. |
+| D4 | Module system | **Convert to ESM** (`import`/`export`). *Supersedes the original "keep CommonJS"; amends [ADR-034](../decisions/ADR-034-typescript-default-native-type-stripping.md).* CJS `require('./x.ts')` types every cross-module import as `any` (verified); `import = require()` is type-safe but non-erasable (`ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX`); only ESM is both type-safe and erasable. |
 | D5 | Test framework | **Keep `node:test`** — runs `.test.ts` via the same type-stripping; zero new dependency. |
 | D6 | Type-check gate | **`tsc --noEmit`** (dev-only). Candidate objective check for the ADR-009 audit. |
 | D7 | Dev-dependency home | A **repo-root `package.json`** (devDeps: `typescript`, `@types/node`) — `tsc`/types are dev tooling, not runtime; the two labs keep their own `package.json`. |
 
-### ◇ Open — resolved empirically by the T0 spike (do NOT guess)
+### ◇ Resolved empirically (spiked 2026-06-24, Node 24.12 / TS 6.0.3)
 
-| ◇ | Question | Resolved by |
-|---|----------|-------------|
-| D8 | Does CJS `require('./x')` resolve `x.ts` on Node 24.12, or are explicit extensions / `.cts` needed? | **T0.1** |
-| D9 | Does `node --test` discover `*.test.ts` by default, or is an explicit glob/`--test` pattern needed? | **T0.1** |
+| ◇ | Question | Resolution |
+|---|----------|------------|
+| D8 | Does CJS `require('./x')` resolve `x.ts`? | **No — explicit `.ts` extensions are mandatory** (`require('./x.ts')`). Renaming a leaf breaks every stale importer until its specifier is flipped `.js`→`.ts`. |
+| D9 | Does `node --test` discover `*.test.ts`? | **Yes**, by default. Mixed CJS `.test.js` + ESM `.test.ts` both run green under a typeless `package.json`. |
+| D10 | What `package.json` `"type"` during transition? | **Omit it** (typeless) — the only setting where `tsc` *and* runtime are both green. `"commonjs"` is a *false green* (tsc passes; ESM `.ts` dies at runtime because explicit commonjs disables Node's syntax-detection); `"module"` breaks un-converted `.js`. Flip to `"type": "module"` at the final gate (T5.1). |
 
 ---
 
@@ -75,31 +82,41 @@ lets `.ts` and `.js` coexist during the transition; it is flipped off only at th
 
 ### Phase 0 — Foundation & de-risking spike (no behaviour change)
 
-- **T0.1 🤖 Spike on one leaf module.** Rename `lib/paths.js`→`paths.ts` and `paths.test.js`→`paths.test.ts`.
-  Confirm, on Node 24.12: (a) `node --test` runs `paths.test.ts` green; (b) a dependent's
-  `require('./paths')` still resolves; (c) `tsc --noEmit` is clean. **Resolves D8/D9.** If `require`
-  won't resolve `.ts`, fall back to explicit extensions or `.cts` and record it here. *(De-risks the
-  entire migration before any breadth.)*
-- **T0.2 🤖 Add repo-root `package.json`** with devDeps `typescript` + `@types/node` (D7); add
-  `typecheck` (`tsc --noEmit`) and `test` (`node --test`) scripts.
-- **T0.3 🤖 Add repo-root `tsconfig.json`**: `strict`, `noEmit`, `allowJs: true`, `checkJs: false`,
-  `module`/`moduleResolution` = `nodenext`, `target` matching Node 24, `erasableSyntaxOnly: true`
-  (the flag that actually rejects non-erasable syntax — enums, namespaces-with-runtime-code,
-  parameter properties; **`verbatimModuleSyntax` does NOT — it silently passes `enum`**),
-  `include` scoped to owned paths, `exclude` =
+- **T0.1 🤖 Spike on a dependent pair (not a lone leaf).** Convert `lib/paths.js`→`paths.ts` to ESM
+  **and** flip a still-CJS importer's specifier to `require('./paths.ts')`, **and** rewrite one
+  `require.main === module` CLI-guard to its ESM form — confirming the idiom on Node 24.12
+  (`import.meta.main`, else `process.argv[1] === fileURLToPath(import.meta.url)`), since 8 dual-mode
+  files need it. Confirm: (a) `node --test` runs `paths.test.ts` green; (b) the CJS importer resolves
+  `require('./paths.ts')` and the converted file runs both as an import target and when invoked
+  directly; (c) `tsc --noEmit` clean. D8/D9/D10 are **already resolved** (table above); this spike
+  validates the ESM seam + main-guard rewrite before breadth. *(De-risks the migration before any
+  breadth.)*
+- **T0.2 🤖 Add repo-root `package.json`** with devDeps **`typescript@6`** (pin the major — TS 6.x
+  errors `TS5112` if files are passed alongside a tsconfig) + `@types/node` (D7). **Omit the `type`
+  field** (D10) — an explicit `"type": "commonjs"` is a false green. Add `typecheck`
+  (`tsc --noEmit`, **no file args**) and `test` (`node --test`) scripts.
+- **T0.3 🤖 Add repo-root `tsconfig.json`** (spike-verified set): `strict`, `noEmit`, `allowJs: true`,
+  `checkJs: false`, `module`/`moduleResolution` = `nodenext`, `target`/`lib` = `es2024` (Node 24),
+  `types: ["node"]`, `erasableSyntaxOnly: true` (the flag that actually rejects non-erasable syntax —
+  enums, namespaces-with-runtime-code, parameter properties; **`verbatimModuleSyntax` does NOT — it
+  silently passes `enum`**), **`allowImportingTsExtensions: true`** (required for ESM `./x.ts`
+  specifiers under `noEmit`), `esModuleInterop: true`, `include` scoped to owned paths, `exclude` =
   `reference/`, `**/vendor/`, `*-workspace/`, `node_modules/`.
 - **T0.4 🤖 Author the hook I/O type contracts** — `plugins/nxtlvl/lib/types.ts`: the per-event stdin
   payload shapes (`PreToolUse`/`PostToolUse` `tool_input`, `SessionStart`, `UserPromptSubmit`,
   `PreCompact`, `SessionEnd`) and hook-output shapes (`additionalContext`, exit-code conventions).
   **This is the migration's core value** — it encodes the platform-boundary shapes that have bitten
-  before (`Skill→tool_input.skill` vs `Agent→tool_input.subagent_type`).
+  before (`Skill→tool_input.skill` vs `Agent→tool_input.subagent_type`). Hooks consume these via
+  **`import type { … }`** — fully erasable, no runtime import.
 - **T0.5 🤖 Verify the green-bar** runs end-to-end on the converted leaf: `npm run typecheck` clean +
   `npm test` green + a hook smoke (`echo '<payload>' | node hooks/<any>.ts`).
 
 ### Phase 1 — Production `lib/` (dependency order, leaves first)
 
-Per module: rename `X.js`→`X.ts` **and** `X.test.js`→`X.test.ts`; add types (consume `lib/types.ts`);
-`tsc --noEmit` clean; `node --test` green; commit.
+Per module (atomic commit): rename `X.js`→`X.ts` **and** `X.test.js`→`X.test.ts`; **flip every
+importer's specifier `.js`→`.ts` in the same commit** (a rename breaks every stale importer until
+flipped); ESM-convert (`require`→`import`, `module.exports`→`export`, `node:*` requires→imports);
+add types (consume `lib/types.ts` via `import type`); `tsc --noEmit` clean; `node --test` green; commit.
 
 - **T1.1** `paths` *(done in T0.1 spike — fold in)*
 - **T1.2** `atomic` · **T1.3** `scrub` *(leaves — no intra-lib deps)*
@@ -108,12 +125,15 @@ Per module: rename `X.js`→`X.ts` **and** `X.test.js`→`X.test.ts`; add types 
 
 ### Phase 2 — Production `hooks/`
 
-Per hook: rename `X.js`→`X.ts` (+ test); type against `lib/types.ts`; **flip the `hooks.json` command
-`node …/X.js` → `node …/X.ts` in the same commit**; stdin smoke test; `node --test` green; commit.
+Per hook (atomic commit): rename `X.js`→`X.ts` (+ test); ESM-convert (`require`→`import`,
+`module.exports`→`export`, `node:*` imports, `require.main === module`→ESM main-guard,
+`__dirname`→`import.meta.dirname`) and flip importer specifiers; type against `lib/types.ts`
+(`import type`); **flip the `hooks.json` command `node …/X.js` → `node …/X.ts` in the same commit**;
+stdin smoke test; `node --test` green; commit.
 
 - **T2.1** `dangerous-bash` (+ regression suite) · **T2.2** `capture` · **T2.3** `observe`
 - **T2.4** `briefing` · **T2.5** `close` · **T2.6** `precompact` · **T2.7** `context-alert`
-- **T2.8** `session-title` · **T2.9** `evals/dangerous-bash/adapter`
+- **T2.8** `session-title` (**author a new `session-title.test.ts`** — the lone untested hook, and a `UserPromptSubmit` stdin-parser: the exact bug class this migration targets) · **T2.9** `evals/dangerous-bash/adapter`
 - *(`fallback-log.sh` stays shell — no change.)*
 
 ### Phase 3 — Labs (`sandbox/nxtlvl-labs/`)
@@ -133,8 +153,10 @@ stay `#!/usr/bin/env node` (Node strips types). Update lab-local docs/READMEs th
 
 ### Phase 5 — Finalize & gate
 
-- **T5.1 🤖** Flip `tsconfig` `allowJs: false`; confirm no owned `.js` remain (`tsc --noEmit` + full
-  `node --test` green across all areas).
+- **T5.1 🤖** Flip `tsconfig` `allowJs: false` **and add `"type": "module"` to the repo-root
+  `package.json`** (D10 final gate — silences the dev-time `MODULE_TYPELESS_PACKAGE_JSON` warning and
+  makes any stray `require`/`module.exports` fail loudly); confirm no owned `.js` remain
+  (`tsc --noEmit` + full `node --test` green across all areas).
 - **T5.2 🤖** Add `tsc --noEmit` to the pre-promote checklist and register it as a candidate objective
   check for the ADR-009 audit.
 - **T5.3 🤖** Update `CLAUDE.md` (+ `sandbox/README.md`): TS is the default; the erasable-syntax rule;
@@ -149,8 +171,9 @@ stay `#!/usr/bin/env node` (Node strips types). Update lab-local docs/READMEs th
 
 | Risk | Mitigation |
 |---|---|
-| `require('./x')` won't resolve `.ts` | **T0.1 spike resolves before breadth**; fallback = explicit extensions or `.cts`. |
-| `node --test` misses `*.test.ts` | T0.1 confirms; fallback = explicit test glob in the `test` script. |
+| `require('./x')` won't resolve `.ts` | **Resolved (spiked):** explicit `.ts` extensions are mandatory; each leaf's rename flips every importer's specifier `.js`→`.ts` atomically. |
+| `node --test` misses `*.test.ts` | **Resolved (spiked):** discovered by default; mixed CJS/ESM test files both run under a typeless `package.json`. |
+| `package.json` set to `"type": "commonjs"` mid-migration | **False green** — `tsc` passes while every ESM `.ts` dies at runtime (explicit commonjs disables Node's syntax-detection). Mitigation: T0.2 omits `type`; D10. |
 | Live hook left broken at a promotable commit | Each hook + its `hooks.json` entry flipped **atomically** with a smoke test (Phase 2); promote only after T5.1 full-green. |
 | Non-erasable syntax sneaks in (enum/decorator) | `tsc --noEmit` + `erasableSyntaxOnly: true` catch it (**`verbatimModuleSyntax` does not — it silently passes `enum`**); `--experimental-transform-types` is an **ask-first / amend-ADR-034** escape hatch, never a default. |
 | Parallel epitaxy automation commits mid-migration | Verify landed bytes with `git show HEAD:<path>`; never amend/rebase/force while it may be active (per repo git-workflow convention). |
