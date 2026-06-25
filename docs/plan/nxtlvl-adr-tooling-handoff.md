@@ -2,7 +2,8 @@
 
 > **Type:** session handoff — a made-decision transfer, not a spec or plan.
 > **SDD phase:** between Plan and Build. Intent, runtime, **and shape are locked** — §7 records the
-> two resolved taste-calls (A: importable core + thin CLI · B: `graph --json` → in-session render).
+> two resolved taste-calls (A: importable core + thin CLI · B: `graph` → `--json` default for
+> in-session render + `--html` opt-in viewer).
 > A fresh session can pick this up cold.
 > **Runtime: LOCKED → TypeScript**, run via native Node type-stripping
 > ([ADR-034](../decisions/ADR-034-typescript-default-native-type-stripping.md)). No build step.
@@ -61,12 +62,12 @@ Author/format source of truth: **§3 of the decision rule** + the live files. Sh
 | **Locate** | `adr list` | Print the index — `id · status · title` for all ADRs (the at-a-glance table). |
 | **Locate** | `adr find <query>` | Filter by keyword / `--status` / "links-to ADR-NNN" / "superseded". |
 | **Review** | `adr show <id>` | Render one ADR with its resolved context — supersession chain, amends/amended-by, inbound + outbound cross-links. |
-| **Analyze** | `adr graph` | Emit the ADR relationship graph (supersedes · amends · cross-links). **`adr graph --json` emits nodes+edges; rendering is in-session (§7-B).** |
+| **Analyze** | `adr graph` | Emit the ADR relationship graph (supersedes · amends · cross-links). **Default emits the nodes+edges JSON for in-session render; `adr graph --html` writes the opt-in standalone viewer (§7-B).** |
 | **Analyze / gate** | `adr audit` | The deterministic integrity gate. **§5.** Exit 2 = deliberate block; exit 0 = pass / warn-only / fail-open. |
 
 `list` / `find` / `show` are cheap renderers over a shared parse layer. `audit` is the verb that
-earns the script (deterministic, testable, gate-wireable). `graph` emits a `--json` contract; its
-in-session rendering is a separate, swappable concern (§7-B).
+earns the script (deterministic, testable, gate-wireable). `graph` emits a `--json` contract by
+default (in-session render); `--html` is an opt-in standalone viewer over the same model (§7-B).
 
 ## 5. The audit contract (load-bearing — build this first and test it hardest)
 
@@ -127,24 +128,22 @@ Governed by [ADR-034](../decisions/ADR-034-typescript-default-native-type-stripp
 - **Tests:** `node --test` over co-located `*.test.ts` (zero new dependency — same as the whole harness).
 - **Type-check gate:** `tsc --noEmit` is the green bar alongside `node --test`.
 
-### ⚠ Prerequisite — this tool is the repo's FIRST new TS code
+### Resolved — self-contained subproject (does NOT touch repo-root infra)
 
-There is **no repo-root `tsconfig.json` or `package.json` yet** (the migration is *planned, not
-started*). Building `adr` therefore requires standing up that dev infra first — which the migration
-plan already specifies:
+The repo has **no repo-root `tsconfig.json` or `package.json` yet** (the migration is *planned, not
+started*, and its repo-root `package.json type` is still open — grill Q3/Q4). Rather than pre-empt
+that call, `adr` is built as a **self-contained subproject**: `scripts/adr/` carries **its own**
+`package.json` (`"type": "module"`) and `tsconfig.json` (`strict`, `noEmit`, `nodenext`,
+`erasableSyntaxOnly: true`, `allowImportingTsExtensions: true`). This stands up *zero* repo-root
+infra, so the tool ships today and still serves as the clean **pilot** of the type-stripping +
+`node:test` (+ later `tsc --noEmit`) loop *before* the big JS→TS migration touches the hot path.
 
-- **T0.2:** repo-root `package.json` (devDeps `typescript` + `@types/node`; `test` + `typecheck` scripts).
-- **T0.3:** repo-root `tsconfig.json` (`strict`, `noEmit`, `nodenext`, `target` ~Node 24,
-  `erasableSyntaxOnly: true`, owned-paths `include`, `reference/`+`vendor/`+`*-workspace/` excluded).
-
-→ **Framing opportunity:** `adr` is a clean, self-contained **pilot** that proves the
-type-stripping + `node:test` + `tsc --noEmit` loop on a few new files *before* the big JS→TS
-migration touches the hot path. Treat standing up T0.2/T0.3 as step 0 of this build.
-
-> Note on `erasableSyntaxOnly` vs `verbatimModuleSyntax`: the migration plan (T0.3) names
+> `erasableSyntaxOnly` vs `verbatimModuleSyntax`: the migration plan (T0.3) named
 > `verbatimModuleSyntax` as the guard against non-erasable syntax. That is **wrong** —
-> `verbatimModuleSyntax` silently passes `enum`. Use **`erasableSyntaxOnly: true`**, which is what
-> actually raises `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX` for enums/namespaces/parameter-properties.
+> `verbatimModuleSyntax` silently passes `enum`. We use **`erasableSyntaxOnly: true`** (plus
+> `allowImportingTsExtensions: true` so explicit-`.ts` imports type-check), which actually raises
+> `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX` for enums/namespaces/parameter-properties. *(Plan + ADR-034
+> still carry the old wording pending their own amendment — tracked separately.)*
 
 ### ⚠ Module system — the one genuinely technical open call (recommend ESM)
 
@@ -159,51 +158,67 @@ This is **new** code, where CJS carries a real cost:
 
 **Adopted (with §7-A):** author `adr` as **ESM** — `scripts/adr/` carries its own `package.json`
 with `"type": "module"`, and every import uses **explicit `.ts` extensions**. That gets full
-cross-module types + erasability and sidesteps the `any` footgun. This is a **deliberate divergence
-from migration-plan D4** (which governs *migrating existing CJS*, not new code). `node --test`
-discovers `*.test.ts` fine once imports carry explicit extensions.
+cross-module types + erasability and sidesteps the `any` footgun. This **aligns with the
+grill-locked D4→ESM direction** (the migration plan's body still reads "keep CJS" pending its own
+amendment + an ADR-034 update — tracked separately). `node --test` discovers `*.test.ts` fine once
+imports carry explicit extensions.
 
-## 7. Resolved decisions (locked 2026-06-24)
+## 7. Resolved decisions (locked 2026-06-24; B refined 2026-06-25)
 
 Both taste-calls are now **locked**. Recorded with the alternative each beat, so the rationale
 survives the handoff.
 
-- **A — Placement & shape → LOCKED: importable core + thin CLI** (not a monolith):
+- **A — Placement & shape → LOCKED: importable core + thin CLI** (not a monolith). As-built tree:
   ```
   scripts/adr/
     package.json      # { "type": "module" } — scopes ESM to this dir (see §6)
+    tsconfig.json     # self-contained: erasableSyntaxOnly + allowImportingTsExtensions (see §6)
     adr.ts            # CLI entry: arg-parse → dispatch to lib, set exit code (ONLY place exit is set)
+    graph.ts          # thin runnable entry for `adr graph` (--json default / --html opt-in) — folds into adr.ts later
     lib/
-      parse.ts        # ADR + README → typed model (shared by all verbs)
+      parse.ts        # raw string → typed frontmatter model (pure; shared by all verbs)   ✅
+      load.ts         # docs/decisions/ → typed AdrNode[] (the one file-I/O seam; shared by graph + audit)  ✅
       audit.ts        # B1–B5 + W1–W2, returns a structured result (NO process.exit here)
-      graph.ts        # relationship graph builder
+      graph.ts        # pure: AdrNode[] → nodes+edges model + the HTML viewer (importable, no I/O)  ✅
       *.test.ts       # co-located node:test, fixture-driven like dangerous-bash
   .claude/commands/adr.md   # the local /adr slash command, wraps `adr <verb>`
   ```
   `audit.ts` is a **pure function that returns a verdict** — the CLI translates that verdict into an
   exit code. That separation is what lets the future `nxtlvl:audit` `import` the audit core instead
   of reconstructing it ([ADR-035](../decisions/ADR-035-compose-substance-defer-own-orchestration.md)).
-  *Beat:* a single `scripts/adr.ts` monolith — simpler today, but not reusable by the gate.
+  The shared **`lib/load.ts`** is the single file-I/O seam (every verb loads through it; the pure
+  cores stay string/model-only and unit-testable). *Beat:* a single `scripts/adr.ts` monolith —
+  simpler today, but not reusable by the gate.
 
-- **B — `graph` output form → LOCKED: `adr graph --json` → in-session render.** `graph` emits a
-  deterministic, testable nodes+edges JSON contract; rendering is pushed to the chat surface (the
-  operator's standing preference is to render visuals in-session). No artifact is written to the
-  repo. *Beat:* generating a gitignored `docs/decisions/.adr-dashboard.html`. A file renderer
-  remains an easy, non-breaking add later precisely *because* the data contract is `--json`.
+- **B — `graph` output form → LOCKED (refined 2026-06-25): `--json` default + `--html` opt-in.**
+  Default `adr graph` emits the deterministic, testable, **body-free** nodes+edges JSON contract and
+  rendering happens **in-session** — the operator's standing preference; **no artifact is written**.
+  `adr graph --html` is an explicit opt-in that writes a self-contained interactive viewer to
+  `docs/decisions/graph.html` (**git-ignored**, regenerated on demand). This **reconciles** the
+  original lock (which was `--json`-only) with a richer viewer the parallel build produced: the
+  in-session default is preserved *exactly*; the viewer is purely additive and never the default.
+  *Beat:* adopting the HTML artifact as the **default** — would overturn the in-session preference
+  and litter the repo; or **dropping** the viewer — loses a genuinely better read of 35 dense ADRs.
 
 ## 8. Suggested build order (mirrors the dangerous-bash discipline)
 
-1. **Step 0 — infra:** repo-root `package.json` + `tsconfig.json` (`erasableSyntaxOnly: true`), per
-   §6, **and** `scripts/adr/package.json` with `"type": "module"` (scopes ESM to the tool, §7-A).
-   Confirm `node --test` + `tsc --noEmit` run green on a trivial `.ts`.
-2. **`parse.ts` + tests** — the shared typed model over the 35 live ADRs (they *are* the happy-path fixtures).
+1. **Step 0 — infra (self-contained, ✅ done):** `scripts/adr/package.json` (`"type": "module"`) +
+   `scripts/adr/tsconfig.json` (`strict`, `noEmit`, `nodenext`, `erasableSyntaxOnly: true`,
+   `allowImportingTsExtensions: true`). The tool is a **self-contained subproject** — it does *not*
+   touch repo-root infra, so it sidesteps the migration's still-open repo-root `package.json type`
+   call (grill Q3/Q4) while piloting the type-stripping + `node:test` loop. *(Deferred: `npm install`
+   + the `tsc --noEmit` gate — the runtime already type-strips & runs green, proving erasability.)*
+2. **`parse.ts` + tests — ✅ done.** The shared typed model over the 35 live ADRs (they *are* the
+   happy-path fixtures). 13 `node:test` cases.
 3. **`audit.ts` + tests** — B1–B5, W1–W2, fail-open. Fixture per failure mode (bad frontmatter,
    dangling cross-link, README orphan, superseded-without-successor, numbering gap/dupe). The live
-   set is the all-green case.
-4. **`adr.ts` CLI** — wire `list`/`find`/`show`/`audit`; set exit codes (0 / 2) only here.
-5. **`graph.ts` + `adr graph --json`** — nodes+edges contract (§7-B); in-session render consumes it.
+   set is the all-green case. Loads via `lib/load.ts`.
+4. **`adr.ts` CLI** — wire `list`/`find`/`show`/`audit` (+ fold in `graph`); set exit codes (0 / 2) only here.
+5. **`graph` — ✅ done (§7-B hybrid):** `lib/load.ts` (shared loader) + `lib/graph.ts` (pure model +
+   viewer) + thin runnable `scripts/adr/graph.ts` (`--json` default / `--html` opt-in);
+   `lib/graph.test.ts` covers edge derivation. The HTML artifact is git-ignored.
 6. **`.claude/commands/adr.md`** — wrap the CLI for in-session use.
-7. Green bar throughout: `tsc --noEmit` clean + `node --test` green.
+7. Green bar throughout: `node --test` green now (20/20); `tsc --noEmit` once deps are installed.
 
 ## 9. References
 
