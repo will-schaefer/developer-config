@@ -1,6 +1,6 @@
 ---
 name: developer-repo-git-workflow
-description: "Git workflow for the ~/Developer workbench repo — historically commit-to-main, but an 'epitaxy' automation now manages feature branches + commits in parallel; verify branch+HEAD by content, never amend/rebase/force while it's active."
+description: "Git workflow for the ~/Developer workbench repo — solo, commit directly to main, don't branch for routine work, don't push unless asked. (The 'epitaxy' parallel-committer was retired 2026-06-25 — see note below.)"
 metadata:
   node_type: memory
   type: feedback
@@ -9,13 +9,12 @@ metadata:
 
 In the `~/Developer` workbench repo the user commits **directly to `main`** (single-author repo; `origin/main` tracked but pushed only when asked). Do **not** branch for routine commits here — that overrides the generic "branch off the default branch first" default.
 
-**Why:** solo personal workbench; existing history (initial → intent → Phase-0 scaffold) is all linear on `main`, and the user expects a bare "commit" to land on `main`.
+**Why:** solo personal workbench; history is linear on `main`, and the user expects a bare "commit" to land on `main`.
 
 **How to apply:**
 - Commit to `main`; don't branch unless asked; don't push unless asked.
-- **Concurrent commits happen** — during a "commit" turn the user (or tooling) may commit in parallel, so the index/HEAD can shift under you mid-task. **Before `git commit --amend`, re-check `git log` / `git show HEAD`** to confirm HEAD is the commit you mean to reword. (2026-06-17: I amended a stray `.claude/settings.local.json` commit instead of the scaffold commit, then had to `git reset --soft <scaffold> && commit --amend` to repair it.)
-- `.claude/settings.local.json` is tracked but accumulates session-generated permission grants; leave its working-tree changes **uncommitted** unless the user asks to include them. (An epitaxy WIP commit may sweep it in anyway — that's epitaxy's doing, not a rule change.)
-- **EPITAXY automation (observed 2026-06-18, branch `nxtlvl-context-hooks-and-adr008`):** a background process commits in parallel AND switches branches (`main`↔feature, "epitaxy pre-switch" WIP commits). It can commit *your* working-tree changes under *its own* commit message before your `git commit` runs — yielding a confusing "nothing to commit." **Don't panic and don't redo work:** verify your changes landed by **content** (`git show HEAD:path`, `git diff --stat HEAD -- <paths>` → empty = clean), not by whether your own commit succeeded. **Never amend/rebase/force-push while epitaxy is active** — history is being rewritten under you; surgery risks real loss. The repo is no longer purely linear-on-main; check the current branch first.
-- **Protect pushed work from overwrite (safepoint tag):** when you push to `main` while epitaxy may rewrite history, immediately pin an annotated tag at your pushed commit and mirror it to origin — `git tag -a safepoint/main-<date>-<topic> <sha> -m '…'; git push origin refs/tags/safepoint/…`. It's purely additive (doesn't touch `main`, doesn't block epitaxy) but keeps your commits reachable/restorable (`git reset --hard <tag>`) even after a force-push, locally or on origin. (2026-06-19: did this for the C&M refinements push — `safepoint/main-2026-06-19-cm-refinements` → f1ee7a0.) Diverged push? Integrate with a **merge**, never a rebase, and only after confirming the incoming commit's files don't collide with your dirty/untracked paths (`git show --stat <sha>` vs `git status --porcelain`).
+- `.claude/settings.local.json` is tracked but accumulates session-generated permission grants; leave its working-tree changes **uncommitted** unless the user asks to include them.
 
-Relates to [[terse-confirms-momentum]], [[nxtlvl-context-alert-hook]].
+**"Epitaxy" — RETIRED (2026-06-25).** For a stretch in 2026-06 a parallel actor (codename *epitaxy*) made `WIP: epitaxy pre-switch from <branch>` commits and switched branches under the active session, which spawned a defensive doctrine (verify-by-content, never-amend/rebase/force, safepoint tags). A 2026-06-25 investigation found **no standing mechanism** — no binary, launchd/cron job, git hook, alias, or script; the only `pre-switch` traces live in session transcripts/logs. It was a **transient Claude Code session behavior** confined to 06-18 → 06-19 (3 WIP commits total: `44a2f6c`, `cddceef`, `95a5aaf`), **not a background daemon**, and has been silent since. Treat the repo as ordinary linear-on-main again; the old "epitaxy is active, take defensive measures" doctrine no longer applies. If `WIP: ... pre-switch ...` commits ever reappear, a session is doing it — stop and investigate that session rather than reinstating blanket caution.
+
+Relates to [[terse-confirms-momentum]].

@@ -176,7 +176,7 @@ stay `#!/usr/bin/env node` (Node strips types). Update lab-local docs/READMEs th
 | `package.json` set to `"type": "commonjs"` mid-migration | **False green** — `tsc` passes while every ESM `.ts` dies at runtime (explicit commonjs disables Node's syntax-detection). Mitigation: T0.2 omits `type`; D10. |
 | Live hook left broken at a promotable commit | Each hook + its `hooks.json` entry flipped **atomically** with a smoke test (Phase 2); promote only after T5.1 full-green. |
 | Non-erasable syntax sneaks in (enum/decorator) | `tsc --noEmit` + `erasableSyntaxOnly: true` catch it (**`verbatimModuleSyntax` does not — it silently passes `enum`**); `--experimental-transform-types` is an **ask-first / amend-ADR-034** escape hatch, never a default. |
-| Parallel epitaxy automation commits mid-migration | Verify landed bytes with `git show HEAD:<path>`; never amend/rebase/force while it may be active (per repo git-workflow convention). |
+| ~~Parallel epitaxy automation commits mid-migration~~ | **Retired 2026-06-25** — "epitaxy" was a transient session behavior (06-18/19), not a standing daemon; no defensive measures needed. Verifying landed bytes with `git show HEAD:<path>` is still sound general hygiene. |
 | Debugging line numbers | Type-stripping replaces types with whitespace → stack-trace lines stay 1:1; no source maps needed. |
 
 ## 5. Verification
