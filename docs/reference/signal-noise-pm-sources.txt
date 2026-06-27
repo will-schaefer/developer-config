@@ -1,0 +1,26 @@
+# Signal-vs-noise / task & project management — source manifest for llm-wiki ingestion
+# Curated 2026-06-25. One URL per line; '#' lines are comments (strip before fetch).
+# Product pages (Amazon/Goodreads) and duplicate SEO posts deliberately excluded.
+
+# --- A. Signal-vs-noise framing ---
+https://dev.to/nkusikevin/the-steve-jobs-signal-to-noise-ratio-a-revolutionary-8020-approach-to-peak-productivity-2k9p
+https://nerdproductivity.com/signal-vs-noise-focus-work-that-matters/
+https://www.projectmanagement.com/discussion-topic/223758/what-s-your-approach-to-managing-signal-vs--noise-as-a-pm-
+https://www.tatianaastray.com/mastering-leadership/2025/7/7/the-leadership-filter-signal-vs-noise-why-top-performers-dont-waste-time-on-the-wrong-things
+
+# --- B. Foundational frameworks ---
+https://en.wikipedia.org/wiki/Getting_Things_Done
+https://www.todoist.com/productivity-methods/getting-things-done
+https://gregmckeown.com/books/essentialism/
+https://asana.com/resources/pareto-principle-80-20-rule
+
+# --- C. Prioritization methods ---
+https://plane.so/blog/feature-prioritization-frameworks-rice-moscow-and-kano-explained
+https://productschool.com/blog/product-fundamentals/ultimate-guide-product-prioritization
+https://monday.com/blog/rnd/product-prioritization-frameworks/
+
+# --- D. Flow & mechanics of noise (highest evidence value) ---
+https://www.atlassian.com/agile/kanban/wip-limits
+https://asana.com/resources/what-is-deep-work
+https://www.academia.edu/13147188/Information_Overload_and_Worker_Performance_A_Decision_Making_Perspective
+https://www.researchgate.net/publication/339130339_Effect_of_Information_Overload_on_Decision's_Quality_Efficiency_and_Time
