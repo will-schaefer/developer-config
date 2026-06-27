@@ -122,7 +122,7 @@ workflows, M6 hardens the hooks, M7 turns on the metric.
 
 ```bash
 # Install the workbench plugin into the daily driver (run from interactive `claude`)
-/plugin marketplace add /Users/willschaefer/Developer      # adds repo-root marketplace "nxtlvl-dev"
+/plugin marketplace add /Users/willschaefer/Developer/nxtlvl      # adds repo-root marketplace "nxtlvl-dev"
 /plugin install nxtlvl@nxtlvl-dev                          # installs the plugin, namespace nxtlvl:
 
 # Iterate → re-install after edits

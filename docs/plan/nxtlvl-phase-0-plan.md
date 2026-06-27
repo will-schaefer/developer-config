@@ -116,7 +116,7 @@ the metric), then integration + promotion.
 #### Task 4: Install + run one real session  **[MANUAL]**
 **Description:** Prove the envelope. Install via local marketplace and run the review workflow end-to-end.
 **Acceptance criteria:**
-- [ ] `/plugin marketplace add /Users/willschaefer/Developer` then `/plugin install nxtlvl@nxtlvl-dev` succeed with no error.
+- [ ] `/plugin marketplace add /Users/willschaefer/Developer/nxtlvl` then `/plugin install nxtlvl@nxtlvl-dev` succeed with no error.
 - [ ] `nxtlvl:review` is listed and runs one real session to completion.
 **Verification:**
 - [ ] **[MANUAL]** install output shows no error; `/nxtlvl:review` produces the five-axis report (Success Criteria 1, 3, 4).

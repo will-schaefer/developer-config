@@ -43,6 +43,7 @@ One line per memory — detail lives in the topic file. Grouped for fast orienta
 - [nxtlvl harness (anchor)](nxtlvl-harness.md) — the personal CC agent-harness plugin; intent doc docs/intent/personal-harness.md, ADRs docs/decisions/; reactive vendoring; hook stdin field shapes.
 - [Agent runtime primer](agent-runtime-primer.md) — runtime anatomy + native-vs-DIY ledger (docs/reference/agent-runtime-primer.md); nxtlvl's substance lives ABOVE the loop, so composing keeps it.
 - [C&M subsystem status](nxtlvl-context-memory-subsystem.md) — C&M domain PROMOTED & LIVE (2026-06-22): installed snapshot==repo HEAD, all 6 hooks firing, Checkpoints A–D verified, fallback 0/137.
+- [C&M store path-keyed fork hazard](cm-store-path-keyed-fork-hazard.md) — store keyed on sha256(realpath(.git)); any repo relocation/new-path clone silently forks it (empty new store, stranded learning) → migrate instincts (rewrite project_id) + bookmarks; runbook Phase 3.5.
 - [Context-alert hook](nxtlvl-context-alert-hook.md) — two-stage hook (200K FYI + 325K notify-only backstop, never stops) MERGED via PR #1; next = Checkpoint A install-observe; Hook 2 (PreCompact) is Phase 2.
 - [dangerous-bash gate](nxtlvl-dangerous-bash-gate.md) — first blocking gate BUILT & LIVE (Node, exit-2, kill switch); 53-case test; raw-string match → still trips on commands that describe dangerous ops.
 - [harness-lab status](nxtlvl-harness-lab-status.md) — incubation tier BUILT (T1–T13, 63 tests, gate doubt-reviewed); NOT a plugin — dogfood as project skills (.claude/skills→../cells); manual dogfood remains.

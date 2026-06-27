@@ -82,6 +82,33 @@ Opportunistic (non-breaking): update the comment in `plugins/nxtlvl/lib/scrub.te
 path mentions in `config/claude/memory/{claude-config-repo,developer-repo-git-workflow,nxtlvl-install-promotion}.md`
 and any `docs/` references, to `~/Developer/nxtlvl`.
 
+## Phase 3.5 — migrate the C&M project store (THE easily-missed step)
+> Added 2026-06-27 after the move silently forked the store. **This was not in the original
+> runbook** and cost a full session of re-learning before it was caught.
+
+The Context & Memory subsystem keys every project's store on the **absolute path of the repo's
+git-common-dir**: `projectId = sha256(realpath(git-common-dir))[:16]` (`plugins/nxtlvl/lib/project-identity.js`),
+and the store lives at `${XDG_STATE_HOME:-~/.local/state}/nxtlvl/projects/<projectId>/`
+(`lib/paths.ts`). Relocating the repo changes `realpath(.git)`, so the key changes — and the hooks
+**silently start a fresh, empty store** under the new key while all accumulated instincts,
+bookmarks, observations, and metrics strand under the old key. Nothing errors; the learning just
+goes cold.
+
+Migrate the durable data old→new (the old store is only read from):
+```sh
+OLD=$(node -e 'console.log(require("crypto").createHash("sha256").update("/Users/willschaefer/Developer/.git").digest("hex").slice(0,16))')
+NEW=$(node -e 'console.log(require("crypto").createHash("sha256").update("/Users/willschaefer/Developer/nxtlvl/.git").digest("hex").slice(0,16))')
+S=~/.local/state/nxtlvl/projects
+tar -cf ~/cm-store-backup.tar -C "$S" "$NEW"                      # back up the new (live) store first
+# instincts: copy + REWRITE project_id (else future reinforcements misroute back to the old store)
+for f in "$S/$OLD"/instincts/*.md; do b=$(basename "$f"); [ -e "$S/$NEW/instincts/$b" ] || \
+  sed "s/^project_id: $OLD\$/project_id: $NEW/" "$f" > "$S/$NEW/instincts/$b"; done
+cp -n "$S/$OLD"/bookmarks/*.jsonl "$S/$NEW"/bookmarks/ 2>/dev/null  # session continuity
+# observations/obs-seq/obs-cursor: leave them — already distilled; merging races the live observer
+```
+Global instincts (`…/nxtlvl/instincts/`, not project-keyed) survive the move untouched.
+**This same fork happens on any future relocation OR fresh clone to a new path** — re-run this step.
+
 ## Phase 4 — verification checklist
 ```sh
 git -C ~/Developer/nxtlvl rev-parse --show-toplevel   # = ~/Developer/nxtlvl
@@ -92,6 +119,8 @@ readlink ~/.claude/projects/-Users-willschaefer-Developer-nxtlvl/memory  # -> ..
 grep Developer ~/.claude/plugins/known_marketplaces.json   # path now ends /Developer/nxtlvl
 find ~/.claude -maxdepth 2 -type l ! -exec test -e {} \; -print   # broken symlinks (expect none)
 ls ~/Developer/llm-wiki/.git >/dev/null && echo "llm-wiki sibling intact"
+NEW=$(node -e 'console.log(require("crypto").createHash("sha256").update("/Users/willschaefer/Developer/nxtlvl/.git").digest("hex").slice(0,16))')
+ls ~/.local/state/nxtlvl/projects/$NEW/instincts | wc -l   # C&M store migrated (expect the full count, not ~3)
 ```
 Then restart Claude Code from `~/Developer/nxtlvl` and confirm the nxtlvl plugin + skills load and
 memory/briefing resolve.
