@@ -2,7 +2,6 @@
   "name": "nxtlvl-dev",
   "owner": { "name": "will-schaefer" },
   "plugins": [
-    { "name": "nxtlvl", "source": "./plugins/nxtlvl", "description": "Personal agent harness." },
-    { "name": "nxtlvl-wiki", "source": "./plugins/nxtlvl-wiki", "description": "Toolkit for building & maintaining the nxtlvl-wiki: ingest/lint/query commands, research-scout agents, and manifest scripts. Operates on the wiki checkout in the current directory." }
+    { "name": "nxtlvl", "source": "./plugins/nxtlvl", "description": "Personal agent harness." }
   ]
 }
