@@ -200,7 +200,7 @@ nearest relative.
    `plugins/nxtlvl/skills/brainstorming/SKILL.md` to *compose* the three intent skills rather
    than inline.
 3. **Agents** (`context-scout`, `idea-critic`, `approach-explorer`) — lean executors, each
-   pointing at the relevant skill as its source of truth (don't restate it; ADR-012/ADR-015).
+   pointing at the relevant skill as its source of truth (don't restate it; ADR-012/ADR-013).
 4. **Commands** (`/brainstorm` + aliases) — thin entries.
 5. **Router wiring** (§9) — last, once the pieces exist.
 

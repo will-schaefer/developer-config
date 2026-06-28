@@ -215,7 +215,7 @@ how outputs merge ([ADR-021](../decisions/ADR-021-agent-orchestration-model.md))
 | G3 | Agent chaining | One agent's output feeds the next | ✅ | Ideation pipeline ([ADR-026](../decisions/ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md)) |
 | G4 | Parallel fan-out | Multiple read-only agents at once | ✅ | `harness-review` fan-out |
 | G5 | Output composition | How subagent results merge back | ✅ | Pointers-over-content briefs (context-scout) |
-| G6 | Native-agent-+-injected-skill vs custom agent | Default to injected skill; custom only if sandbox/model/isolation demands | ✅ | [ADR-015](../decisions/ADR-015-agent-skill-load-rule-methodology-vs-spawn-target.md) |
+| G6 | Native-agent-+-injected-skill vs custom agent | Default to injected skill; custom only if sandbox/model/isolation demands | ✅ | [ADR-012](../decisions/ADR-012-agent-design-contract.md) / [ADR-013](../decisions/ADR-013-skill-agent-authoring-model.md) |
 | G7 | Context preservation via delegation | Heavy work in isolated context keeps orchestrator lean | ✅ | [`personal-harness.md`](../intent/personal-harness.md):72 |
 | G8 | Workflow DAG authoring | A declared fixed multi-step topology | 🟡 | Rides native `Workflow` (A3); authored per domain as earned |
 | G9 | Self-evolving topology | Agents that rewrite their own graph | ⛔ | CowAgent/autonomous-loop shape — out ([`reference-domain-map.md`](reference-domain-map.md)) |

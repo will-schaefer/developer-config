@@ -65,7 +65,7 @@ silent-failure-hunter, tdd-guide, refactor-cleaner, doc-updater, performance-opt
   library. This is `agent-sort`'s evidence logic applied at the *operator* level — but ecc's
   install machinery is **not** adopted (already covered by ADR-002 + ADR-008).
 - **Realization test:** native agent that **loads** its skill by default (runner case per build
-  ADR-012/ADR-015; spawn-target agents take a schema pointer and don't load); custom agent only
+  ADR-012/ADR-013; spawn-target agents take a schema pointer and don't load); custom agent only
   when isolated context / restricted tools / a distinct model tier forces it.
 - **Adopted wholesale:** the lean agent contract and the harness-construction authoring checklist.
 
@@ -95,7 +95,7 @@ it leans on — eval-first, model-routed, with knowledge injected from a caller-
 
 ### nxtlvl decision → [ADR-018](../decisions/ADR-018-agent-authoring-method.md)
 - **Adopt:** one-way skill→lean-executor dependency (the runner agent **loads** the skill it
-  fronts per build ADR-012/ADR-015; a spawn-target agent takes a schema pointer instead);
+  fronts per build ADR-012/ADR-013; a spawn-target agent takes a schema pointer instead);
   done-condition-first; explicit stop-and-ask guardrails; phased structure + deterministic output
   + a binary decision rule.
 - **Adapt:** model-routing heuristic (tiers per ADR-017, escalate only on a reasoning-gap); the
@@ -296,6 +296,6 @@ All six phases reviewed (Design → Author → Evaluate → Debug → Orchestrat
 recorded as an ADR (017–022, renumbered from 012–017 on merge to clear a collision with `main`'s
 build ADRs 012–016). The review decisions defer to those build ADRs where they decide the same
 point — most notably the agent↔skill mechanism (the executor **loads** its skill, build
-ADR-012/ADR-015, rather than the orchestrator injecting it) and the build-now confident-core
+ADR-012/ADR-013, rather than the orchestrator injecting it) and the build-now confident-core
 (build ADR-016). The same adopt/adapt/reject method now applies to any future harness brought in
 as a reference.
