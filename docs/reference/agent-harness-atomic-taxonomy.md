@@ -125,7 +125,7 @@ hand-built version is structurally a slower, capped shim around the real one
 | C6 | Custom tool | A harness-defined tool beyond the built-ins | ◻ | No bespoke tools yet; MCP (B7) covers current need |
 | C7 | MCP tool | A tool surfaced by an MCP server | ✅ | via context7 / deepwiki servers |
 | C8 | Typed output contract | A JSON schema an agent must emit | ✅ | `skills/doubt-driven-development/reviewer-output.schema.json` |
-| C9 | Alias / router entry | Thin entry resolving through router precedence to an upstream skill | ✅ | `/interview-me`, `/grill-me`, `/idea-refine` ([ADR-027](../decisions/ADR-027-router-endorses-only-established-items.md)) |
+| C9 | Alias / router entry | Thin entry resolving through router precedence to an upstream skill | ✅ | `/interview-me`, `/grill-me`, `/idea-refine` ([ADR-020](../decisions/ADR-020-router-endorses-established-items.md)) |
 | C10 | Progressive-disclosure reference | A skill's `references/` loaded on demand, not up front | ✅ | `skills/harness-review/references/**` |
 | C11 | Bundled script | Executable shipped inside a component | ✅ | `skills/crop/scripts/`, `lib/*.js` |
 | C12 | Shared library | Cross-component helper code | ✅ | `plugins/nxtlvl/lib/` (atomic, paths, scrub, recall…) |
@@ -211,8 +211,8 @@ how outputs merge ([ADR-021](../decisions/ADR-021-agent-orchestration-model.md))
 | ID | Atom | One-line | nxtlvl | Pointer / note |
 |--|--|--|:--:|--|
 | G1 | Orchestrator/specialist model | Lean main session delegates to scoped specialists | ✅ | [`personal-harness.md`](../intent/personal-harness.md):63–73 |
-| G2 | Delegation policy | When to spawn vs. do inline | ✅ | [ADR-022](../decisions/ADR-022-agent-operation-model.md) |
-| G3 | Agent chaining | One agent's output feeds the next | ✅ | Ideation pipeline ([ADR-026](../decisions/ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md)) |
+| G2 | Delegation policy | When to spawn vs. do inline | ✅ | [ADR-023](../decisions/ADR-023-agent-operation-model.md) |
+| G3 | Agent chaining | One agent's output feeds the next | ✅ | Ideation pipeline ([ADR-018](../decisions/ADR-018-ideation-domain.md)) |
 | G4 | Parallel fan-out | Multiple read-only agents at once | ✅ | `harness-review` fan-out |
 | G5 | Output composition | How subagent results merge back | ✅ | Pointers-over-content briefs (context-scout) |
 | G6 | Native-agent-+-injected-skill vs custom agent | Default to injected skill; custom only if sandbox/model/isolation demands | ✅ | [ADR-012](../decisions/ADR-012-agent-design-contract.md) / [ADR-013](../decisions/ADR-013-skill-agent-authoring-model.md) |
@@ -234,10 +234,10 @@ how outputs merge ([ADR-021](../decisions/ADR-021-agent-orchestration-model.md))
 | H2 | Per-agent tool scoping | Restricting an agent's tool set | ✅ | e.g. read-only reviewers ([ADR-017](../decisions/ADR-017-agent-design-contract.md)) |
 | H3 | Read-only sandbox | An executor that cannot Write/Edit | ✅ | `doubt-reviewer`, `context-scout` |
 | H4 | MCP server integration | Wiring an external tool server | ✅ | context7, deepwiki (`.mcp.json`) |
-| H5 | Docs grounding (primary-source) | Version-pinned library docs into context | ✅ | `/context7` + `context7-scout` ([ADR-030](../decisions/ADR-030-context7-testifies-primary-sources-version-pinned.md)) |
-| H6 | Repo orientation (non-evidence) | DeepWiki orientation, treated as a lead not proof | ✅ | `deepwiki-scout` ([ADR-029](../decisions/ADR-029-deepwiki-orientation-not-evidence.md)) |
+| H5 | Docs grounding (primary-source) | Version-pinned library docs into context | ✅ | `/context7` + `context7-scout` ([ADR-026](../decisions/ADR-026-context7-testifies-primary-sources.md)) |
+| H6 | Repo orientation (non-evidence) | DeepWiki orientation, treated as a lead not proof | ✅ | `deepwiki-scout` ([ADR-025](../decisions/ADR-025-deepwiki-orientation-not-evidence.md)) |
 | H7 | Deferred / lazy tool loading | Load tool schemas on demand to save context | ⬛ | Platform `ToolSearch` |
-| H8 | GitHub operations | PR/issue/CI mechanics | ✅ | `git-workflow-runner` + `github-workflow` ([ADR-023](../decisions/ADR-023-github-workflow-skill-and-conventions.md)) |
+| H8 | GitHub operations | PR/issue/CI mechanics | ✅ | `git-workflow-runner` + `github-workflow` ([ADR-017](../decisions/ADR-017-git-workflows-domain.md)) |
 | H9 | Browser / computer-use tool | Drive a browser or GUI | ⚪ | Dormant-ecc backstop |
 | H10 | Image/screenshot handling | Crop/process visual inputs | ✅ | `/crop` + `skills/crop/` |
 
@@ -257,11 +257,11 @@ no-secrets floor.*
 | I5 | Secrets / no-leak gate | No secrets may land | ✅ | `lib/scrub.js` (fail-closed) |
 | I6 | Dangerous-command guard | Block catastrophic shell commands | ✅ | `hooks/dangerous-bash.js` |
 | I7 | Frontmatter / dead-ref validation | No dead skill/agent refs; valid frontmatter | 🟡 | Audit sub-check ([ADR-009](../decisions/ADR-009-objective-invoked-audit-gate.md)) |
-| I8 | Prose-quality / stop-slop | Guard against LLM slop in shipped prose | 🟡 | [ADR-011](../decisions/ADR-011-prose-quality-stop-slop.md) + `docs/spec/nxtlvl-stop-slop-pipeline.md` |
+| I8 | Prose-quality / stop-slop | Guard against LLM slop in shipped prose | 🟡 | [ADR-024](../decisions/ADR-024-prose-quality-stop-slop.md) + `docs/spec/nxtlvl-stop-slop-pipeline.md` |
 | I9 | Quality-first-over-leanness | Tie-break favors quality, not minimalism | ✅ | [ADR-014](../decisions/ADR-014-quality-first-over-leanness.md) |
-| I10 | Global decision rule | The adopt/adapt/reject decision discipline | ✅ | [ADR-010](../decisions/ADR-010-global-decision-rule.md) |
-| I11 | Agent evaluation model | How an authored agent is judged good | 🟡 | [ADR-019](../decisions/ADR-019-agent-evaluation-model.md) |
-| I12 | Agent debugging model | How a misbehaving agent is diagnosed | 🟡 | [ADR-020](../decisions/ADR-020-agent-debugging-model.md) |
+| I10 | Global decision rule | The adopt/adapt/reject decision discipline | ✅ | `~/.claude/rules/decisions.md` |
+| I11 | Agent evaluation model | How an authored agent is judged good | 🟡 | [ADR-021](../decisions/ADR-021-agent-evaluation-model.md) |
+| I12 | Agent debugging model | How a misbehaving agent is diagnosed | 🟡 | [ADR-022](../decisions/ADR-022-agent-debugging-model.md) |
 
 ---
 
@@ -393,7 +393,7 @@ visible.
 
 | Atom | Why it's open | Cheapest first move if a task earns it |
 |--|--|--|
-| **F7 · Stop hook** | No turn-end hook; the stop-slop gate ([ADR-011](../decisions/ADR-011-prose-quality-stop-slop.md)) is the obvious tenant | Wire `Stop` to the stop-slop check once I8 ships |
+| **F7 · Stop hook** | No turn-end hook; the stop-slop gate ([ADR-024](../decisions/ADR-024-prose-quality-stop-slop.md)) is the obvious tenant | Wire `Stop` to the stop-slop check once I8 ships |
 | **F8 · SubagentStop hook** | No subagent-completion hook; could compose G5 output-merging | Defer until a delegation pattern needs post-processing |
 | **F9 · Notification hook** | Unused native event | Defer; no driving task |
 | **C6 · Custom (non-MCP) tool** | All external capability is MCP today (H4); no bespoke tool | Only if a need resists both built-ins and MCP |

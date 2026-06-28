@@ -19,7 +19,7 @@
   (own context window) · `skill` = methodology/knowledge loaded into a context.
 - **Native** = authored in nxtlvl. **Alias** = a thin entry point that resolves through router
   precedence (`nxtlvl:` → `agent-skills:` → native) to an upstream skill until an nxtlvl-refined
-  version is authored ([ADR-024](../decisions/ADR-024-git-workflows-domain-command-agent-skill.md),
+  version is authored ([ADR-017](../decisions/ADR-017-git-workflows-domain.md),
   router skill).
 
 ---
@@ -27,7 +27,7 @@
 ## 1. Ideation domain
 
 *Turn a raw idea into an approved direction before any building, then hand off to spec → plan.*
-Orchestrator skill + isolated read-only agents ([ADR-026](../decisions/ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md)).
+Orchestrator skill + isolated read-only agents ([ADR-018](../decisions/ADR-018-ideation-domain.md)).
 
 | Type | Name | Native? | Purpose |
 |------|------|---------|---------|
@@ -44,7 +44,7 @@ Orchestrator skill + isolated read-only agents ([ADR-026](../decisions/ADR-026-i
 ## 2. Git workflows domain
 
 *Drive a change through branch → commit → PR → review → CI → merge.*
-([ADR-024](../decisions/ADR-024-git-workflows-domain-command-agent-skill.md))
+([ADR-017](../decisions/ADR-017-git-workflows-domain.md))
 
 | Type | Name | Native? | Purpose |
 |------|------|---------|---------|

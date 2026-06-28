@@ -29,7 +29,7 @@
 ### What is thin or still an interim exception
 
 - **`review` skill** — thin wrapper around upstream `agent-skills:review`; a fully nxtlvl-refined body is not authored yet.
-- **`/grill-me`, `/interview-me`, `/idea-refine`** — thin aliases to upstream `agent-skills` skills as interim exceptions per [ADR-027](../../../docs/decisions/ADR-027-router-endorses-only-established-items.md).
+- **`/grill-me`, `/interview-me`, `/idea-refine`** — thin aliases to upstream `agent-skills` skills as interim exceptions per [ADR-020](../../../docs/decisions/ADR-020-router-endorses-established-items.md).
 - **`/context7`** — command and scout are present, but the Context7 MCP is not exercised in an automated test.
 - **No README in the plugin root** — `plugins/nxtlvl/README.md` does not exist; the plugin is documented via this deepwiki and the command/skill/agent files.
 

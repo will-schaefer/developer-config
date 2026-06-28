@@ -62,8 +62,8 @@ It is the source of truth for installing the plugin from this repo; the per-mach
 ## Relevant ADRs / intent
 
 - [ADR-001](../../../docs/decisions/ADR-001-plugin-local-marketplace-packaging.md) — plugin local-marketplace packaging.
-- [ADR-029](../../../docs/decisions/ADR-029-deepwiki-orientation-not-evidence.md) — DeepWiki produces leads, not evidence.
-- [ADR-030](../../../docs/decisions/ADR-030-context7-testifies-primary-sources-version-pinned.md) — Context7 testifies; cite doc URL, version-pinned.
+- [ADR-025](../../../docs/decisions/ADR-025-deepwiki-orientation-not-evidence.md) — DeepWiki produces leads, not evidence.
+- [ADR-026](../../../docs/decisions/ADR-026-context7-testifies-primary-sources.md) — Context7 testifies; cite doc URL, version-pinned.
 - [Intent](../../../docs/intent/personal-harness.md) — the plugin's purpose and scope.
 
 ## Open questions / TODOs

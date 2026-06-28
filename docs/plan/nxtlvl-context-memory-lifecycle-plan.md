@@ -355,7 +355,7 @@ below-bar/stale pending instincts; reports what it dropped. **Dependencies:** 1.
 (dry-run default), and on `--generate` dispatches the **`evolver` subagent** to author each
 artifact. We **reject** ecc's mechanical regex/string-concat stub generation (low quality) and
 **replace** it with real LLM authoring: the agent loads `skill-creator` conventions and writes
-valid frontmatter + body in an **isolated context** (per [ADR-026](../decisions/ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md)
+valid frontmatter + body in an **isolated context** (per [ADR-018](../decisions/ADR-018-ideation-domain.md)
 isolated-agents pattern). Command = cheap orchestration; agent = expensive authoring.
 **Acceptance criteria:**
 - [ ] `/evolve` (no flag) lists candidates from 5.4a; writes nothing.

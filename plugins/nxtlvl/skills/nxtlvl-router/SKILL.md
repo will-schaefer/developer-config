@@ -5,7 +5,7 @@ description: nxtlvl skill router — the meta-skill that decides which nxtlvl sk
 
 # nxtlvl Router
 
-This router points you at the **right nxtlvl skill** for a task — and, deliberately, at *nothing* when nxtlvl owns no skill for the phase you're in. It endorses only what the project has **established**; it does **not** advertise the whole upstream `agent-skills` catalog as if nxtlvl had adopted it ([ADR-027](../../../../docs/decisions/ADR-027-router-endorses-only-established-items.md), which amends [ADR-003](../../../../docs/decisions/ADR-003-compose-not-reconstruct.md)).
+This router points you at the **right nxtlvl skill** for a task — and, deliberately, at *nothing* when nxtlvl owns no skill for the phase you're in. It endorses only what the project has **established**; it does **not** advertise the whole upstream `agent-skills` catalog as if nxtlvl had adopted it ([ADR-020](../../../../docs/decisions/ADR-020-router-endorses-established-items.md), which refines the composition posture of [ADR-003](../../../../docs/decisions/ADR-003-compose-not-reconstruct.md) at the router layer).
 
 It routes; it does not restate. Each skill holds its own knowledge ([ADR-012](../../../../docs/decisions/ADR-012-agents-execute-skills-hold-knowledge.md)) — this file sends you there, it doesn't duplicate what's inside. **Pointers over dumped content** applies to the router itself.
 
@@ -23,7 +23,7 @@ There is **no general agent-skills tier.** A nxtlvl-refined skill is self-contai
 
 **The one carve-out — named interim exceptions (‡).** A *small, finite, shrinking* set of upstream `agent-skills` skills are still pointed to **by name**, because an established nxtlvl skill composes them and their ◆ replacement isn't authored yet. These are tracked debt, not a floor: each retires the moment its ◆ version ships. They are the *only* upstream skills this router endorses. Everything else upstream is unendorsed — still installed and directly invokable, but the router neither recommends nor depends on it.
 
-`agent-skills` is not uninstalled. Removing it from the router is an **endorsement** decision, not an access-control one ([ADR-027](../../../../docs/decisions/ADR-027-router-endorses-only-established-items.md)).
+`agent-skills` is not uninstalled. Removing it from the router is an **endorsement** decision, not an access-control one ([ADR-020](../../../../docs/decisions/ADR-020-router-endorses-established-items.md)).
 
 ## Discovery map
 
@@ -57,11 +57,11 @@ That last ◆ branch is an off-ramp from the SDLC, not a phase within it. `◆ h
 
 A feature still flows in sequence: `◆ brainstorming` → (its handoff) `‡ spec-driven-development` → `‡ planning-and-task-breakdown` → implement *natively* with `◆ doubt-driven-development` in-flight when stakes are high → `◆ review` → `◆ github-workflow` → `◆ documentation-and-adrs`. The implement/test/debug middle is currently native — nxtlvl owns no skill there yet.
 
-**Two named ◆ skills carry names different from the upstream they replaced** (historical context, no longer a fallthrough concern): `◆ review` supersedes the upstream `code-review-and-quality` skill (`review` is its command alias), and `◆ github-workflow` supersedes `git-workflow-and-versioning`, renamed for its GitHub/`gh` focus ([ADR-024](../../../../docs/decisions/ADR-024-git-workflows-domain-command-agent-skill.md)).
+**Two named ◆ skills carry names different from the upstream they replaced** (historical context, no longer a fallthrough concern): `◆ review` supersedes the upstream `code-review-and-quality` skill (`review` is its command alias), and `◆ github-workflow` supersedes `git-workflow-and-versioning`, renamed for its GitHub/`gh` focus ([ADR-017](../../../../docs/decisions/ADR-017-git-workflows-domain.md)).
 
 ## Dark at unowned phases
 
-For any phase not on the map, **the router offers nothing to route to** — by design ([ADR-027](../../../../docs/decisions/ADR-027-router-endorses-only-established-items.md)). nxtlvl has established only the phases above; the rest of the SDLC (implementation specifics, testing, debugging, security, performance, CI/CD, deprecation, observability, shipping) is **hand-flown natively** until nxtlvl builds a skill for it.
+For any phase not on the map, **the router offers nothing to route to** — by design ([ADR-020](../../../../docs/decisions/ADR-020-router-endorses-established-items.md)). nxtlvl has established only the phases above; the rest of the SDLC (implementation specifics, testing, debugging, security, performance, CI/CD, deprecation, observability, shipping) is **hand-flown natively** until nxtlvl builds a skill for it.
 
 This is deliberate, and it has a cost: most of the lifecycle has no skill scaffolding right now. The fix is **reactive, not a floor** — phases get covered as nxtlvl builds them (the bounded confident-core of [ADR-016](../../../../docs/decisions/ADR-016-confident-core-capability-domains.md) — Python, TS/JS, Rust, Frontend, Backend — plus anything that earns its way in through the [ADR-008](../../../../docs/decisions/ADR-008-reactive-growth-intake-gate.md) intake gate). Until then, *handle it natively* is the honest answer, not *borrow an unvetted upstream skill*.
 
@@ -76,7 +76,7 @@ These five are the **only** upstream skills the router points to, and the list i
 | `interview-me` | ideation sub-skill; body pending authoring (per its command file) | its ◆ body is authored |
 | `grill-me` | ideation sub-skill; body pending authoring | its ◆ body is authored |
 | `idea-refine` | ideation sub-skill; body pending authoring | its ◆ body is authored |
-| `spec-driven-development` | composed by `◆ brainstorming`'s ideation→contract handoff ([ADR-026](../../../../docs/decisions/ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md)) | its ◆ version is built |
+| `spec-driven-development` | composed by `◆ brainstorming`'s ideation→contract handoff ([ADR-018](../../../../docs/decisions/ADR-018-ideation-domain.md)) | its ◆ version is built |
 | `planning-and-task-breakdown` | composed by the same handoff | its ◆ version is built |
 
 `◆ brainstorming` already has its own body; it composes the three ‡ ideation sub-skills until they're authored.
@@ -85,9 +85,9 @@ These five are the **only** upstream skills the router points to, and the list i
 
 Skills hold knowledge; **agents execute it** ([ADR-012](../../../../docs/decisions/ADR-012-agents-execute-skills-hold-knowledge.md)). When a phase has a dedicated nxtlvl agent, the agent is the executor and the skill is its single source of truth — don't restate the skill into the agent's request.
 
-- **`nxtlvl:git-workflow-runner`** (agent / `/git-workflow`) executes `◆ github-workflow` — branch → commit → PR → review → CI → merge in isolation, composing `◆ review` at the review step. It has `Bash` but no `Write`/`Edit`, so it commits and pushes yet cannot touch source — code fixes hand back to you ([ADR-024](../../../../docs/decisions/ADR-024-git-workflows-domain-command-agent-skill.md)). Reach for the agent to drive a change to a reviewed PR; reach for the skill to do it inline.
+- **`nxtlvl:git-workflow-runner`** (agent / `/git-workflow`) executes `◆ github-workflow` — branch → commit → PR → review → CI → merge in isolation, composing `◆ review` at the review step. It has `Bash` but no `Write`/`Edit`, so it commits and pushes yet cannot touch source — code fixes hand back to you ([ADR-017](../../../../docs/decisions/ADR-017-git-workflows-domain.md)). Reach for the agent to drive a change to a reviewed PR; reach for the skill to do it inline.
 - **`nxtlvl:doc-keeper`** (agent / `/doc-keeper`) executes `◆ documentation-and-adrs` — records the *why*, writes/supersedes ADRs, keeps the index honest. Reach for the agent when you want the documentation pass *done*; the skill when you want to do it inline.
-- **`◆ brainstorming`** spawns the read-only support agents **`nxtlvl:context-scout`** (repo/context sweep) and **`nxtlvl:idea-critic`** (adversarial idea critique) at its seams; **`nxtlvl:doubt-reviewer`** is the post-decision executor that `◆ doubt-driven-development` spawns. These run in isolation and return a brief/verdict — the interactive interview itself stays on the main thread ([ADR-026](../../../../docs/decisions/ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md)).
+- **`◆ brainstorming`** spawns the read-only support agents **`nxtlvl:context-scout`** (repo/context sweep) and **`nxtlvl:idea-critic`** (adversarial idea critique) at its seams; **`nxtlvl:doubt-reviewer`** is the post-decision executor that `◆ doubt-driven-development` spawns. These run in isolation and return a brief/verdict — the interactive interview itself stays on the main thread ([ADR-018](../../../../docs/decisions/ADR-018-ideation-domain.md)).
 
 ## Core operating behaviors
 

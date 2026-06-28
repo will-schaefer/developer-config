@@ -1,11 +1,11 @@
 ---
-id: ADR-029
-title: "DeepWiki orients harness-review but never testifies: leads, not evidence"
-status: Archived
-date: 2026-06-21
+id: ADR-025
+title: "Secondary sources orient but never testify — DeepWiki gives leads, not evidence"
+status: Draft
+date: 2026-06-28
 ---
 
-# ADR-029: DeepWiki orients `harness-review` but never testifies — leads, not evidence
+# ADR-025: DeepWiki orients `harness-review` but never testifies — leads, not evidence
 
 ## Context
 
@@ -39,7 +39,7 @@ produces **leads, not evidence.**
   `file:line`; **zero** DeepWiki claims reach any artifact.
 - **Every claim is a stamped lead.** The `deepwiki-scout` brief stamps each claim
   `LEAD — verify at source` with a where-to-verify pointer into the clone. An unstamped claim is a bug.
-- **Read-only by withheld tools** (per [ADR-026](ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md)'s isolated-agent pattern). `deepwiki-scout` holds *only* the three
+- **Read-only by withheld tools** (per [ADR-018](ADR-018-ideation-domain.md)'s isolated-agent pattern). `deepwiki-scout` holds *only* the three
   `mcp__plugin_nxtlvl_deepwiki__*` tools + `WebFetch` — no Read/Write/Edit/Bash/Glob/Grep. A leaked
   DeepWiki citation is made **structurally impossible**: the scout cannot write the tree or the artifact.
 - **Graceful degradation, never a hard dependency.** Public GitHub `REPO` → DeepWiki on; local path
@@ -100,6 +100,6 @@ formats are untouched.
   `mcp__plugin_nxtlvl_deepwiki__*` tools available and used the native MCP path end-to-end (one
   `read_wiki_structure` + four `ask_question`, no WebFetch fallback), every claim `LEAD`-stamped with
   a clone pointer. The native path is now confirmed working.
-- Recorded per the global decision rule ([ADR-010](ADR-010-global-decision-rule.md)). Reuses the
-  isolated read-only-agent pattern of [ADR-026](ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md)
+- Recorded per the global decision rule (`~/.claude/rules/decisions.md`). Reuses the
+  isolated read-only-agent pattern of [ADR-018](ADR-018-ideation-domain.md)
   ([`context-scout`](../../plugins/nxtlvl/agents/context-scout.md) is the sibling).

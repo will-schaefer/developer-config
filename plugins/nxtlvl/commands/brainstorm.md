@@ -12,7 +12,7 @@ approval gate → hand off to the native spec/plan pipeline.
 **It does not delegate to an agent — and that is deliberate.** Unlike `/git-workflow` (which spawns an
 isolated executor), the work here is an *interactive interview*, and agents can't talk to the user. The
 executor is a main-thread skill by design — the "executor inversion"
-([ADR-026](../../../docs/decisions/ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md)).
+([ADR-018](../../../docs/decisions/ADR-018-ideation-domain.md)).
 
 ## What it does
 

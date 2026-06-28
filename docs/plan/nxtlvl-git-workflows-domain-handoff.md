@@ -3,16 +3,16 @@
 > Continuity doc written 2026-06-19 for a fresh build session (which had `agent-skills` +
 > `/skill-creator`; this drafting session had neither). **That session has since completed the
 > work — see the Resolution banner below.** The plan body is kept for the record; for live state,
-> read [ADR-024](../decisions/ADR-024-git-workflows-domain-command-agent-skill.md) and intake
+> read [ADR-017](../decisions/ADR-017-git-workflows-domain.md) and intake
 > entry #3 in [`nxtlvl-skill-intake-backlog.md`](nxtlvl-skill-intake-backlog.md).
 
 > **Resolution (build session, 2026-06-19) — DONE.** The domain shipped as
 > `/git-workflow` (command) → `git-workflow-runner` (agent: `Bash` but no `Write`/`Edit`, `model: sonnet`,
 > composes `nxtlvl:review`) → `github-workflow` (skill, refined in place). **ADR renumber:** `main`
-> had meanwhile taken ADR-012–014, so this branch's `ADR-012-github-workflow…` was renumbered to
-> **ADR-023** (Superseded) and the domain decision recorded as **ADR-024** (supersedes ADR-023) — *not*
+> had meanwhile taken ADR-012–014, so this branch's `ADR-012-github-workflow…` was renumbered and
+> the domain decision recorded as **ADR-017** — *not*
 > the 012/013 the plan below names. Read the live state in
-> [ADR-024](../decisions/ADR-024-git-workflows-domain-command-agent-skill.md) and
+> [ADR-017](../decisions/ADR-017-git-workflows-domain.md) and
 > [`../decisions/README.md`](../decisions/README.md); the steps below are the original plan, kept for
 > the record.
 
@@ -28,8 +28,8 @@ single-skill approach already on the branch (see "Where we are").
 1. **Agent-vs-skill doctrine (governs the whole shape):** `docs/reference/ecc-agent-vs-skill-scoping.md`
    — §3 the command→agent→skill pairing, §4 the worked `/go-review` trace, §5 the agent-vs-skill checklist, §6 smells.
 2. **Intent (anchor):** `docs/intent/personal-harness.md` — "compose, don't reconstruct"; agent-building is *reactive*; ECC is the dormant backstop.
-3. **Current decision being superseded:** `docs/decisions/ADR-023-github-workflow-skill-and-conventions.md`
-   (renumbered to `ADR-023-…` during the build — see the Resolution note above).
+3. **The git-workflows domain decision:** `docs/decisions/ADR-017-git-workflows-domain.md`
+   (see the Resolution note above).
 4. **The seed skill already built:** `plugins/nxtlvl/skills/github-workflow/SKILL.md`.
 5. **House ADR format + lifecycle:** `plugins/nxtlvl/skills/documentation-and-adrs/SKILL.md`.
 6. **Intake gate:** `docs/plan/nxtlvl-skill-intake-backlog.md` + `docs/decisions/ADR-008-reactive-growth-intake-gate.md`.
@@ -121,7 +121,7 @@ plugins/nxtlvl/
    `nxtlvl:review` for the five-axis pass; consults the skill via a pointer.
 5. **Build the thin command entry/entries** that delegate to the agent/skill.
 6. **Harness bookkeeping:** ADR-013 (domain decision; supersede ADR-012); update `docs/decisions/README.md`
-   index; add intake-backlog entry #3 naming the task + the thing that failed (ADR-008); record per ADR-010.
+   index; add intake-backlog entry #3 naming the task + the thing that failed (ADR-008); record per the decision rule (`~/.claude/rules/decisions.md`).
 7. **Validate (audit-style):** every JSON manifest parses; frontmatter parses (skills name+desc;
    agents name/desc/tools/model; commands description); no dead skill/agent refs; ADR cross-links
    resolve; no Prompt Defense Baseline leaked in from vendoring.

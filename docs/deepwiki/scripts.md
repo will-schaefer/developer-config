@@ -61,7 +61,7 @@ The `scripts/` directory contains two Bash scripts that support the plugin lifec
 ## Relevant ADRs / intent
 
 - [ADR-001](../../../docs/decisions/ADR-001-plugin-local-marketplace-packaging.md) — local marketplace packaging.
-- [ADR-026](../../../docs/decisions/ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md) — ideation orchestrator + context-scout snapshot.
+- [ADR-018](../../../docs/decisions/ADR-018-ideation-domain.md) — ideation orchestrator + context-scout snapshot.
 - [Intent](../../../docs/intent/personal-harness.md) — install/promotion mechanics.
 
 ## Open questions / TODOs

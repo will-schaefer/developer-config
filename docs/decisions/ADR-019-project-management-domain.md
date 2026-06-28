@@ -1,12 +1,12 @@
 ---
-id: ADR-028
-title: "Ship a Project Management workflow domain as a manage-and-see layer with a standalone interactive dashboard over a single-writer state library"
-status: Archived
-date: 2026-06-20
+id: ADR-019
+title: "Project-management domain — a manage-and-see layer over a single-writer state library"
+status: Draft
+date: 2026-06-28
 implementation: "Build deferred and phased (Phase 1 = state library + status schema + Status; Phase 2 = dashboard; Phase 3 = Backlog); tracked in a follow-on spec + plan."
 ---
 
-# ADR-028: Ship a Project Management workflow domain as a manage-and-see layer with a standalone interactive dashboard over a single-writer state library
+# ADR-019: Project-management domain — a manage-and-see layer over a single-writer state library
 
 ## Context
 
@@ -14,9 +14,9 @@ nxtlvl's front-door spine is `brainstorm → spec → plan` (the planning-and-ta
 
 Three forces shaped the design space:
 
-1. **Governance constraint:** ADR-016 bounds capability domains at five (Python, TS/JS, Rust, Frontend, Backend) as a deliberate anti-bloat brake. Any new domain must either fit inside that cap or be a workflow/process domain, which are not bounded.
+1. **Governance constraint:** [ADR-015](ADR-015-scope-determination-and-extension-gate.md) bounds capability domains at five (Python, TS/JS, Rust, Frontend, Backend) as a deliberate anti-bloat brake. Any new domain must either fit inside that cap or be a workflow/process domain, which are not bounded.
 
-2. **Composition constraint:** ADR-003 (compose-not-reconstruct) and ADR-012 (agents execute, skills hold knowledge) require that PM not re-implement execution. Domain agents (built in the five capability domains and shipped via the git-workflows domain) perform the actual work; PM tracks and visualizes it.
+2. **Composition constraint:** [ADR-003](ADR-003-compose-not-reconstruct.md) (compose-not-reconstruct) and [ADR-012](ADR-012-agent-design-contract.md) (agents execute, skills hold knowledge) require that PM not re-implement execution. Domain agents (built in the five capability domains and shipped via the git-workflows domain) perform the actual work; PM tracks and visualizes it.
 
 3. **Reference harness contrast:** ecc ships ~15 PM-related commands (`epic-*`, `projects`, `pm2`, etc.); SuperClaude ships a `pm` command + PDCA/reflexion prose split across files; Trellis has native spec+plan+memory integration. All are either over-weight for this harness's size or require external dependencies (GitHub issues backend). The explicit anti-ecc-bloat goal (curated over comprehensive) rules out direct adoption of any of them.
 
@@ -24,7 +24,7 @@ The user asked for a "project management suite" with an interactive visual tool 
 
 ## Decision
 
-**1. Add a "Project Management" workflow/process domain.** It is explicitly NOT a sixth capability domain; it belongs to the workflow/process tier alongside Ideation (ADR-026) and git-workflows (ADR-024). ADR-016's bounded-five brake does not apply. This classification is the key governance point: if it were filed as a capability domain it would either bump an existing one or require amending ADR-016.
+**1. Add a "Project Management" workflow/process domain.** It is explicitly NOT a sixth capability domain; it belongs to the workflow/process tier alongside Ideation ([ADR-018](ADR-018-ideation-domain.md)) and git-workflows ([ADR-017](ADR-017-git-workflows-domain.md)). The bounded-five brake of [ADR-015](ADR-015-scope-determination-and-extension-gate.md) does not apply. This classification is the key governance point: if it were filed as a capability domain it would either bump an existing one or require amending the capability-domain cap.
 
 **2. The suite is the manage-and-see layer, not an execution engine.** It tracks, visualizes, and coordinates work. It does NOT drive task execution. Execution responsibility belongs to the domain-specific agents the user builds in the five capability domains; those agents perform the work and ship via the git-workflows domain. PM is a coordination and visibility surface, not a build-driver. An earlier design included an "Execute" capability and a `pm-runner` executor agent; both were removed (see Alternatives Considered).
 
@@ -33,7 +33,7 @@ The user asked for a "project management suite" with an interactive visual tool 
 - **Portfolio** — cross-plan overview (how multiple active plans relate).
 - **Backlog** — capture → triage → prioritize → promote items into `/plan`.
 
-**4. State model: plan files as durable source of truth; native Task tool as live in-session surface; all writes through a single-writer state library.** Plan files carry a defined **status schema** (Phase-1 deliverable). The state library owns parse↔serialize + atomic write (tmp-rename, per ADR-025's pattern) + version check. Every writer — the dashboard, the `pm-reporter` agent, and external domain agents reporting task completion — goes through the state library. Single-writer discipline eliminates an entire class of corruption bugs at one integration seam.
+**4. State model: plan files as durable source of truth; native Task tool as live in-session surface; all writes through a single-writer state library.** Plan files carry a defined **status schema** (Phase-1 deliverable). The state library owns parse↔serialize + atomic write (tmp-file + rename) + version check. Every writer — the dashboard, the `pm-reporter` agent, and external domain agents reporting task completion — goes through the state library. Single-writer discipline eliminates an entire class of corruption bugs at one integration seam.
 
 **5. Visual tool: a standalone local dashboard.** A small Node server (matching the harness's existing Node hook tooling) plus an interactive board UI — chosen as the primary surface because the user wants a persistent tool kept open across work sessions. The dashboard is fully interactive: drag cards, mark done, reprioritize, all with write-back. The two-writer hazard (dashboard and domain agents both mutating plan files concurrently) is resolved in the state library via optimistic concurrency (version check → on conflict: surface to user, dashboard re-fetches). This is handled once, in one module, and reused by every writer.
 
@@ -48,7 +48,7 @@ The user asked for a "project management suite" with an interactive visual tool 
 
 Command names are provisional and will be pinned in the Phase-1 spec.
 
-**7. Composition posture (ADR-003).** The suite reads `/plan` output (does not re-plan). `Backlog` promotes items into `/plan` by invoking the planning domain's conventions. The suite does NOT compose `/git-workflow` itself — shipping moved to the domain agents. `doubt`/`review` and `/doc-keeper` remain available at the broader workflow level, unchanged.
+**7. Composition posture ([ADR-003](ADR-003-compose-not-reconstruct.md)).** The suite reads `/plan` output (does not re-plan). `Backlog` promotes items into `/plan` by invoking the planning domain's conventions. The suite does NOT compose `/git-workflow` itself — shipping moved to the domain agents. `doubt`/`review` and `/doc-keeper` remain available at the broader workflow level, unchanged.
 
 **8. Build order.** Phase 1: state library + status schema + Status (read side). Phase 2: standalone dashboard (Status + Portfolio + write-back). Phase 3: Backlog grooming.
 
@@ -56,8 +56,8 @@ Command names are provisional and will be pinned in the Phase-1 spec.
 
 ### PM as a sixth capability domain
 - Pros: symmetric with the five existing capability domains; no new tier to explain.
-- Cons: trips ADR-016's bounded-five brake; PM is not a coding capability — it is a coordination and visibility layer over the harness's own work.
-- Rejected: wrong tier. ADR-016's brake exists precisely to prevent scope creep through capability-domain expansion.
+- Cons: trips the bounded-five capability-domain brake; PM is not a coding capability — it is a coordination and visibility layer over the harness's own work.
+- Rejected: wrong tier. The capability-domain brake exists precisely to prevent scope creep through capability-domain expansion.
 
 ### PM as a meta-PM surface only (manage the nxtlvl build, nothing more)
 - Pros: smallest possible scope; no risk of generalizing too early.
@@ -95,16 +95,19 @@ Command names are provisional and will be pinned in the Phase-1 spec.
 - **New load-bearing artifact: the plan-file status schema.** This is the contract shared by `pm-reporter`, the Node server, the dashboard, and all domain agents that report task completion. It must be defined and locked in Phase 1 before any other component is built.
 - **Dependency on domain agents for execution.** Until the five capability domains have built agents, marking tasks done is manual (dashboard-driven or command-driven). This is acceptable — PM tracks; it does not require agents to exist in order to function.
 - **Single integration seam for all writes.** The state library absorbs concurrency complexity once. Every new writer (future domain agent, future command) reuses it rather than re-implementing atomic write logic.
-- **Curated component count.** ~6 components (vs ecc's ~15 PM commands). Curating hard here is a deliberate signal; PM is where harnesses historically bloat first.
+- **Curated component count.** ~6 components (vs ecc's ~15 PM commands). Curating hard here is a deliberate signal — a quality choice, not a leanness compromise; PM is where harnesses historically bloat first.
 - **Phased build.** Three phases; a Phase-1 spec + plan follow this ADR. Nothing in the existing harness is blocked by deferring PM.
 - **Not a gate on the main build.** PM is additive; the existing `brainstorm → spec → plan` spine continues to function independently.
 
+## Implementation
+
+Build is deferred and phased: Phase 1 = state library + status schema + Status (read side); Phase 2 = standalone dashboard (Status + Portfolio + write-back); Phase 3 = Backlog grooming. Tracked in a follow-on spec + plan. The state library's atomic-write seam follows the standard tmp-file + rename pattern for durable on-disk state (see [ADR-007](ADR-007-memory-architecture.md) for the harness's state/provenance conventions).
+
 Cross-links:
 - [ADR-003](ADR-003-compose-not-reconstruct.md) — compose-not-reconstruct; PM reads `/plan`, does not re-plan.
-- [ADR-012](ADR-012-agents-execute-skills-hold-knowledge.md) — agents execute, skills hold knowledge; `pm-reporter` is read-only by design.
-- [ADR-014](ADR-014-quality-first-over-leanness.md) — quality-first; curated ~6 components is a quality choice, not a leanness compromise.
-- [ADR-016](ADR-016-confident-core-capability-domains.md) — why PM is NOT a capability domain; the five-domain brake and why workflow/process domains are the right tier.
-- [ADR-024](ADR-024-git-workflows-domain-command-agent-skill.md) — workflow-domain precedent (three-layer command → agent → skill).
-- [ADR-025](ADR-025-project-identity-observer-concurrency.md) — atomic write (tmp + rename) pattern reused by the state library.
-- [ADR-026](ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md) — workflow-domain precedent (orchestrator skill + isolated agents).
+- [ADR-012](ADR-012-agent-design-contract.md) — agents execute, skills hold knowledge; `pm-reporter` is read-only by design.
+- [ADR-015](ADR-015-scope-determination-and-extension-gate.md) — why PM is NOT a capability domain; the five-domain brake and why workflow/process domains are the right tier.
+- [ADR-017](ADR-017-git-workflows-domain.md) — workflow-domain precedent (three-layer command → agent → skill).
+- [ADR-018](ADR-018-ideation-domain.md) — workflow-domain precedent (orchestrator skill + isolated agents).
+- Curated-over-comprehensive is treated as a **principle** (quality-first over leanness), not a separately recorded decision.
 - Global decision rule: `~/.claude/rules/decisions.md`.

@@ -92,7 +92,7 @@ independent of D-event and can land immediately as the first safe commit.
 These are the spec's open questions, surfaced as explicit decisions. Recommended defaults are given
 so the plan can proceed on review; override any at the noted checkpoint. None rise to ADR-worthy
 (small, reversible hook behavior — they fold into the spec per
-[ADR-010](../decisions/ADR-010-global-decision-rule.md) §1, not a new ADR).
+the decision rule (`~/.claude/rules/decisions.md`) §1, not a new ADR).
 
 | ID | Decision | Recommended default | Why / when |
 |----|----------|---------------------|------------|

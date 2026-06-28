@@ -11,4 +11,4 @@ On the `nxtlvl` harness, ADRs in `docs/decisions/` are **advisory references, no
 
 **Why:** (2026-06-18) Mid-redesign of the Context & Memory + session-lifecycle subsystem, the user chose to un-defer continuous-learning and adopt ecc's background-observer model — overriding ADR-004 ("extend native memory, no separate store") and ADR-008 (continuous-learning deferred). They explicitly said to stop holding ADRs canonical.
 
-**How to apply:** When a new decision conflicts with an ADR, surface the conflict once (so it's recorded), then proceed with the new direction and record it as a superseding/amending ADR per the decision rule ([[ADR-010-global-decision-rule]]). Don't relitigate or block on the old ADR.
+**How to apply:** When a new decision conflicts with an ADR, surface the conflict once (so it's recorded), then proceed with the new direction and record it as a superseding/amending ADR per the decision rule (`~/.claude/rules/decisions.md`). Don't relitigate or block on the old ADR.

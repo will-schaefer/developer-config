@@ -13,10 +13,10 @@ The six phases: **Design → Author → Evaluate → Debug → Orchestrate → O
 |---|-------|--------|----------|
 | 1 | Design | ✅ reviewed | [ADR-017](../decisions/ADR-017-agent-design-contract.md) |
 | 2 | Author | ✅ reviewed | [ADR-018](../decisions/ADR-018-agent-authoring-method.md) |
-| 3 | Evaluate | ✅ reviewed | [ADR-019](../decisions/ADR-019-agent-evaluation-model.md) |
-| 4 | Debug | ✅ reviewed | [ADR-020](../decisions/ADR-020-agent-debugging-model.md) |
+| 3 | Evaluate | ✅ reviewed | [ADR-021](../decisions/ADR-021-agent-evaluation-model.md) |
+| 4 | Debug | ✅ reviewed | [ADR-022](../decisions/ADR-022-agent-debugging-model.md) |
 | 5 | Orchestrate | ✅ reviewed | [ADR-021](../decisions/ADR-021-agent-orchestration-model.md) |
-| 6 | Operate | ✅ reviewed | [ADR-022](../decisions/ADR-022-agent-operation-model.md) |
+| 6 | Operate | ✅ reviewed | [ADR-023](../decisions/ADR-023-agent-operation-model.md) |
 
 ---
 
@@ -129,7 +129,7 @@ formal eval-suite discipline, and a tool to compare agent products head-to-head.
 3. **`agent-eval`** — a benchmark CLI comparing coding-agent *products* (Claude Code vs Aider vs
    Codex) on pass-rate / cost / time / consistency in git worktrees.
 
-### nxtlvl decision → [ADR-019](../decisions/ADR-019-agent-evaluation-model.md)
+### nxtlvl decision → [ADR-021](../decisions/ADR-021-agent-evaluation-model.md)
 - **Adapt:** `agent-self-evaluation` as an *advisory* per-task done-condition check, scoped to
   non-trivial work, evidence rule + anti-patterns adopted wholesale. It **defers** to `review`
   (code) and stop-slop (prose) rather than introduce a third rubric, and is **never a gate** —
@@ -179,7 +179,7 @@ static-overlap items (dead refs, invalid frontmatter) belong to the gate; the be
 layer is already answered by nxtlvl's design: ADR-005 makes fallback logged and explicit, ADR-006
 keeps hooks fail-open.
 
-### nxtlvl decision → [ADR-020](../decisions/ADR-020-agent-debugging-model.md)
+### nxtlvl decision → [ADR-022](../decisions/ADR-022-agent-debugging-model.md)
 - **Adopt:** `agent-introspection-debugging` as the in-session self-debug loop (the 4 phases,
   pattern table, recovery heuristics, and no-fake-healing honesty rule); a caller-agnostic skill
   (ADR-018) the orchestrator or a stuck executor invokes, pairing with ADR-018 stop-and-ask and
@@ -277,7 +277,7 @@ posture is already fixed: fail-open hooks + kill switches (ADR-006), an invoked-
 gate (ADR-009), the fallback-log readouts (ADR-005/ADR-013), native memory (ADR-004), human gates
 (ADR-021). So the nuggets fold into decisions already made rather than spawning new machinery.
 
-### nxtlvl decision → [ADR-022](../decisions/ADR-022-agent-operation-model.md)
+### nxtlvl decision → [ADR-023](../decisions/ADR-023-agent-operation-model.md)
 - **Reject:** autonomous self-direction (autonomous-agent-harness), the continuous-loop runtime,
   and the enterprise fleet-ops platform — on ADR-003 (don't reconstruct runtime), ADR-004 (no new
   memory), ADR-006/009 (fail-open + gated, human-in-loop), and single-operator scope.

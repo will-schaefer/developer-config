@@ -1,7 +1,7 @@
 # Spec: `nxtlvl` Project Management domain — Phase 1
 
 > SDD Phase: **Specify**. Implements the decision recorded in
-> [`ADR-028`](../decisions/ADR-028-project-management-domain-manage-and-see.md).
+> [`ADR-019`](../decisions/ADR-019-project-management-domain.md).
 > **Scope: Phase 1 only** — the shared **state library**, the plan-file **status schema** (the
 > load-bearing contract), and the read-side **Status** capability. Phase 2 (standalone dashboard)
 > and Phase 3 (Backlog grooming) appear here as forward pointers, **not** contract.
@@ -14,7 +14,7 @@ Give `nxtlvl` a read-side window into plan state. Parse a plan's tasks out of it
 report **where a project stands** — counts by status, % done, the next task, and what's blocked —
 without hand-counting checkboxes.
 
-Per [ADR-028](../decisions/ADR-028-project-management-domain-manage-and-see.md) the PM suite
+Per [ADR-019](../decisions/ADR-019-project-management-domain.md) the PM suite
 *manages and sees*; it does **not** execute. So Phase 1 **only reads**. It is the foundation the
 Phase-2 dashboard and Phase-3 backlog grooming build on: all three consume the same state library
 and the same status schema.
@@ -137,7 +137,7 @@ the live plugin (only skills/agents/commands/hooks are) — so the sandbox-first
 keep work-in-progress *off the discovery path*, does not apply to it. It is placed directly in the
 **shared** `plugins/nxtlvl/lib/` so the non-skill Phase-2 dashboard server can import the one
 canonical parse/serialize module without reaching across a skill boundary (single-writer discipline,
-ADR-028 §4–5). This matches the existing precedent — the C&M Phase-1 stores (commit `07a69c4`) and
+ADR-019 §4–5). This matches the existing precedent — the C&M Phase-1 stores (commit `07a69c4`) and
 `scrub.js` already live in `plugins/nxtlvl/lib/`. The **skill and command ARE discoverable**, so they
 stage in `sandbox/` and promote with `git mv sandbox/skills/project-management plugins/nxtlvl/skills/`
 (and the command) when ready.
@@ -177,7 +177,7 @@ collects warnings and returns what it can) — read-side reporting must degrade,
   consumers depend on — see the lock note); adding a runtime dependency. *(The `lib/` location and
   command name are resolved — see Resolved Decisions — and are no longer open.)*
 - **Never:** **write** to plan files in Phase 1 (read-only — writes are Phase 2 via the atomic,
-  versioned path); synthesize stable IDs; couple to GitHub issues (rejected in ADR-028).
+  versioned path); synthesize stable IDs; couple to GitHub issues (rejected in ADR-019).
 
 ## Success Criteria
 
@@ -195,14 +195,14 @@ settled ground:
 
 1. **`lib/` home → shared `plugins/nxtlvl/lib/`** (not skill-local). The Phase-2 dashboard server is
    not a skill and must import the one canonical parse/serialize module without crossing a skill
-   boundary; this is what makes ADR-028's single-writer discipline enforceable. Matches the existing
+   boundary; this is what makes ADR-019's single-writer discipline enforceable. Matches the existing
    precedent (`plugins/nxtlvl/lib/` already holds the C&M Phase-1 stores and `scrub.js`). See
    *Project Structure* for the lib-direct / skill-sandbox split.
 2. **native Task-tool depth → file-only in Phase 1.** The durable truth is the plan file; a
    live-session Task overlay is a Phase-2 concern that rides with the dashboard. Phase 1 stays a pure,
    testable function: markdown → parsed shape.
 3. **Command name → `/pm-status`** (not `/status`). Domain-namespaced, matches `/pm-dashboard`
-   (ADR-028), no collision risk.
+   (ADR-019), no collision risk.
 4. **Write side stays deferred to Phase 2.** The atomic, **versioned** write path + optimistic
    concurrency is *not* in Phase 1 (read-only). This is where the
    [ADR-025](../decisions/ADR-025-project-identity-observer-concurrency.md) atomic-write cross-link

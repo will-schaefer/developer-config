@@ -5,12 +5,12 @@
 > ships as a three-layer `command → executor → knowledge` domain in ECC's shape
 > ([`../reference/ecc-agent-vs-skill-scoping.md`](../reference/ecc-agent-vs-skill-scoping.md) §3),
 > but with the executor **inverted** onto the main thread because the work is an interactive
-> dialogue (see §2). Recorded as [ADR-026](../decisions/ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md).
+> dialogue (see §2). Recorded as [ADR-018](../decisions/ADR-018-ideation-domain.md).
 >
 > Anchor intent: [`../intent/personal-harness.md`](../intent/personal-harness.md).
-> Domain precedent: [ADR-024](../decisions/ADR-024-git-workflows-domain-command-agent-skill.md)
+> Domain precedent: [ADR-017](../decisions/ADR-017-git-workflows-domain.md)
 > (git-workflows, the inverse shape). Builds on: ADR-003 (compose, don't reconstruct),
-> ADR-012 (agents execute, skills hold knowledge), ADR-010 (decision rule).
+> ADR-012 (agents execute, skills hold knowledge), the decision rule (`~/.claude/rules/decisions.md`).
 >
 > **Scope boundary:** this spec pins the **architecture** — the component inventory, the
 > executor inversion, the composition seams, and the router placement. It does **not** pin the
@@ -37,7 +37,7 @@ and the C&M subsystem — not a reactive un-deferral under the intake gate
 
 ECC's domain shape is `COMMAND (entry) → AGENT (executor) → SKILL (knowledge)` — the agent does
 the work in an isolated, tool-scoped context, and only a result crosses back. That is exactly
-what [ADR-024](../decisions/ADR-024-git-workflows-domain-command-agent-skill.md) shipped for
+what [ADR-017](../decisions/ADR-017-git-workflows-domain.md) shipped for
 git-workflows.
 
 **This domain inverts the middle layer.** Its core work is an **interview** — a live,
@@ -121,7 +121,7 @@ brief/verdict; the noisy work stays in the subagent (the `/go-review` payoff).
 
 **Pass-1 build scope (resolved 2026-06-19):** `context-scout` and `idea-critic` ship in the
 first pass; `approach-explorer` is **deferred** until the 2–3-approaches step proves it wants
-parallelism in practice (§13). All three remain part of the domain shape (ADR-026).
+parallelism in practice (§13). All three remain part of the domain shape (ADR-018).
 
 ## 5. Commands — the entry layer (thin)
 
@@ -142,7 +142,7 @@ The domain ends where the pipeline already exists; it composes, never reconstruc
   `docs/spec/`. This is the ideation→contract boundary and stays **native** (not refined now).
 - **`planning-and-task-breakdown`** — two hops downstream; the terminal handoff.
 - **the decision rule** — when the direction settles an ADR-worthy choice, record it via
-  `◆ documentation-and-adrs` ([the rule](../decisions/ADR-010-global-decision-rule.md)).
+  `◆ documentation-and-adrs` (the decision rule, `~/.claude/rules/decisions.md`).
 
 ## 7. The flow — front door, end to end
 
@@ -185,9 +185,9 @@ Per the floor-brief discoverability finding, the front door must be wired into t
 
 ## 10. Decision-record implications
 
-Recorded as **[ADR-026](../decisions/ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md)** —
+Recorded as **[ADR-018](../decisions/ADR-018-ideation-domain.md)** —
 "ideation domain: a three-layer domain with a main-thread orchestrator skill and isolated
-read-only agents." It cross-links ADR-024 (the inverse-shape precedent), ADR-012, ADR-003, and
+read-only agents." It cross-links ADR-017 (the inverse-shape precedent), ADR-012, ADR-003, and
 the scoping doctrine. No existing ADR is superseded; ADR-016's proactive-domain category is the
 nearest relative.
 
@@ -215,17 +215,17 @@ nearest relative.
 ## 13. Decisions resolved + still open
 
 **Resolved 2026-06-19** (build decisions that fold into this spec — not new ADRs; all stay
-within ADR-026's recorded shape):
+within ADR-018's recorded shape):
 
 - **Front-door command name → `/brainstorm`.** 1:1 with the skill; avoids the `shaping-skills`
   plugin collision. (`/ideate` and `/shape` declined.)
 - **`approach-explorer` → deferred to a later pass.** Pass 1 ships `context-scout` +
   `idea-critic` only; add the parallel approach fan-out once the 2–3-approaches step proves it
-  wants parallelism in practice. It remains part of the domain shape (ADR-026).
+  wants parallelism in practice. It remains part of the domain shape (ADR-018).
 - **`idea-critic` → its own agent**, not a composition of `doubt-driven-development`. It needs
   a distinct *pre-decision, idea-level* rubric (holes/risks on an idea draft) and a verdict
   folded back into the interview dialogue — a different input, rubric, output, and moment than
-  the post-decision `doubt-reviewer`. Matches ADR-026's agent list; no ADR amendment needed.
+  the post-decision `doubt-reviewer`. Matches ADR-018's agent list; no ADR amendment needed.
 - **`context-scout` brief format → pinned in the agent**: pointers-over-content (each finding is
   a `file:line` + one-line *why*, grouped by kind), aligned with the C&M read-path style. No
   pasted blocks cross back.

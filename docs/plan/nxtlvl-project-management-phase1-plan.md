@@ -2,7 +2,7 @@
 
 > SDD Phase: **Plan**. Implements the **APPROVED + schema-LOCKED** spec
 > [`docs/spec/nxtlvl-project-management.md`](../spec/nxtlvl-project-management.md), which records the
-> decision in [`ADR-028`](../decisions/ADR-028-project-management-domain-manage-and-see.md).
+> decision in [`ADR-019`](../decisions/ADR-019-project-management-domain.md).
 > 🤖 = agent-verifiable · 🧑 = manual gate · ◇ = decision to lock (none open — spec is locked).
 > **Status: DRAFT — awaiting human review before implementation.**
 
@@ -178,7 +178,7 @@ for an explicit arg.
 **Acceptance criteria:**
 - [ ] 🧑 `git mv sandbox/skills/project-management plugins/nxtlvl/skills/` and the command into
   `plugins/nxtlvl/commands/`; `/plugin` promote; confirm `/pm-status` fires live.
-- [ ] 🤖 Spec status → built; confirm **no new ADR needed** (ADR-028 already covers Phase 1) via
+- [ ] 🤖 Spec status → built; confirm **no new ADR needed** (ADR-019 already covers Phase 1) via
   `nxtlvl:doc-keeper`.
 
 **Verification:** `/pm-status` works from the installed plugin; spec marked built.

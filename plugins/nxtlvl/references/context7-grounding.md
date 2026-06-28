@@ -3,8 +3,8 @@
 > Loaded by the [`context7-scout`](../agents/context7-scout.md) agent and by any nxtlvl-owned
 > entry point that grounds a claim in official library docs (the `/context7` command, a direct
 > main-session spawn). Keep this lean — it is the contract, not a tutorial. Recorded as
-> [ADR-030](../../../docs/decisions/ADR-030-context7-testifies-primary-sources-version-pinned.md)
-> (the inverse-companion to [ADR-029](../../../docs/decisions/ADR-029-deepwiki-orientation-not-evidence.md)).
+> [ADR-026](../../../docs/decisions/ADR-026-context7-testifies-primary-sources.md)
+> (the inverse-companion to [ADR-025](../../../docs/decisions/ADR-025-deepwiki-orientation-not-evidence.md)).
 
 ## The principle (load-bearing)
 
@@ -18,7 +18,7 @@ mis-rank a snippet, so the trust is disciplined: the citation is to the **offici
 **resolved library version** — the witness — never to "Context7" — the courier. For
 correctness-critical or version-sensitive facts the doc URL is named as the authority.
 
-This completes ADR-029's doctrine into a matched pair: **secondary sources orient (DeepWiki →
+This completes ADR-025's doctrine into a matched pair: **secondary sources orient (DeepWiki →
 leads); primary sources testify with attribution (Context7 → cited evidence).**
 
 ## The two tools (server `context7`, registered in `plugins/nxtlvl/.mcp.json`)
@@ -26,7 +26,7 @@ leads); primary sources testify with attribution (Context7 → cited evidence).*
 A plugin-bundled MCP server is namespaced, so the live tool ids carry the
 `mcp__plugin_<plugin>_<server>__` prefix — here `mcp__plugin_nxtlvl_context7__*`. The agent's
 `tools:` grant **must** use that full form; the bare `mcp__context7__*` form grants nothing (the
-ADR-029 dogfood bug — verify the grant resolved after the first `/plugin` promote).
+ADR-025 dogfood bug — verify the grant resolved after the first `/plugin` promote).
 
 - `mcp__plugin_nxtlvl_context7__resolve-library-id` — map a human library name (e.g. `next.js`,
   `prisma`) to a Context7 `/org/project` id, optionally at a version. **Always resolve first** — a

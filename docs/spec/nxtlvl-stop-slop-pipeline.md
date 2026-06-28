@@ -7,7 +7,7 @@
 > [ADR-008](../decisions/ADR-008-reactive-growth-intake-gate.md) (reactive growth),
 > [ADR-009](../decisions/ADR-009-objective-invoked-audit-gate.md) (objective audit).
 > The decision this spec implements is recorded in
-> [ADR-011](../decisions/ADR-011-prose-quality-stop-slop.md).
+> [ADR-024](../decisions/ADR-024-prose-quality-stop-slop.md).
 > Status: **DRAFT — awaiting human review.**
 
 ## Objective
@@ -66,7 +66,7 @@ off from structured-doc skeletons. The pass instruction states this explicitly.
 
 **Memory writes.** The memory protocol gains one line — "apply stop-slop core rules" — rather than
 a separate pass; entries are short enough that a one-line rule-reminder in the protocol suffices.
-This is memory's light Face A touch (per ADR-011 §2), not a hand-off to Face B, which governs chat.
+This is memory's light Face A touch (per ADR-024 §2), not a hand-off to Face B, which governs chat.
 
 ### 3. Face B — the condensed chat convention (chat responses)
 A condensed core-rules block (target ≤ 15 lines) added to global `~/.claude/CLAUDE.md`, always
@@ -74,7 +74,7 @@ loaded, so chat prose is shaped from the first token. It is marked as an extract
 skill and carries a pointer back to `nxtlvl:stop-slop` for the full rules + references.
 
 **Why content, not a pointer.** [ADR-007](../decisions/ADR-007-context-budgeted-injection.md) and
-[ADR-010](../decisions/ADR-010-global-decision-rule.md) both reject inlining content into always-on
+the decision rule (`~/.claude/rules/decisions.md`) both reject inlining content into always-on
 context. This is the deliberate exception: a pointer cannot shape prose unless the skill loads, and
 chat has no trigger that reliably loads it. The condensed block earns its always-on tokens because
 prose-shaping is impossible without them. The mitigation is a size cap — a *soft densification
@@ -86,7 +86,7 @@ stays a tight, dense extract (never the full skill) that still covers all of the
 the global layer; the audit verifies it still matches the skill's core rules. This keeps the
 daily-driver layer independent of the workbench path and avoids coupling always-on global context to
 a plugin location across the promotion boundary. (`@import` was rejected: it inlines the same way
-ADR-010 already declined, and adds cross-layer path coupling.)
+the decision rule already declined, and adds cross-layer path coupling.)
 
 ### 4. Audit drift-check (specified now, built with `nxtlvl:audit`)
 A new objective check: the condensed block in global `CLAUDE.md` still **covers** the vendored skill's
@@ -103,7 +103,7 @@ gate — a one-line entry naming the task and the rule that failed ([ADR-008](..
 
 **Anticipated first trigger.** stop-slop core rule 6 ("no em dashes") collides with the em-dash-heavy
 ADR/spec house style. It is resolved at the dogfood run — the first real use — as a logged intake
-miss, **not** pre-tuned here (the reactive stance ADR-011 chose over tune-to-voice). Optimizing for
+miss, **not** pre-tuned here (the reactive stance ADR-024 chose over tune-to-voice). Optimizing for
 agent consumers, the likely refinement is a *surface-scoped subset*: structured internal docs
 (ADRs/specs/memory) get the precision rules (cut filler, active voice, be specific, trust readers);
 human-facing deliverable prose and chat get the full rubric, including the authenticity rules
@@ -116,8 +116,8 @@ prove, not baked in now.
 |---|---|---|
 | stop-slop shape | `SKILL.md` (8 core rules + quick-checks + 1–10 × 5 rubric, revise < 35/50) + `references/{phrases,structures,examples}.md` (the source archive also ships `LICENSE`/`CHANGELOG.md`/`README.md`). MIT, by Hardik Pandya — `LICENSE` is vendored verbatim. | verified (read) |
 | Vendor target | `plugins/nxtlvl/skills/stop-slop/` — components live at plugin root (matches the Phase-0 layout). Namespace → `nxtlvl:stop-slop`. | verified (consistent with MVH spec) |
-| Always-on vs on-demand `CLAUDE.md` | Global `CLAUDE.md` is always loaded; an `@import` *inlines* a file (same budget cost as inline text), a plain path is on-demand. The condensed block is **inline literal text**, deliberately (Face B). | verified (ADR-010 platform note) |
-| Global layer ≠ plugin | Global `~/.claude/CLAUDE.md` is not part of plugin promotion and is not version-controlled by this repo (same as the decision rule in ADR-010). ADR-011 + this spec are the repo's record. | verified (ADR-010 consequence) |
+| Always-on vs on-demand `CLAUDE.md` | Global `CLAUDE.md` is always loaded; an `@import` *inlines* a file (same budget cost as inline text), a plain path is on-demand. The condensed block is **inline literal text**, deliberately (Face B). | verified (decision-rule platform note) |
+| Global layer ≠ plugin | Global `~/.claude/CLAUDE.md` is not part of plugin promotion and is not version-controlled by this repo (same as the decision rule, `~/.claude/rules/decisions.md`). ADR-024 + this spec are the repo's record. | verified (decision-rule consequence) |
 | Exact condensed-block wording | Drafted in `/plan`, not here. Source path for the vendor copy is pinned at build time. | open (plan) |
 
 ## Project structure (files touched)
@@ -133,7 +133,7 @@ Developer/                                        ← workbench repo
 │   (spec / dev / review / brainstorming flows)    ←   writing workflows in use now
 └── docs/
     ├── spec/nxtlvl-stop-slop-pipeline.md         ← this spec
-    └── decisions/ADR-011-prose-quality-stop-slop.md  ← the decision record
+    └── decisions/ADR-024-prose-quality-stop-slop.md  ← the decision record
 
 ~/.claude/                                         ← daily driver (global layer; not promoted by plugin)
 └── CLAUDE.md                                      ← Face B: the condensed always-on convention (≤15 lines)
@@ -159,7 +159,7 @@ exists:
   draft.
 - **Drift-check spec'd** — the audit's future check is written down (block-tier) even though the
   audit is not built.
-- **Dogfood** — this spec and ADR-011 are run through the pass once the skill is vendored; it **passes**
+- **Dogfood** — this spec and ADR-024 are run through the pass once the skill is vendored; it **passes**
   when both contain no core-rule violation except any rule logged (via the intake gate) as
   surface-exempted for structured docs (see §5 — the em-dash rule is the anticipated first such case).
 
@@ -183,14 +183,14 @@ exists:
 ## Success criteria (binary)
 
 1. **(vendor)** `nxtlvl:stop-slop` is invokable; `SKILL.md`, `LICENSE`, and the three references present and parsing.
-2. **(Face A)** `/spec`, `documentation-and-adrs`, `brainstorming` each name a final stop-slop step — in whichever form the vendoring-sequencing open question resolves (vendored into `nxtlvl` vs. augmented in place; `brainstorming` currently lives in the global `~/.claude/` layer, outside this repo per ADR-010).
+2. **(Face A)** `/spec`, `documentation-and-adrs`, `brainstorming` each name a final stop-slop step — in whichever form the vendoring-sequencing open question resolves (vendored into `nxtlvl` vs. augmented in place; `brainstorming` currently lives in the global `~/.claude/` layer, outside this repo per the decision rule, `~/.claude/rules/decisions.md`).
 3. **(guard)** The pass run on an existing ADR leaves frontmatter + every section heading (the four core + `Implementation` when present) unchanged.
 4. **(Face B)** A ≤15-line extract block is in global `CLAUDE.md`, marked as an extract with a pointer to the skill.
 5. **(memory)** The memory protocol carries the one-line stop-slop note.
 6. **(on-demand)** `nxtlvl:stop-slop` de-slops an ad-hoc paragraph end to end.
 7. **(audit spec)** The coverage-based drift-check is documented as a block-tier item for the future `nxtlvl:audit`.
 8. **(reactive)** No stop-slop rule is edited without a logged intake entry naming the triggering task.
-9. **(dogfood)** This spec and ADR-011, after the pass, show no core-rule violation except rules logged as surface-exempted; the em-dash collision is resolved via the intake gate at dogfood, not pre-tuned.
+9. **(dogfood)** This spec and ADR-024, after the pass, show no core-rule violation except rules logged as surface-exempted; the em-dash collision is resolved via the intake gate at dogfood, not pre-tuned.
 
 ## Open questions (resolve in `/plan`, not blocking)
 

@@ -36,7 +36,7 @@ The `references/` directory contains bundled reference documents that agents and
 
 ## Relevant ADRs / intent
 
-- [ADR-030](../../../docs/decisions/ADR-030-context7-testifies-primary-sources-version-pinned.md) — Context7 testifies; cite the doc URL, version-pinned.
+- [ADR-026](../../../docs/decisions/ADR-026-context7-testifies-primary-sources.md) — Context7 testifies; cite the doc URL, version-pinned.
 
 ## Open questions / TODOs
 

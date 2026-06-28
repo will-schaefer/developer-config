@@ -9,7 +9,7 @@ Thin alias into the **intent-extraction** sub-skill of the ideation domain. Use 
 interview — extract and sharpen intent — not the whole brainstorming front door.
 
 **Invoke the `interview-me` skill** (Skill tool) on the main thread. The router's precedence is
-`nxtlvl:` → native ([ADR-027](../../../docs/decisions/ADR-027-router-endorses-only-established-items.md));
+`nxtlvl:` → native ([ADR-020](../../../docs/decisions/ADR-020-router-endorses-established-items.md));
 `interview-me` is one of its **named interim exceptions** — its nxtlvl-refined body isn't authored yet, so
 this resolves to the upstream `interview-me` for now, and that pointer retires once the ◆ version ships. The
 interview is interactive, so it runs on the main thread — never as an agent.

@@ -15,7 +15,7 @@
 
 ## 1. `documentation-and-adrs` — VENDORED (2026-06-17)
 
-- **Task that required it:** record ADR-010 and all future decisions in my house ADR format, and
+- **Task that required it:** record the decision rule (`~/.claude/rules/decisions.md`) and all future decisions in my house ADR format, and
   make the canonical `/documentation-and-adrs` invocation resolve to my conventions rather than
   upstream defaults.
 - **Existing thing that failed:** `agent-skills:documentation-and-adrs` emits a `## Status` /
@@ -46,7 +46,7 @@
   every project that touches GitHub), so it qualifies on the spot — no logged near-miss needed.
 - **Action taken:** vendored `git-workflow` + `github-ops` into
   [`plugins/nxtlvl/skills/github-workflow/SKILL.md`](../../plugins/nxtlvl/skills/github-workflow/SKILL.md),
-  refined for fit ([ADR-003](../decisions/ADR-003-compose-not-reconstruct.md), [ADR-023](../decisions/ADR-023-github-workflow-skill-and-conventions.md), since superseded by [ADR-024](../decisions/ADR-024-git-workflows-domain-command-agent-skill.md)):
+  refined for fit ([ADR-003](../decisions/ADR-003-compose-not-reconstruct.md), [ADR-017](../decisions/ADR-017-git-workflows-domain.md)):
   Conventional Commits, draft-PR-first, no attribution, full-loop scope. The skill runs in-context
   and **composes** the existing `nxtlvl:review` agent at the review step rather than reconstructing
   it; per the agent-vs-skill axis ([`ecc-agent-vs-skill-scoping.md`](../reference/ecc-agent-vs-skill-scoping.md) §5)
@@ -60,7 +60,7 @@
 - **Task that required it:** ship the standardized GitHub loop as a reusable `git-workflows` *domain* —
   a `/git-workflow` entry that drives a change to a reviewed, mergeable PR with the noisy diff/CI/review
   work off the main thread, not just a documented procedure the main thread runs inline.
-- **Existing thing that failed:** the single in-context `github-workflow` skill (entry #2, [ADR-023](../decisions/ADR-023-github-workflow-skill-and-conventions.md))
+- **Existing thing that failed:** the single in-context `github-workflow` skill (entry #2, [ADR-017](../decisions/ADR-017-git-workflows-domain.md))
   ran the whole loop on the main thread — no isolation, no model routing, and **no sandbox** stopping an
   over-eager agent from editing source while "just committing." A skill *cannot* express a `tools:`
   allowlist or a `model:` tier ([`ecc-agent-vs-skill-scoping.md`](../reference/ecc-agent-vs-skill-scoping.md) §2),
@@ -72,6 +72,6 @@
   command [`/git-workflow`](../../plugins/nxtlvl/commands/git-workflow.md); refined the
   [`github-workflow`](../../plugins/nxtlvl/skills/github-workflow/SKILL.md) skill in place to stay
   caller-agnostic. The executor composes `nxtlvl:review` at the review step. Recorded as
-  [ADR-024](../decisions/ADR-024-git-workflows-domain-command-agent-skill.md) (supersedes ADR-023).
+  [ADR-017](../decisions/ADR-017-git-workflows-domain.md).
 - **Upstream disposition:** `agent-skills`/ECC stay installed and untouched — dormant-not-deleted
   per [ADR-002](../decisions/ADR-002-ecc-dormant-reference-backstop.md).

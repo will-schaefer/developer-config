@@ -1,12 +1,12 @@
 ---
-id: ADR-030
-title: "Context7 testifies: primary sources, version-pinned — the inverse-companion to ADR-029"
-status: Archived
-date: 2026-06-21
+id: ADR-026
+title: "Primary sources testify, version-pinned — Context7 citations name the doc URL, not the courier"
+status: Draft
+date: 2026-06-28
 implementation: build plan forthcoming; capability not yet shipped
 ---
 
-# ADR-030: Context7 testifies — primary sources, version-pinned
+# Primary sources testify, version-pinned — Context7 citations name the doc URL, not the courier
 
 ## Context
 
@@ -17,19 +17,19 @@ nxtlvl is adding a self-contained Context7 MCP docs-grounding capability: the pl
 cutoff — a gap this session surfaced concretely (an authoritative-sounding hook-event list was
 stale; Context7 corrected it).
 
-The load-bearing question is **trust posture**. [ADR-029](ADR-029-deepwiki-orientation-not-evidence.md)
+The load-bearing question is **trust posture**. [ADR-025](ADR-025-deepwiki-orientation-not-evidence.md)
 ruled DeepWiki a **secondary source** (auto-generated prose, can be stale or hallucinated) and
 assigned it "leads, not evidence; zero citations reach artifacts." Context7 serves **official
 library docs** — it is **primary-derived**, so that posture must invert: its output *may* be cited.
 But Context7 is a third-party snapshot that can lag latest or mis-rank snippets, so the trust must
-be disciplined. ADR-029 itself anticipated this generalization: "secondary sources orient, primary
-sources testify… generalizes to any future third-party knowledge source."
+be disciplined. The doctrine generalizes: secondary sources orient, primary sources testify, and
+the principle extends to any future third-party knowledge source.
 
 This is a trust boundary — architectural (shapes how every doc-grounded claim is produced and
 cited) and expensive to reverse (a citation pattern propagates across every future task that
 consumes the scout) — hence an ADR.
 
-Governed by the decision rule ([ADR-010](ADR-010-global-decision-rule.md)). Source of truth:
+Recorded per the global decision rule (`~/.claude/rules/decisions.md`). Source of truth:
 [`docs/spec/nxtlvl-context7-docs-grounding.md`](../spec/nxtlvl-context7-docs-grounding.md).
 
 ## Decision
@@ -39,8 +39,8 @@ that delivered it.**
 
 Concretely:
 
-1. **Context7 produces evidence, not just leads** — the inverse of ADR-029. The `context7-scout`
-   brief is citable; its claims may reach artifacts and downstream reasoning.
+1. **Context7 produces evidence, not just leads** — the inverse of the DeepWiki posture. The
+   `context7-scout` brief is citable; its claims may reach artifacts and downstream reasoning.
 
 2. **Courier-vs-witness citation discipline.** Every claim the scout returns is stamped
    `CITE — /org/project@version + doc URL`. The citation is to the **official doc URL** at a
@@ -51,13 +51,13 @@ Concretely:
 3. **Read-only by withheld tools** — the `context7-scout` holds *only* the two
    `mcp__plugin_nxtlvl_context7__*` tools (no Read/Write/Edit/Bash/Glob/Grep). A fabricated or
    mis-attributed citation is made **structurally impossible**: the scout cannot write the tree.
-   Reuses [ADR-026](ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md)'s isolated-agent
+   Reuses [ADR-018](ADR-018-ideation-domain.md)'s isolated-agent
    pattern (the same mechanism as `deepwiki-scout` and `context-scout`).
 
 4. **Graceful degradation, never a hard dependency.** Unreachable server or unknown library → the
    scout emits a one-line "unavailable" with a "model knowledge may be stale" caveat and returns.
-   Context7 is never a blocker. Per [ADR-027](ADR-027-router-endorses-only-established-items.md),
-   wiring into un-owned consumer skills (`source-driven-development`, `claude-api`,
+   Context7 is never a blocker. Per [ADR-020](ADR-020-router-endorses-established-items.md), wiring
+   into un-owned consumer skills (`source-driven-development`, `claude-api`,
    `agent-development`) is **deferred** until those are vendored.
 
 5. **Bounded spend.** 1 `resolve-library-id` + ≤3 `query-docs` per grounding session.
@@ -87,14 +87,14 @@ point. Build is deferred to a forthcoming plan.
 - Pros: simpler; one fewer constraint.
 - Cons: makes a fabricated or mis-attributed citation a prompt-adherence matter rather than a
   structural impossibility. Withheld tools cost nothing and remove the failure mode entirely.
-- Rejected: same reasoning as ADR-029 for `deepwiki-scout`. Read-only-by-withheld-tools is the
-  durable guarantee.
+- Rejected: same reasoning as the DeepWiki ruling for `deepwiki-scout`. Read-only-by-withheld-tools
+  is the durable guarantee.
 
 ### Make Context7 a required dependency
 - Pros: uniform pipeline; no degradation branch.
 - Cons: turns a free, no-auth service into a brittle hard dependency. Any network issue or
   rate-limit exhaustion would block the caller.
-- Rejected: must degrade silently, never block — mirrors ADR-029's degradation requirement.
+- Rejected: must degrade silently, never block — mirrors the DeepWiki degradation requirement.
 
 ### Don't adopt Context7
 - Pros: zero new surface; no trust question to manage.
@@ -105,7 +105,7 @@ point. Build is deferred to a forthcoming plan.
 
 ## Consequences
 
-- **Completes ADR-029's doctrine into a matched pair.** Secondary sources orient
+- **Completes the DeepWiki doctrine into a matched pair.** Secondary sources orient
   (DeepWiki → leads); primary sources testify with attribution (Context7 → cited evidence). The
   doctrine is now a two-pole trust tier, not a one-off ruling.
 
@@ -119,9 +119,8 @@ point. Build is deferred to a forthcoming plan.
 
 - **The cite-the-URL+version rule is testable by dogfood:** 100% of scout claims carry a
   `CITE — URL @ version`; zero uncited assertions in any brief. This is a binary, automatable
-  check consistent with the objective-gate discipline of [ADR-009](ADR-009-objective-invoked-audit-gate.md).
+  check consistent with the objective-gate discipline of [ADR-014](ADR-014-audit-gate.md).
 
-- Cross-links: [ADR-029](ADR-029-deepwiki-orientation-not-evidence.md) (inverse companion),
-  [ADR-026](ADR-026-ideation-domain-orchestrator-skill-isolated-agents.md) (isolated-agent pattern
-  reused), [ADR-027](ADR-027-router-endorses-only-established-items.md) (consumer-wiring deferral),
-  [ADR-010](ADR-010-global-decision-rule.md) (decision rule).
+- Cross-links: [ADR-025](ADR-025-deepwiki-orientation-not-evidence.md) (inverse companion),
+  [ADR-018](ADR-018-ideation-domain.md) (isolated-agent pattern reused),
+  [ADR-020](ADR-020-router-endorses-established-items.md) (consumer-wiring deferral).

@@ -18,7 +18,7 @@ nxtlvl is a Claude Code plugin that layers a personal harness on top of native C
 - **GitHub workflow** — a standardized branch → commit → PR → review → CI → merge loop.
 - **Harness review** — a method for analyzing external agent harnesses via parallel fan-out.
 
-The plugin is intentionally **scoped** — it does not try to cover every SDLC phase. Unowned phases (implementation specifics, testing, debugging, security, performance, CI/CD, observability, shipping) are handled natively per [ADR-027](../../../docs/decisions/ADR-027-router-endorses-only-established-items.md).
+The plugin is intentionally **scoped** — it does not try to cover every SDLC phase. Unowned phases (implementation specifics, testing, debugging, security, performance, CI/CD, observability, shipping) are handled natively per [ADR-020](../../../docs/decisions/ADR-020-router-endorses-established-items.md).
 
 ## Pages
 

@@ -1,11 +1,11 @@
 ---
-id: ADR-026
-title: "Ship the ideation phase as a three-layer domain with a main-thread orchestrator skill and isolated read-only agents"
-status: Archived
-date: 2026-06-19
+id: ADR-018
+title: "Ideation domain — a main-thread orchestrator skill with isolated read-only support agents"
+status: Draft
+date: 2026-06-28
 ---
 
-# ADR-026: Ship the ideation phase as a three-layer domain with a main-thread orchestrator skill and isolated read-only agents
+# Ideation domain — a main-thread orchestrator skill with isolated read-only support agents
 
 ## Context
 
@@ -18,21 +18,23 @@ isn't composed with it.
 
 The user directed a **whole-domain** build of this phase — refined nxtlvl versions of the ideation
 skills plus a front-door orchestrator, support agents, and commands. That makes this a
-user-directed, proactive domain build (the category of
-[ADR-016](ADR-016-confident-core-capability-domains.md) and the C&M subsystem), not a reactive
-un-deferral under the intake gate ([ADR-008](ADR-008-reactive-growth-intake-gate.md)).
+user-directed, proactive domain build (a confident-core capability domain like the C&M subsystem),
+not a reactive un-deferral under the extension gate
+([ADR-015](ADR-015-scope-determination-and-extension-gate.md)).
 
-Two precedents frame the shape. [ADR-024](ADR-024-git-workflows-domain-command-agent-skill.md)
-established that an nxtlvl domain ships as a three-layer `command → agent → skill` set
-([scoping doctrine](../reference/ecc-agent-vs-skill-scoping.md) §3) with an **isolated agent
-executor**. And [ADR-012](ADR-012-agents-execute-skills-hold-knowledge.md) fixed the
-knowledge/execution split. The open question this ADR settles: *what shape does the ideation
-domain take* — given that its core work is fundamentally different from git-workflows'.
+Two precedents frame the shape. The git-workflows domain
+([ADR-017](ADR-017-git-workflows-domain.md)) established that an nxtlvl domain ships as a
+three-layer `command → agent → skill` set ([scoping doctrine](../reference/ecc-agent-vs-skill-scoping.md)
+§3) with an **isolated agent executor**. And
+[ADR-012](ADR-012-agent-design-contract.md) fixed the knowledge/execution split. The open
+question this ADR settles: *what shape does the ideation domain take* — given that its core work
+is fundamentally different from git-workflows'.
 
 ## Decision
 
-Ship the ideation phase as a three-layer **ideation domain**, but **invert the executor** relative
-to ADR-024 and resolve the synthesis question by **ownership**:
+Ship the ideation phase as a three-layer **ideation domain**, but place the executor on the
+**main thread** (the deliberate counterpart to the git-workflows domain's isolated agent executor)
+and resolve the synthesis question by **ownership**:
 
 - **Skills (◆, the knowledge layer)** — four refined, caller-agnostic skills:
   `interview-me` (intent engine), `grill-me` (deep interrogation tier), `idea-refine` (variant
@@ -45,7 +47,7 @@ to ADR-024 and resolve the synthesis question by **ownership**:
 - **Commands (thin entries)** — `/brainstorm` (front door) plus `/interview-me`, `/grill-me`,
   `/idea-refine` aliases.
 
-**Why the executor is a main-thread skill, not an agent (the inversion).** ADR-024's executor
+**Why the executor is a main-thread skill, not an agent.** The git-workflows domain's executor
 is an isolated agent because committing/reviewing is non-interactive work whose noise should
 leave the thread. The ideation domain's core work is the **opposite kind**: a live,
 one-question-at-a-time **interview** with the user. Agents run in their own context and cannot
@@ -60,7 +62,7 @@ whether `brainstorming` should *inline a fork* of `interview-me`'s engine (coher
 that drifts from upstream) or *delegate* to it (no copy, but a relay seam). Owning a refined
 `nxtlvl:interview-me` dissolves the dilemma: `brainstorming` **composes** it as factored
 knowledge — one copy, consulted one-way. The drift risk existed only while `interview-me` was
-upstream; refining it in-domain removes it (ADR-012, ADR-003).
+upstream; refining it in-domain removes it (ADR-012, [ADR-003](ADR-003-compose-not-reconstruct.md)).
 
 ## Alternatives Considered
 
@@ -77,13 +79,13 @@ upstream; refining it in-domain removes it (ADR-012, ADR-003).
   evolves; violates the factored-knowledge rule (scoping §3).
 - Rejected: owning `interview-me` as its own refined skill gives the coherence without the copy.
 
-### Run the interview as an isolated agent (ADR-024's literal shape)
+### Run the interview as an isolated agent (the git-workflows domain's literal shape)
 - Pros: structurally uniform with git-workflows; noisy exploration leaves the thread.
 - Cons: **impossible** — agents can't hold a one-question-at-a-time dialogue with the user; the
   defining work of the domain is interactive.
 - Rejected: the interactivity of the interview forbids it. This is the forcing constraint.
 
-### Single in-context skill, no agents (ADR-023's old anti-agent stance)
+### Single in-context skill, no agents (a pure anti-agent stance)
 - Pros: simplest; one file; everything visible on the thread.
 - Cons: forfeits isolation for the genuinely isolatable sub-tasks — repo sweeps, adversarial
   critique, and parallel approach-exploration would all pollute the main context.
@@ -93,9 +95,10 @@ upstream; refining it in-domain removes it (ADR-012, ADR-003).
 ## Consequences
 
 - The ideation domain is nxtlvl's **first domain whose executor is a main-thread skill** — the
-  deliberate inverse of [ADR-024](ADR-024-git-workflows-domain-command-agent-skill.md). The
-  scoping doctrine's `command → agent → skill` shape holds; only the executor's *placement*
-  flips, and the ADR pair (024 ↔ 026) now documents both polarities.
+  deliberate counterpart to the git-workflows domain's isolated-agent executor
+  ([ADR-017](ADR-017-git-workflows-domain.md)). The scoping doctrine's `command → agent → skill`
+  shape holds; only the executor's *placement* flips, so the two domains now document both
+  polarities.
 - The support agents **cannot mutate the tree by design** (read-only sandbox) — they inform the
   dialogue and hand briefs back; `idea-critic` is the pre-decision sibling of the existing
   post-decision `doubt-reviewer`.
@@ -107,6 +110,5 @@ upstream; refining it in-domain removes it (ADR-012, ADR-003).
   pipeline and the decision rule rather than reconstructing them
   ([ADR-003](ADR-003-compose-not-reconstruct.md)); `spec-driven-development` stays native as the
   ideation→contract boundary.
-- Recorded per the global decision rule ([ADR-010](ADR-010-global-decision-rule.md)); full
-  architecture in [`../spec/nxtlvl-ideation-domain.md`](../spec/nxtlvl-ideation-domain.md). No ADR
-  is superseded.
+- Recorded per the global decision rule (`~/.claude/rules/decisions.md`); full architecture in
+  [`../spec/nxtlvl-ideation-domain.md`](../spec/nxtlvl-ideation-domain.md).
