@@ -7,7 +7,7 @@ metadata:
   originSessionId: fec6bb5c-ac29-4fc1-8b83-4c5cc07dbc3f
 ---
 
-The installed `nxtlvl@nxtlvl-dev` is a **cache copy pinned to a git commit SHA** at `~/.claude/plugins/cache/nxtlvl-dev/nxtlvl/<version>/`. The `nxtlvl-dev` marketplace `source` is `directory` → `/Users/willschaefer/Developer/nxtlvl` (the repo, relocated there 2026-06-27 per ADR-037), but it is **NOT read live** — committed repo changes do not appear in the running harness until a manual promotion re-pins the install to current `HEAD`.
+The installed `nxtlvl@nxtlvl-dev` is a **cache copy pinned to a git commit SHA** at `~/.claude/plugins/cache/nxtlvl-dev/nxtlvl/<version>/`. The `nxtlvl-dev` marketplace `source` is `directory` → `/Users/willschaefer/Developer/nxtlvl` (the repo, relocated there 2026-06-27), but it is **NOT read live** — committed repo changes do not appear in the running harness until a manual promotion re-pins the install to current `HEAD`.
 
 So **repo HEAD routinely runs ahead of the daily-driver.** Verified 2026-06-17: install pinned to the *initial* commit `f5a7e56` (only the `review` skill) while repo HEAD was 6 commits ahead — all M1+ work (hooks, vendored skills, ADRs) lived in the repo but was never loaded.
 

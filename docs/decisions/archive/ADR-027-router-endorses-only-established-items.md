@@ -1,7 +1,7 @@
 ---
 id: ADR-027
 title: "Router endorses only established nxtlvl items; delist the agent-skills fallthrough floor"
-status: Accepted
+status: Archived
 date: 2026-06-19
 ---
 

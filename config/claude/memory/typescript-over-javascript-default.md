@@ -18,7 +18,7 @@ checker catches the recurring shape-mismatch bug class (e.g. `Skill→tool_input
 
 **How to apply:** default new scripts to `.ts`. For nxtlvl specifically, the runtime is **native
 Node type-stripping** (no build step; `node X.ts`; erasable-syntax-only; `tsconfig` is
-`tsc --noEmit`/editor only) — see ADR-034 + the migration plan at
+`tsc --noEmit`/editor only) — see the migration plan at
 docs/plan/nxtlvl-typescript-migration-plan.md. If another provider/runtime can't guarantee Node
 ≥23.6, a build step is the fallback (ask first). Reach for Python/Rust when it's the right tool, and
 say why. See [[nxtlvl-harness]] and [[nxtlvl-install-promotion]].

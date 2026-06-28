@@ -1,8 +1,0 @@
-{
-  "cell": "bad-evals-cell",
-  "engine": "stub",
-  "results": [
-    { "id": "behavioral", "passed": false, "score": 0.3, "detail": "only 3/10 behavioral cases passed" }
-  ],
-  "summary": { "total": 1, "passed": 0, "failed": 1, "allPassed": false }
-}

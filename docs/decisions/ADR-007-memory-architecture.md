@@ -2,7 +2,7 @@
 id: ADR-007
 title: "nxtlvl-harness memory architecture — stores, ownership, and provenance"
 status: Draft
-date: 2026-07-28
+date: 2026-06-28
 ---
 
 # ADR-007: nxtlvl-harness memory architecture — stores, ownership, and provenance
@@ -12,8 +12,7 @@ date: 2026-07-28
 The harness needs durable, evolving memory across sessions. What "memory" means, how
 many stores there should be, who owns each, and what rules govern writes are all open
 questions. ADR-003 establishes that everything is built from scratch and that the
-production bar is the standard — not convenience, not what was built in prior
-exploration.
+production bar is the standard — not convenience.
 
 Claude Code natively provides a file-based memory (`MEMORY.md` + per-fact files under
 `~/.claude/projects/`). That is one option. Other options exist — a purpose-built
@@ -45,9 +44,8 @@ constraint argues for one store or two, and where each lives, is part of the dec
 
 **4. What does production-quality memory look like?**
 
-The archived decision (ADR-004) was made before the build strategy was fully
-articulated. The current standard — ADR-003's production-quality bar, informed by
-agents-wiki — may point to a different answer. This is what agents-wiki is being
+The standard — ADR-003's production-quality bar, informed by agents-wiki — defines
+what production-quality memory looks like. This is what agents-wiki is being
 queried on.
 
 ### What agents-wiki is being queried on

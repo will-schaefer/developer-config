@@ -2,7 +2,7 @@
 id: ADR-014
 title: "nxtlvl-harness audit gate — objective promotion criteria and invocation"
 status: Draft
-date: 2026-07-28
+date: 2026-06-28
 ---
 
 # ADR-014: nxtlvl-harness audit gate — objective promotion criteria and invocation
@@ -14,8 +14,7 @@ of the daily-driver plugin. That point is the audit gate. It is the intentional 
 to the fail-open hook layer ([ADR-010](ADR-010-hook-layer-contract.md)): hooks run
 continuously and fail open so the user is never blocked; the audit runs at promotion and
 must block, because promoting a broken capability into the daily driver is worse than pausing
-promotion. ADR-003 establishes that the production bar is the standard — not what was built
-in prior exploration, and not any particular rubric inherited from archived ADR-009.
+promotion. ADR-003 establishes that the production bar is the standard.
 
 What the audit actually checks, how it is invoked, and how it relates to the labs graduation
 gate (ADR-005) are all open. The only fixed constraint is that the audit must be objective and

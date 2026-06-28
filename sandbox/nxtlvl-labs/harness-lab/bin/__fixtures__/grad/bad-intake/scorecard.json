@@ -1,8 +1,0 @@
-{
-  "cell": "bad-intake-cell",
-  "engine": "stub",
-  "results": [
-    { "id": "behavioral", "passed": true, "score": 1.0, "detail": "all behavioral cases passed" }
-  ],
-  "summary": { "total": 1, "passed": 1, "failed": 0, "allPassed": true }
-}

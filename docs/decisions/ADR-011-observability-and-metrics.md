@@ -2,14 +2,14 @@
 id: ADR-011
 title: "nxtlvl-harness observability and metrics — north-star measurement and automatic logging"
 status: Draft
-date: 2026-07-28
+date: 2026-06-28
 ---
 
 # ADR-011: nxtlvl-harness observability and metrics — north-star measurement and automatic logging
 
 ## Context
 
-The harness needs to measure itself to know if it is working. What constitutes a meaningful signal, what gets logged automatically, and how the harness distinguishes between improvement and degradation are all open questions. This covers the archived ADR-005 territory (fallback log + dual metric) but from scratch, with the production-quality bar from ADR-003 as the standard.
+The harness needs to measure itself to know if it is working. What constitutes a meaningful signal, what gets logged automatically, and how the harness distinguishes between improvement and degradation are all open questions. The scope here is the fallback log and dual metric, designed from scratch with the production-quality bar from ADR-003 as the standard.
 
 Observability is not optional — without it, the harness cannot know whether changes are helping or hurting. But too much observability creates noise and maintenance burden. The right balance starts from what the harness actually needs to measure, not from what is easy to log.
 

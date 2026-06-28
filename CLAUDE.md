@@ -21,3 +21,15 @@ It mirrors the plugin's shape (`sandbox/{skills,agents,commands}/`); promote whe
 `git mv sandbox/skills/<name> plugins/nxtlvl/skills/<name>` — the move *is* the activation. See
 [`sandbox/README.md`](sandbox/README.md). For throwaway experiments use the gitignored
 `*-workspace/` convention instead.
+
+## ADR lifecycle (project override)
+This repo **overrides** the global decision rule's keep-never-delete lifecycle
+(`~/.claude/rules/decisions.md` §3, §4). Here:
+- An ADR superseded by a newer decision is **moved to
+  [`docs/decisions/archive/`](docs/decisions/archive/) and marked `status: Archived`** — not
+  kept inline as `Superseded`. An archived ADR **may be deleted** once nothing references it.
+- New ADRs are written as **standalone, original decisions**: no `replaces:`/supersession
+  frontmatter, no "this revises ADR-N" prose, and no cross-links into archived ADRs.
+- Everything else in the global ADR format still applies — frontmatter, the
+  Context · Decision · Alternatives · Consequences body, the `docs/decisions/` location, and
+  the `README.md` index.

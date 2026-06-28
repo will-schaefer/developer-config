@@ -2,7 +2,8 @@
 
 Significant, expensive-to-reverse decisions behind `nxtlvl` — the *why* the code and the
 intent/spec/plan docs don't capture on their own. New decisions get the next sequential
-number; superseded ones are kept (never deleted) and marked `Superseded by ADR-XXX`.
+number; superseded ones move to [`archive/`](archive/) marked `status: Archived` and may be
+deleted once nothing references them (project lifecycle override — see the repo `CLAUDE.md`).
 
 Anchors these consume: [`../intent/personal-harness.md`](../intent/personal-harness.md) →
 [`../spec/nxtlvl-phase-0-mvh.md`](../spec/nxtlvl-phase-0-mvh.md) →
@@ -27,5 +28,6 @@ Anchors these consume: [`../intent/personal-harness.md`](../intent/personal-harn
 | [015](ADR-015-scope-determination-and-extension-gate.md) | Scope determination and extension gate — harness domain map, include/defer/exclude frame, and extension gate for additions beyond defined scope | Draft |
 | [016](ADR-016-orchestration-model.md) | Orchestration model — composition layer, delegation contract, and human gates | Draft |
 
-> **Archive:** ADR-004 through ADR-037 have been moved to [`archive/`](archive/). As new ADRs
-> are written that supersede archived ones, the archived versions will be deleted.
+> **Archive:** earlier ADRs that this set supersedes live in [`archive/`](archive/), marked
+> `status: Archived` — they no longer govern. Under the project lifecycle override (see the
+> repo `CLAUDE.md`), archived ADRs may be deleted once nothing references them.

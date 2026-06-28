@@ -1,7 +1,7 @@
 ---
 id: ADR-022
 title: "Operation — nxtlvl runs as gated, interactive, single-operator sessions; reject autonomous/continuous/enterprise runtimes; reuse the existing metric, gate, and kill switches"
-status: Accepted
+status: Archived
 date: 2026-06-19
 ---
 

@@ -1,7 +1,7 @@
 ---
 id: ADR-019
 title: "Evaluation — agent-self-evaluation as an advisory per-task done-condition check; formal eval suites stay reactive; gates unchanged"
-status: Accepted
+status: Archived
 date: 2026-06-19
 ---
 

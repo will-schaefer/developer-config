@@ -1,7 +1,7 @@
 ---
 id: ADR-011
 title: "Prose quality is governed harness-wide by a vendored stop-slop skill, with a condensed always-on chat convention"
-status: Accepted
+status: Archived
 date: 2026-06-17
 ---
 

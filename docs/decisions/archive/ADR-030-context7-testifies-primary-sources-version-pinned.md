@@ -1,7 +1,7 @@
 ---
 id: ADR-030
 title: "Context7 testifies: primary sources, version-pinned — the inverse-companion to ADR-029"
-status: Accepted
+status: Archived
 date: 2026-06-21
 implementation: build plan forthcoming; capability not yet shipped
 ---

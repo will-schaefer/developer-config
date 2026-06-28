@@ -2,7 +2,7 @@
 id: ADR-013
 title: "nxtlvl-harness skill and agent authoring model — skill files, agent files, and load rules"
 status: Draft
-date: 2026-07-28
+date: 2026-06-28
 ---
 
 # ADR-013: nxtlvl-harness skill and agent authoring model — skill files, agent files, and load rules
@@ -13,7 +13,7 @@ nxtlvl's skills and agents are core Claude Code primitives: markdown files that 
 knowledge and subagent behavior. Their internal structure, the boundary between them, when
 they are loaded into context, and how they are authored are all open.
 [ADR-003](ADR-003-compose-not-reconstruct.md) establishes that the harness is built from
-scratch against a production-quality standard, and that prior exploration is not binding.
+scratch against a production-quality standard.
 
 A skill is a markdown file loaded into context. An agent is a markdown file that defines a
 subagent. The two files are conceptually separate: skills hold domain knowledge; agents

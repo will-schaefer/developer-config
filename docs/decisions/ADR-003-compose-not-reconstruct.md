@@ -130,4 +130,4 @@ the harness.
 - **The production bar is set by active harnesses and top-tier research**, not by what
   upstream sources happen to ship. Domain-agnostic means no vertical assumptions are
   inherited; revenue-generating capable means the bar is real production, not demo quality.
-- Recorded per the global decision rule ([ADR-010](ADR-010-global-decision-rule.md)).
+- Recorded per the global decision rule.

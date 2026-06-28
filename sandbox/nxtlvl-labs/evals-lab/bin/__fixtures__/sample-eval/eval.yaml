@@ -1,7 +1,0 @@
-name: sample-parity
-sut: { adapter: ./adapter.js }   # adapter exports run(input) -> actual
-grader: exact-match              # registry key; only exact-match is built in this seed
-corpus: ./corpus.jsonl
-criteria:
-  - { id: even-rate, select: { tag: even }, metric: pass-rate, bar: 1.0 }
-  - { id: odd-rate,  select: { tag: odd },  metric: pass-rate, bar: 1.0 }

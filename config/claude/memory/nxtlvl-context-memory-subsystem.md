@@ -11,13 +11,15 @@ The harness's **Context & Memory (C&M) domain** — the umbrella over context-in
 fallback/observe, and lifecycle-persist. Model: **two paths (read/inject + write/capture)
 over three stores in two planes**, joined by a **SessionEnd cheap-model analyze pass** that
 distills scoped obs → instincts (no 4th store). Through-line: restraint both ways. The user
-**un-deferred the whole subsystem** as the deliberate exception to reactive-growth (ADR-008) —
-it *is* the harness's core job.
+**un-deferred the whole subsystem** as the deliberate exception to reactive growth (now ADR-015,
+scope determination & extension gate) — it *is* the harness's core job.
 
 **Design = FINAL.** Spec: `docs/spec/nxtlvl-context-memory-lifecycle.md` (status flipped FINAL→**BUILT**
 in T6.2; supersedes the old `nxtlvl-context-memory-subsystem.md` + `context-awareness-hooks.md`).
-Subsystem decision = **ADR-013** (floor-on-demand backbone) + **ADR-014** (quality-first); ADR-004/005/007
-amended, ADR-008 superseded-by-013, ADR-025 = project identity. All 5 `◇` decisions LOCKED (2026-06-19):
+Subsystem design (floor-on-demand backbone, quality-first) is recorded in that spec; its dedicated ADRs
+used the old pre-reorg numbering and were **superseded by the 2026-06-28 ADR reorg** — the current
+architecture homes are ADR-007 (memory architecture), ADR-008 (context assembly), ADR-009 (session
+lifecycle), ADR-011 (observability), all Draft. The 5 `◇` build decisions remain LOCKED (2026-06-19):
 D1 storage root `${XDG_STATE_HOME:-~/.local/state}/nxtlvl` (OUTSIDE ~/.claude + outside any sync root);
 D2 bookmark gate ≥10 tool-calls OR mutation; D3 `/evolve` = thin cmd + deterministic `lib/evolve` +
 `evolver` agent; D4 metrics in `/instinct-status` only; D5 observer = `claude-sonnet-4-6`.

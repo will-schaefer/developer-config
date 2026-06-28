@@ -2,7 +2,7 @@
 id: ADR-010
 title: "nxtlvl-harness hook layer contract"
 status: Draft
-date: 2026-07-28
+date: 2026-06-28
 ---
 
 # ADR-010: nxtlvl-harness hook layer contract
@@ -13,7 +13,7 @@ The harness needs a defined boundary for hooks: the layer that executes rules in
 to session lifecycle events. What happens when a hook fails, what a hook's exit codes mean,
 whether a hook can block and under what conditions, and how many hooks are enough are all
 open questions. ADR-003 establishes that everything is built from scratch and that the
-production bar is the standard — not convenience, not what was built in prior exploration.
+production bar is the standard — not convenience.
 
 ADR-004 places hooks as one layer of the harness internal structure. ADR-009 defines the
 session lifecycle — hooks are the execution mechanism that makes those lifecycle events

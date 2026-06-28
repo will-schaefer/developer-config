@@ -1,7 +1,7 @@
 ---
 id: ADR-026
 title: "Ship the ideation phase as a three-layer domain with a main-thread orchestrator skill and isolated read-only agents"
-status: Accepted
+status: Archived
 date: 2026-06-19
 ---
 

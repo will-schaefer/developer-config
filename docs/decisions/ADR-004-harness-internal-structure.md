@@ -2,7 +2,7 @@
 id: ADR-004
 title: "nxtlvl-harness internal structure — layers, runtime contracts, and language"
 status: Draft
-date: 2026-07-28
+date: 2026-06-28
 ---
 
 # ADR-004: nxtlvl-harness internal structure — layers, runtime contracts, and language
@@ -14,10 +14,8 @@ ADR-003 establishes that everything is built from scratch. Neither records what 
 should actually contain, how its layers should be structured, what runtime each layer runs
 under, or what language the executable layers should be written in.
 
-These are the foundational structural decisions for the harness. They need to be made
-explicitly rather than inherited from whatever was built during earlier exploration. The
-current state of `plugins/nxtlvl/` is prior exploratory work — useful as a reference
-for what problems surfaced during that exploration, but not binding on this decision.
+These are the foundational structural decisions for the harness, and they need to be
+made explicitly and deliberately.
 
 ### The questions
 

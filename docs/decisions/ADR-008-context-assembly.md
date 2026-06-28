@@ -2,7 +2,7 @@
 id: ADR-008
 title: "nxtlvl-harness context assembly — injection policy, organization, and budget"
 status: Draft
-date: 2026-07-28
+date: 2026-06-28
 ---
 
 # ADR-008: nxtlvl-harness context assembly — injection policy, organization, and budget
@@ -50,8 +50,7 @@ discard exactly the context that would have mattered.
 
 **4. What does production-quality context assembly look like?**
 
-The prior exploration did not systematically address injection policy. The current standard —
-ADR-003's production bar, informed by agents-wiki and the reference harnesses — may point to
+ADR-003's production bar, informed by agents-wiki and the reference harnesses, points to
 patterns and constraints that are not obvious from first principles. This is what agents-wiki is
 being queried on.
 

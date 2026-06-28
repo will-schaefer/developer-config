@@ -1,7 +1,7 @@
 ---
 id: ADR-010
 title: "A global decision rule governs how decisions are made and recorded; ADR-worthy tier first"
-status: Accepted
+status: Archived
 date: 2026-06-17
 ---
 

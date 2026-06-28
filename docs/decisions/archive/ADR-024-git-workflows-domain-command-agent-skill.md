@@ -1,7 +1,7 @@
 ---
 id: ADR-024
 title: "Ship the GitHub workflow as a three-layer git-workflows domain — command → agent → skill — with an isolated, edit-less executor"
-status: Accepted
+status: Archived
 date: 2026-06-19
 supersedes: ADR-023
 ---

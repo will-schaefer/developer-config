@@ -1,7 +1,7 @@
 ---
 id: ADR-028
 title: "Ship a Project Management workflow domain as a manage-and-see layer with a standalone interactive dashboard over a single-writer state library"
-status: Accepted
+status: Archived
 date: 2026-06-20
 implementation: "Build deferred and phased (Phase 1 = state library + status schema + Status; Phase 2 = dashboard; Phase 3 = Backlog); tracked in a follow-on spec + plan."
 ---

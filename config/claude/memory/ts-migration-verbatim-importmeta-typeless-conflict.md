@@ -7,7 +7,7 @@ metadata:
   originSessionId: 0146c41c-3a0b-4720-adf5-03d15d48859e
 ---
 
-In the nxtlvl TypeScript migration (ADR-034, plan [[nxtlvl-harness]]), the plan's D10 chose a
+In the nxtlvl TypeScript migration (plan [[nxtlvl-harness]]), the plan's D10 chose a
 **typeless** root/lab `package.json` for the mixed CJS->ESM phase — correct for the RUNTIME (Node's
 per-file syntax detection loads ESM `.ts` as ESM while CJS `.js` stay CJS). But `tsc --noEmit` with
 `module: nodenext` derives each file's module KIND from the nearest `package.json type`: typeless →

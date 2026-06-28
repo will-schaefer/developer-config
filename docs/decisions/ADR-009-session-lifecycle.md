@@ -2,7 +2,7 @@
 id: ADR-009
 title: "nxtlvl-harness session lifecycle — automatic actions, human-invoked commands, and the open/close boundary"
 status: Draft
-date: 2026-07-28
+date: 2026-06-28
 ---
 
 # ADR-009: nxtlvl-harness session lifecycle — automatic actions, human-invoked commands, and the open/close boundary

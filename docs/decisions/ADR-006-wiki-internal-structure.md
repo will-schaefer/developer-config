@@ -2,7 +2,7 @@
 id: ADR-006
 title: "nxtlvl-wiki internal structure — layers, runtime contracts, and language"
 status: Draft
-date: 2026-07-28
+date: 2026-06-28
 ---
 
 # ADR-006: nxtlvl-wiki internal structure — layers, runtime contracts, and language

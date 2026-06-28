@@ -11,7 +11,7 @@ The C&M store keys every project on the **absolute path of the repo's git-common
 `projectId = sha256(realpath(git-common-dir))[:16]` (`plugins/nxtlvl/lib/project-identity.js`),
 store at `${XDG_STATE_HOME:-~/.local/state}/nxtlvl/projects/<projectId>/` (`lib/paths.ts`).
 
-**Hazard:** relocating the repo (ADR-037: `~/Developer` → `~/Developer/nxtlvl`) — or cloning to a
+**Hazard:** relocating the repo (the 2026-06-27 move `~/Developer` → `~/Developer/nxtlvl`) — or cloning to a
 new path — changes `realpath(.git)`, so the key changes and the hooks **silently start a fresh,
 empty store** under the new key. No error fires; accumulated instincts/bookmarks/observations/
 metrics strand under the old key and the learning goes cold. Confirmed live 2026-06-27: old key

@@ -1,7 +1,7 @@
 ---
 id: ADR-020
 title: "Debugging — adopt the introspection self-debug loop; scope the architecture audit to owned layers; diagnostic, never a gate"
-status: Accepted
+status: Archived
 date: 2026-06-19
 ---
 

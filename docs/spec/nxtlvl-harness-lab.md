@@ -10,9 +10,10 @@
 
 ## Objective
 
-**What:** A self-contained R&D **workspace** inside the nxtlvl repo, `harness-lab` (a dev workspace, *not*
+**What:** A self-contained R&D **workspace**, `harness-lab` (a dev workspace, *not*
 a standalone plugin — its cells graduate into the `nxtlvl` plugin, e.g. `nxtlvl:pointer-summary`), living
-at `Developer/sandbox/nxtlvl-labs/harness-lab/`, where new agent capabilities — skills, agents/subagents,
+at `Developer/nxtlvl-labs/harness-lab/` in the standalone `nxtlvl-labs` repo (a sibling of the nxtlvl
+repo; moved out of the harness repo's `sandbox/` on 2026-06-28), where new agent capabilities — skills, agents/subagents,
 commands, hooks — are **incubated to production quality and then graduate into the `nxtlvl` plugin.**
 
 **Why:** The `nxtlvl` workbench already *authors* and *promotes* capabilities, but it has no dedicated
@@ -23,22 +24,22 @@ promotion pressure is lowest — so half-built or unproven capabilities never to
 **Who:** The user (solo), running daily, building agents *with* the agent harness (dogfooding).
 
 **Success looks like:** a capability can be conceived, built, pressure-tested against a *pre-declared*
-bar, and graduate end-to-end into `Developer/sandbox/` with its eval cases in tow — with an objective
+bar, and graduate end-to-end into the `nxtlvl` plugin (`plugins/nxtlvl/`) with its eval cases in tow — with an objective
 gate that blocks on facts and never on taste.
 
 ### The 3-tier promotion ladder
 
 ```
 harness-lab                       →   nxtlvl plugin        →   installed ~/.claude
-(sandbox/nxtlvl-labs/, highest       (the workbench,           (stable daily driver)
+(Developer/nxtlvl-labs/, highest     (the workbench,           (stable daily driver)
  churn, lowest pressure)              Developer repo)
 ```
 
-`harness-lab` lives **inside** the `Developer` working tree at `sandbox/nxtlvl-labs/harness-lab/` — under
-the off-discovery `sandbox/` staging tree (per `CLAUDE.md`, `sandbox/` is intentionally off the plugin's
-discovery path, so in-flight cells are never loaded, routed to, or warned about by the live plugin). It is
-**tracked as part of the `Developer` repo** (not a separate repo, not gitignored scratch), sharing
-Developer's git history, and sits beside its sibling `evals-lab/` under the shared `nxtlvl-labs/` parent.
+`harness-lab` lives in the **standalone `nxtlvl-labs` repo** at `Developer/nxtlvl-labs/harness-lab/` — a
+sibling of the nxtlvl repo, fully off the live plugin's discovery path (a separate tree entirely, so
+in-flight cells are never loaded, routed to, or warned about by the live plugin). It is **its own repo**
+(`will-schaefer/nxtlvl-labs`) with its own git history — not a subdir of the nxtlvl repo, not gitignored
+scratch — and sits beside its sibling `evals-lab/` under the shared `nxtlvl-labs/` parent.
 It is decoupled from the `nxtlvl` plugin only *logically* — its own `package.json`, machinery, and tests;
 graduation is an **in-repo `git mv`** from a cell to its `target:` under `plugins/nxtlvl/`, carrying the
 cell's `evals/`.
@@ -78,7 +79,7 @@ Install for dogfood: <local-marketplace install>     # confirm against current C
 ## Project Structure
 
 ```
-sandbox/nxtlvl-labs/harness-lab/  # tracked subdir of the Developer repo (beside evals-lab/)
+Developer/nxtlvl-labs/harness-lab/  # in the standalone nxtlvl-labs repo (beside evals-lab/)
   cells/<capability>/          # the unit of work — one incubating capability each
     manifest.yaml              #   intent · type · stage · deps · graduation criteria · intake · target
     <capability files>         #   SKILL.md | agent .md | command .md | hook(s)
@@ -233,9 +234,10 @@ engine exists, the seam may be backed by a stub that returns a scorecard in the 
 
 ## Open Questions
 
-- ~~Exact repo root path~~ — **RESOLVED 2026-06-22:** `Developer/sandbox/nxtlvl-labs/harness-lab/`, a
-  tracked subdir of `Developer` beside `evals-lab/`. The stale `Developer/nxtlvl-lab` placeholder is
-  already gone; the empty `sandbox/nxtlvl-labs/{harness-lab,evals-lab}/` dirs already exist.
+- ~~Exact repo root path~~ — **RESOLVED 2026-06-22; RELOCATED 2026-06-28:** now
+  `Developer/nxtlvl-labs/harness-lab/`, in the standalone `nxtlvl-labs` repo (sibling of the nxtlvl
+  repo) beside `evals-lab/`. Originally lived as a tracked subdir under the harness repo's
+  `sandbox/nxtlvl-labs/`; moved out to its own repo on 2026-06-28.
 - The concrete shared **eval spec / scorecard schema** — co-designed with the `evals-lab` cycle; this
   spec fixes only the interface shape.
 - ~~Whether the installable-plugin uses the local-marketplace mechanism~~ — **RESOLVED/REVERSED
@@ -249,10 +251,12 @@ Per the decision rule (`~/.claude/rules/decisions.md`), record after spec+plan �
 and expensive to reverse. Verify ADR numbering against the committed/remote tree first (collision
 hazard); next is ~ADR-031.
 
-1. **Labs-in-sandbox topology** — the incubation lab (`harness-lab`) and the standing measurement
-   instrument (`evals-lab`) live as tracked subdirs under `Developer/sandbox/nxtlvl-labs/` (not separate
-   repos); a cell graduates by in-repo `git mv` into the `nxtlvl` plugin. *(Records the 2026-06-22
-   relocation away from the original separate-`~/agent-lab`-repo design.)*
+1. **Labs topology** — the incubation lab (`harness-lab`) and the standing measurement
+   instrument (`evals-lab`) live in the standalone `nxtlvl-labs` repo at `Developer/nxtlvl-labs/`
+   (a sibling of the nxtlvl repo); a cell graduates by `git mv` into the `nxtlvl` plugin in the
+   harness repo. *(Originally incubated as tracked subdirs under the harness repo's `sandbox/` per the
+   2026-06-22 relocation away from the separate-`~/agent-lab`-repo design; moved out to its own
+   `nxtlvl-labs` repo on 2026-06-28.)*
 2. **Cells + stage-as-data architecture** — capability cells with stage-as-data manifests; in-flight
    cells dogfooded as **project skills** (the lab as a live CC project), *not* as a standalone plugin.
    *(ADR-032, with its 2026-06-22 amendment reversing the original installable-as-plugin half.)*

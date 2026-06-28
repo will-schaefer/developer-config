@@ -2,7 +2,7 @@
 id: ADR-012
 title: "Agent design contract — agents, skills, and the orchestrator/specialist boundary"
 status: Draft
-date: 2026-07-28
+date: 2026-06-28
 ---
 
 # ADR-012: Agent design contract — agents, skills, and the orchestrator/specialist boundary
@@ -10,9 +10,7 @@ date: 2026-07-28
 ## Context
 
 nxtlvl needs a clear model for what an agent is, what a skill is, and how the main
-session should delegate to specialist agents. The territory was explored in archived
-ADR-017 (agent design contract) and ADR-012 (agents execute, skills hold knowledge),
-but the build strategy in ADR-003 means nothing from prior exploration is binding.
+session should delegate to specialist agents. The build strategy is set by [ADR-003](ADR-003-compose-not-reconstruct.md).
 The production bar is the standard: a contract that is tight enough to make agents
 predictable and loose enough to let them adapt.
 

@@ -1,7 +1,7 @@
 ---
 id: ADR-029
 title: "DeepWiki orients harness-review but never testifies: leads, not evidence"
-status: Accepted
+status: Archived
 date: 2026-06-21
 ---
 

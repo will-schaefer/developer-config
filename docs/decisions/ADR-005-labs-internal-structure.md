@@ -2,7 +2,7 @@
 id: ADR-005
 title: "nxtlvl-labs internal structure — layers, runtime contracts, and language"
 status: Draft
-date: 2026-07-28
+date: 2026-06-28
 ---
 
 # ADR-005: nxtlvl-labs internal structure — layers, runtime contracts, and language
@@ -21,12 +21,12 @@ loaded into every session — it is a purposeful environment the user enters to 
 evaluate agent teams. That difference in identity likely implies a different internal
 structure than `nxtlvl-harness`. What that structure should be is an open question.
 
-ADR-001 describes two internal subprojects from prior exploration:
+ADR-001 describes two candidate internal subprojects:
 - `harness-lab` — a capability incubation pipeline (cells, stage manifests, graduation gate)
 - `evals-lab` — a measurement engine (`eval spec → engine → scorecard`)
 
-These represent prior thinking, not binding structure. The right decomposition — whether
-two subprojects, one, or something else entirely — is part of what this ADR decides.
+Whether that is the right decomposition — two subprojects, one, or something else
+entirely — is part of what this ADR decides.
 
 ### The questions
 

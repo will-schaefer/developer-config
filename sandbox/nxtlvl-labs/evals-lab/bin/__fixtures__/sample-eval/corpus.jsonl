@@ -1,4 +1,0 @@
-{"input":2,"expected":0,"tag":"even","label":"two"}
-{"input":4,"expected":0,"tag":"even","label":"four"}
-{"input":3,"expected":1,"tag":"odd","label":"three"}
-{"input":5,"expected":1,"tag":"odd","label":"five"}

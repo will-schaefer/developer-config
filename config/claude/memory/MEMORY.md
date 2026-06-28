@@ -6,7 +6,7 @@ One line per memory — detail lives in the topic file. Grouped for fast orienta
 - [User: builder domain](user-builder-domain.md) — multi-language app dev (Next/Python/Rust) + agentic engineering & agent-building.
 - [User: Max subscription](user-max-subscription.md) — on Claude Max; per-token cost tracking is irrelevant — drop cost machinery by default.
 - [User: 1M context, degrades ~150–200K](user-1m-context-degradation.md) — runs a 1M-window model but quality degrades ~150–200K; that band is the practical ceiling, not the cap.
-- [TypeScript over JavaScript](typescript-over-javascript-default.md) — standing default: TS over JS (no new JS); polyglot Py/Rust when best; nxtlvl runs native type-stripping (ADR-034).
+- [TypeScript over JavaScript](typescript-over-javascript-default.md) — standing default: TS over JS (no new JS); polyglot Py/Rust when best; nxtlvl runs native type-stripping.
 - [Prefers visual diagrams](prefers-visual-diagrams.md) — "seeing it always helps" — default to rendering diagrams/visuals for anything structural.
 - [Grill branch-by-branch](grill-branch-by-branch.md) — wants exhaustive multi-pass, one-question-at-a-time design interrogation.
 - [Terse confirms = momentum](terse-confirms-momentum.md) — one-word locks; acknowledge in one line and advance.
@@ -34,7 +34,7 @@ One line per memory — detail lives in the topic file. Grouped for fast orienta
 - [Workflow args not array](cc-workflow-args-not-array.md) — Workflow tool `args` may not arrive as a native array; generate the list in-script or guard with Array.isArray/JSON.parse.
 
 ## Environment & repo
-- [~/.claude config repo](claude-config-repo.md) — nxtlvl repo (~/Developer/nxtlvl, ADR-037) is the SOURCE for global CC config (config/claude/*); ~/.claude/* symlink in; PR→main, remote will-schaefer/nxtlvl-harness.
+- [~/.claude config repo](claude-config-repo.md) — nxtlvl repo (~/Developer/nxtlvl) is the SOURCE for global CC config (config/claude/*); ~/.claude/* symlink in; PR→main, remote will-schaefer/nxtlvl-harness.
 - [Developer repo git workflow](developer-repo-git-workflow.md) — solo, commit directly to main, don't branch for routine work, don't push unless asked; the 'epitaxy' parallel-committer was retired 2026-06-25 (was a transient session behavior, not a daemon).
 - [Disable ecc active hooks in dev](disable-ecc-active-hooks-dev.md) — ecc dormant via enabledPlugins."ecc@ecc":false (flip to re-enable); ECC_GATEGUARD=off was ineffective.
 - [nxtlvl install/promotion](nxtlvl-install-promotion.md) — installed nxtlvl is a SHA-pinned cache snapshot, not a live repo read; committed work needs a manual /plugin promote; repo HEAD runs ahead.

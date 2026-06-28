@@ -2,7 +2,7 @@
 id: ADR-016
 title: "nxtlvl orchestration model — composition layer, delegation contract, and human gates"
 status: Draft
-date: 2026-07-28
+date: 2026-06-28
 ---
 
 # ADR-016: nxtlvl orchestration model — composition layer, delegation contract, and human gates
@@ -16,9 +16,7 @@ orchestrator, the delegation contract, and the placement of human gates are all 
 
 [ADR-003](ADR-003-compose-not-reconstruct.md) makes the dispatch runtime native and forbids
 reconstructing it. [ADR-012](ADR-012-agent-design-contract.md) defines the agent/skill
-boundary, which affects how a specialist is briefed and what it loads. An earlier archived
-decision (ADR-021) touched this same territory; this ADR revisits it from scratch, with no
-inherited conclusions.
+boundary, which affects how a specialist is briefed and what it loads.
 
 ### The questions
 

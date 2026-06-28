@@ -1,13 +1,13 @@
 ---
 name: developer-repo-git-workflow
-description: "Git workflow for the nxtlvl harness repo (at ~/Developer/nxtlvl since the 2026-06-27 relocation, ADR-037) — solo, commit directly to main, don't branch for routine work, don't push unless asked. (The 'epitaxy' parallel-committer was retired 2026-06-25 — see note below.)"
+description: "Git workflow for the nxtlvl harness repo (at ~/Developer/nxtlvl since the 2026-06-27 relocation) — solo, commit directly to main, don't branch for routine work, don't push unless asked. (The 'epitaxy' parallel-committer was retired 2026-06-25 — see note below.)"
 metadata:
   node_type: memory
   type: feedback
   originSessionId: d04f38f2-2d92-4957-b1c6-f8379cee9434
 ---
 
-In the nxtlvl harness repo (`~/Developer/nxtlvl` since the 2026-06-27 relocation per [[ADR-037]]) the user commits **directly to `main`** (single-author repo; `origin/main` tracked but pushed only when asked). Do **not** branch for routine commits here — that overrides the generic "branch off the default branch first" default.
+In the nxtlvl harness repo (`~/Developer/nxtlvl` since the 2026-06-27 relocation) the user commits **directly to `main`** (single-author repo; `origin/main` tracked but pushed only when asked). Do **not** branch for routine commits here — that overrides the generic "branch off the default branch first" default.
 
 **Why:** solo personal workbench; history is linear on `main`, and the user expects a bare "commit" to land on `main`.
 
