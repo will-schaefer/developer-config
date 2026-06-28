@@ -1,0 +1,4 @@
+{
+  "name": "nxtlvl-wiki",
+  "description": "Toolkit for building and maintaining the nxtlvl-wiki — a Karpathy-style LLM-wiki of agent harnesses & agentic engineering. Provides the ingest/lint/query commands, research-scout agents, and manifest scripts; operates on the wiki checkout in the current directory."
+}
