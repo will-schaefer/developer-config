@@ -1,91 +1,133 @@
 ---
 id: ADR-003
-title: "Compose on native + agent-skills; reconstruct only the plumbing; never reconstruct orchestration"
-status: Superseded
-date: 2026-06-16
-amended: 2026-06-19
-superseded-by: ADR-035
+title: "Build nxtlvl from scratch against a production-quality reference standard"
+status: Accepted
+date: 2026-06-27
 ---
 
-# ADR-003: Compose on native + agent-skills; reconstruct only the plumbing; never reconstruct orchestration
-
-> **Superseded by [ADR-035](ADR-035-compose-substance-defer-own-orchestration.md).** The three-tier
-> spine carries forward unchanged — reconstruct the plumbing, compose the substance, leave
-> orchestration native. What ADR-035 *re-leads*: (1) agent-skills is no longer a privileged "compose
-> on" floor — it is one reviewed source among many (the change [ADR-027](ADR-027-router-endorses-only-established-items.md)
-> began in the router, now generalized to the whole build strategy); (2) the reviewed reference
-> harnesses + the agents-wiki are named as the source-and-guidance substrate; and (3) orchestration
-> is native **through the build-out** rather than **permanently** — nxtlvl's own runtime/orchestration
-> becomes a *deferred exploration*, not a permanent exclusion. The original framing below is kept as
-> history.
+# ADR-003: Build nxtlvl from scratch against a production-quality reference standard
 
 ## Context
-The whole point of `nxtlvl` is to **learn agent-harness architecture by rebuilding it** —
-but "rebuild everything" would re-explode the project to ecc scale and re-derive things that
-are already done well natively. The learning target must be scoped precisely, or the build
-never ends and the result is a slower shim around the real platform.
 
-Three kinds of machinery are in play, and they call for **opposite strategies**:
-1. The **plumbing** native CC / agent-skills don't hand me (packaging, context assembly,
-   memory, composition, hooks, audit).
-2. The **workflow substance** (how to review, how to develop) — already well-covered by
-   agent-skills.
-3. The **orchestration primitives** (skill routing, agent dispatch, the tool-use loop,
-   context-window assembly) — owned by the platform, below the plugin boundary.
+Three things frame the build problem:
+
+1. **Scope must be bounded.** "Build everything" without a clear north star re-explodes to
+   the scale of the harnesses being studied — a build that never ends and produces a slower
+   shim around tools that already exist. The learning target must be precise.
+
+2. **A reference standard is needed.** Building in a vacuum risks missing the production
+   bar. The standard comes from active production harnesses and top-tier research — not as
+   blueprints to copy from, but as the bar to build against.
+
+3. **The CC plugin identity establishes a native-first constraint.** `nxtlvl-harness` is a
+   Claude Code plugin ([ADR-001](ADR-001-plugin-local-marketplace-packaging.md)) — it
+   composes above the native CC loop rather than replacing it. Owning a runtime before the
+   harness stands is premature; the plugin identity sets the correct starting posture.
+
+[ADR-001](ADR-001-plugin-local-marketplace-packaging.md) establishes the family structure
+and plugin identity. [ADR-002](ADR-002-reference-corpus-nxtlvl-wiki.md) establishes
+`nxtlvl-wiki` as the reference corpus — queryable, synthesized guidance over reviewed
+production harnesses, serving as orientation and leads throughout the build. The remaining
+question is the build strategy itself.
 
 ## Decision
-Adopt a three-tier strategy:
 
-- **Plumbing layer → reconstruct.** This is where the learning lives: layered config +
-  plugin packaging, **context assembly** ([ADR-007](ADR-007-context-budgeted-injection.md)),
-  **memory** ([ADR-004](ADR-004-extend-native-memory.md)), the composition layer, a lean
-  **hook** layer ([ADR-006](ADR-006-hook-fail-open-gated-blocking.md)), and the **audit**
-  ([ADR-009](ADR-009-objective-invoked-audit-gate.md)).
-- **Workflow layer → compose, don't reconstruct.** Dev and review **wrap and refine
-  agent-skills** + my conventions. Skills are **vendored into the repo and refined for fit**
-  — not called untouched, not rebuilt from scratch. Research is the one workflow I build
-  fresh (agent-skills lacks it; `deep-research` is a *structural reference only*).
-- **Orchestration → native, always.** Skill routing, agent dispatch, the tool-use loop, and
-  context-window assembly **must not be reconstructed**. Deterministic multi-agent control
-  uses the native `Workflow` tool. I learn orchestration by *reading* CC/ecc and *designing
-  the composition layer*, not by reimplementing the dispatcher.
+**The north star:** a production-quality, domain-agnostic agent harness — built from
+scratch, held to the standard of active production harnesses and top-tier research —
+capable of supporting revenue-generating work.
 
-The dividing question throughout: **"learn by reconstruction" applies to the harness, not
-the SDLC content.**
+### Everything → build from scratch
+
+Plumbing and workflow substance alike are built from scratch. No vendoring, no forking, no
+adapting someone else's design. Every layer is owned and understood.
+
+`nxtlvl-wiki` guides the build throughout — surfacing how production harnesses approached
+a problem, what patterns recur, where the bar is set — as orientation and leads, never as
+a blueprint to copy. The wiki is what keeps "build from scratch" from meaning "build in a
+vacuum." Every wiki output that informs a build decision is verified at primary source
+before acting on it (per [ADR-002](ADR-002-reference-corpus-nxtlvl-wiki.md)'s evidence
+boundary).
+
+The scope of reconstruction:
+- **Plumbing** — the machinery native CC doesn't hand over: context assembly, memory,
+  hooks, composition layer, audit. This is where the core harness learning lives.
+- **Workflow substance** — dev, review, research, documentation. Built from scratch rather
+  than adapted from upstream, informed by what the wiki surfaces from production harnesses
+  and top-tier research.
+
+### Orchestration → native CC through the build; own runtime a deliberate second phase
+
+As a CC plugin, nxtlvl composes above the native loop rather than replacing it. Building a
+runtime before the harness stands is premature — you cannot meaningfully design
+orchestration for something that doesn't exist yet, and a hand-built dispatcher at this
+stage is only a slower, capped shim.
+
+**Phase one:** build the complete harness on native CC. Skill routing, agent dispatch, the
+tool-use loop, and context-window assembly stay native. Deterministic multi-agent control
+uses the native Workflow tool.
+
+**Phase two:** once the harness stands complete on native rails, explore adding nxtlvl's
+own runtime/orchestration — guided by the wiki and informed by the reference harnesses that
+ship their own runtimes. This is a deliberate future phase, not a permanent exclusion.
+
+`nxtlvl-labs` follows the same sequencing: native CC through its build; own runtime only
+after nxtlvl-harness has explored it first.
 
 ## Alternatives Considered
 
-### Reconstruct everything (including orchestration)
-- Pros: maximal understanding-by-rebuilding.
-- Cons: a hand-built router is structurally a slower, capped shim around the real
-  dispatcher; re-derives review/dev substance, re-expanding the learning target to ecc
-  breadth. ecc itself reimplements none of this.
-- Rejected: the cost is enormous and the result is worse than native.
+### Vendor or adapt from upstream harnesses
 
-### Compose everything (reconstruct nothing)
-- Pros: fastest to a working harness.
-- Cons: defeats the learning goal; leaves the plumbing un-owned and un-tailorable.
-- Rejected: I want a harness I understand to the metal, not one I merely configure.
+Build by vendoring skills, agents, or workflows from reviewed harnesses and refining them
+for fit.
 
-### Fork ecc and trim it
-- Pros: inherits a working architecture.
-- Cons: inherits ecc's complexity and assumptions; trimming is harder than building lean;
-  no clean learning path.
-- Rejected: ecc stays a dormant reference ([ADR-002](ADR-002-ecc-dormant-reference-backstop.md)),
-  not a base to fork.
+- Pros: faster to a working harness; inherits proven patterns directly.
+- Cons: inherits upstream assumptions, structure, and constraints alongside the patterns;
+  the harness is no longer fully owned and understood at every layer; the production bar
+  becomes "good enough for the source" rather than the independent standard nxtlvl is
+  held to. The wiki already provides the survey acceleration without requiring inheritance
+  of someone else's design.
+- Rejected: build from scratch is the stated goal; the wiki provides the reference
+  without the inheritance cost.
+
+### Build without a reference standard (scratch only, no wiki)
+
+Build entirely from first principles with no reference corpus.
+
+- Pros: maximum independence; no external reference to distrust.
+- Cons: risks missing the production bar entirely; the work of surveying active harnesses
+  has already been done and is queryable via the wiki — discarding it is waste, not purity.
+  [ADR-002](ADR-002-reference-corpus-nxtlvl-wiki.md) already decided this question.
+- Rejected: the wiki is the mechanism that makes the production bar real; building without
+  it is building in a vacuum.
+
+### Reconstruct orchestration now (own the runtime up front)
+
+Build nxtlvl's own runtime/orchestration from the start rather than sequencing it after
+the harness.
+
+- Pros: maximum ownership; nxtlvl becomes its own full-stack harness immediately.
+- Cons: re-explodes scope before there is a harness worth orchestrating; collides with
+  the CC plugin identity ([ADR-001](ADR-001-plugin-local-marketplace-packaging.md)) — a
+  CC plugin composes above the native loop, not below it; a premature dispatcher is a
+  slower shim with nothing real to orchestrate yet.
+- Deferred, not rejected: sequenced after the native build, when the harness is complete
+  and there is something real to orchestrate. Phase two is explicit.
 
 ## Consequences
-- A hard, explicit **"never reconstruct"** boundary: router / dispatch / tool-loop / context-
-  window assembly are out of scope, permanently.
-- The composition layer (when skills fire, how agents chain, how outputs compose) is *mine*;
-  the orchestration *primitive* underneath it is native.
-- Vendoring individual agent-skills skills stays **reactive**
-  ([ADR-008](ADR-008-reactive-growth-intake-gate.md)) — v1 workflows compose, they don't copy.
-- The "production quality" bar applies to the plumbing layer, not the envelope.
-- **Amended 2026-06-19 by [ADR-027](ADR-027-router-endorses-only-established-items.md):** the
-  *router's* exposure of the agent-skills floor is removed — `nxtlvl-router` endorses only
-  established nxtlvl items and goes dark at unowned phases (precedence collapses to
-  `nxtlvl → native`). This narrows the "compose on agent-skills" conclusion **for the router only**;
-  the three-tier strategy (plumbing-reconstruct, orchestration-native, reactive workflow-vendoring)
-  otherwise stands. agent-skills remains installed and composable directly — it is simply no longer
-  routed to.
+
+- **Every layer is owned.** No inherited assumptions from upstream designs. The wiki
+  informs; nxtlvl decides and builds.
+- **The wiki's orientation role is load-bearing.** It is what keeps the production bar
+  real throughout the build — plumbing and workflow substance alike. Without it, "build
+  from scratch" is building in a vacuum.
+- **Orchestration is phased, not closed.** Native CC through the build-out; own
+  runtime/orchestration is an explicit future phase. When that phase opens it will revisit
+  the plugin identity ([ADR-001](ADR-001-plugin-local-marketplace-packaging.md)) and the
+  orchestration posture — flagged now, decided then.
+- **`nxtlvl-labs` follows the same runtime sequencing.** Native CC first; own runtime
+  only after nxtlvl-harness has explored it. Labs' team creation lifecycle and incubation
+  pipeline both run on native CC through their respective builds.
+- **The production bar is set by active harnesses and top-tier research**, not by what
+  upstream sources happen to ship. Domain-agnostic means no vertical assumptions are
+  inherited; revenue-generating capable means the bar is real production, not demo quality.
+- Recorded per the global decision rule ([ADR-010](ADR-010-global-decision-rule.md)).

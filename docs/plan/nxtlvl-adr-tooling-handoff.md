@@ -23,7 +23,7 @@ Architecture Decision Records** — the **35** files at
 gate over the ADR set (§5). That verb is a concrete, repo-local instance of the objective-gate
 shape ADR-009 reserves for the future `nxtlvl:audit` — building it now serves the repo today *and*
 prototypes the gate's two-tier / exit-code discipline so `nxtlvl:audit` can later **compose** it
-rather than reconstruct it ([ADR-035](../decisions/ADR-035-compose-substance-defer-own-orchestration.md)).
+rather than reconstruct it ([ADR-003](../decisions/ADR-003-compose-not-reconstruct.md)).
 
 ## 2. Scope (in / out)
 
@@ -185,7 +185,7 @@ survives the handoff.
   ```
   `audit.ts` is a **pure function that returns a verdict** — the CLI translates that verdict into an
   exit code. That separation is what lets the future `nxtlvl:audit` `import` the audit core instead
-  of reconstructing it ([ADR-035](../decisions/ADR-035-compose-substance-defer-own-orchestration.md)).
+  of reconstructing it ([ADR-003](../decisions/ADR-003-compose-not-reconstruct.md)).
   The shared **`lib/load.ts`** is the single file-I/O seam (every verb loads through it; the pure
   cores stay string/model-only and unit-testable). *Beat:* a single `scripts/adr.ts` monolith —
   simpler today, but not reusable by the gate.
@@ -228,8 +228,7 @@ survives the handoff.
   · [ADR-033](../decisions/ADR-033-three-part-objective-graduation-contract.md) (two-tier exit-code gate).
 - Runtime: [ADR-034](../decisions/ADR-034-typescript-default-native-type-stripping.md) ·
   [TS migration plan](nxtlvl-typescript-migration-plan.md) (T0.2/T0.3 infra, D4 CJS caveat).
-- Compose-don't-reconstruct: [ADR-035](../decisions/ADR-035-compose-substance-defer-own-orchestration.md)
-  · [ADR-003](../decisions/ADR-003-compose-not-reconstruct.md).
+- Build-from-scratch strategy: [ADR-003](../decisions/ADR-003-compose-not-reconstruct.md).
 - Precedent code: [`plugins/nxtlvl/hooks/dangerous-bash.js`](../../plugins/nxtlvl/hooks/dangerous-bash.js)
   + [`.test.js`](../../plugins/nxtlvl/hooks/dangerous-bash.test.js).
 - Data: [`docs/decisions/`](../decisions/) (35 ADRs) + [`README.md`](../decisions/README.md) index.

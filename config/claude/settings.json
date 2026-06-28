@@ -73,7 +73,7 @@
   },
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
-  "theme": "light",
+  "theme": "dark-ansi",
   "autoScrollEnabled": false,
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true
