@@ -4,15 +4,15 @@ This repo builds **nxtlvl**, a personal Claude Code harness. Anchor:
 [`docs/intent/personal-harness.md`](docs/intent/personal-harness.md). Decisions (ADRs):
 [`docs/decisions/`](docs/decisions/).
 
-## Build method — review harnesses to shape ours (read before working the build)
-nxtlvl is shaped in part by **systematically reviewing existing agent harnesses** and deciding,
-area by area, what to **adopt / adapt / reject** — primarily the **ecc** plugin (vendored at
-`reference/ECC-main/`, kept installed-but-dormant per
-[ADR-002](docs/decisions/ADR-002-ecc-dormant-reference-backstop.md)), and **potentially other
-harnesses over time**. Reviewing ecc is expected and intended, not a dependency to hide.
-Distillations land in [`docs/reference/`](docs/reference/); each decision becomes an ADR. The
-main session orchestrates and delegates — **when spawning a subagent during the build, pass this
-method along** so it knows we study harnesses to shape ours.
+## Build method — build from scratch against a production-quality standard
+nxtlvl is built from scratch, guided by **`nxtlvl-wiki`** — a queryable corpus of reviewed
+production harnesses that sets the reference bar without imposing anyone else's design
+([ADR-002](docs/decisions/ADR-002-reference-corpus-nxtlvl-wiki.md),
+[ADR-003](docs/decisions/ADR-003-compose-not-reconstruct.md)). Harnesses in `reference/` are
+study material; each review produces an ADR-recorded decision and a distillation under
+[`docs/reference/`](docs/reference/). The main session orchestrates and delegates — **when
+spawning a subagent during the build, pass this method along** so it knows we build against
+the wiki's production standard, not from prior harness designs.
 
 ## Scaffolding new harness items — `sandbox/`
 Build new skills/agents/commands in [`sandbox/`](sandbox/) — a staging tree **off the harness's
