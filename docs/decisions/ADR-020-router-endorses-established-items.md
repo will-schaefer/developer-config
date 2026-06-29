@@ -9,35 +9,36 @@ date: 2026-06-28
 
 ## Context
 
-The `nxtlvl-router` skill is how nxtlvl skills get discovered and invoked. An earlier version of
-the router embodied a three-tier precedence rule — `nxtlvl:<skill> → agent-skills:<skill> →
-native` — and its discovery map enumerated ~14 upstream `agent-skills:*` phases (implementation,
-testing, debugging, security, performance, CI/CD, deprecation, observability, shipping, …) as
-first-class routing destinations. Two problems converged:
+The `nxtlvl-router` skill is how nxtlvl skills get discovered and invoked. The open question is
+what it should endorse. One option is a three-tier precedence rule — `nxtlvl:<skill> →
+agent-skills:<skill> → native` — whose discovery map enumerates ~14 upstream `agent-skills:*`
+phases (implementation, testing, debugging, security, performance, CI/CD, deprecation,
+observability, shipping, …) as first-class routing destinations. That option has two problems:
 
-1. **Staleness.** The ideation domain — `interview-me`, `grill-me`, `idea-refine`,
+1. **Staleness.** A static upstream enumeration goes stale the moment nxtlvl establishes its own
+   version of a phase. The ideation domain — `interview-me`, `grill-me`, `idea-refine`,
    `brainstorming` — is established as refined `◆` nxtlvl skills (see
-   [ADR-018](ADR-018-ideation-domain.md)). But the router still routed
-   `interview-me`/`idea-refine` **upstream** and never mentioned `brainstorming`/`grill-me`. The
-   router was actively pointing away from skills nxtlvl now owns.
+   [ADR-018](ADR-018-ideation-domain.md)); a three-tier map would route
+   `interview-me`/`idea-refine` **upstream** and never mention `brainstorming`/`grill-me`,
+   pointing away from skills nxtlvl owns.
 
 2. **Blind adoption.** Enumerating every upstream phase as an adopted destination presents all of
    `agent-skills` as if nxtlvl had vetted and adopted it. That contradicts the project's
    reactive-growth posture and its **bounded confident-core** (see
    [ADR-015](ADR-015-scope-determination-and-extension-gate.md)): nxtlvl has actually established
    only a handful of phases (ideation, doubt-driven-development, review, github-workflow,
-   documentation-and-adrs, harness-review). The map advertised ownership the project never earned.
+   documentation-and-adrs, harness-review). Such a map advertises ownership the project never earned.
 
 The user directed that the router point **only** to what nxtlvl has established, and — stress-tested
-branch-by-branch via `grill-me` — chose to go *dark* at unowned phases rather than keep a demoted
-fallthrough.
+branch-by-branch via `grill-me` — chose to go *dark* at unowned phases rather than carry a demoted
+upstream fallthrough.
 
 The dividing question: what the router should endorse. Going dark at unowned phases is *not
 endorsing* upstream content the project hasn't vetted, and building `◆` versions reactively when a
 phase is actually needed. This is **consistent with build-from-scratch
 ([ADR-003](ADR-003-build-from-scratch.md)) at the router layer**: the router endorses only nxtlvl's
-own from-scratch items; upstream is neither endorsed nor depended on. The router simply stops
-exposing an agent-skills floor.
+own from-scratch items; upstream is neither endorsed nor depended on. The router exposes no
+agent-skills floor.
 
 ## Decision
 
@@ -47,11 +48,11 @@ The router **endorses only established nxtlvl items**, and is silent at unowned 
   the router offers nothing to route to; the phase is hand-flown **natively**. Accepted cost: most
   of the SDLC (implementation, testing, debugging, shipping, …) has no skill scaffolding in the
   router until nxtlvl builds it.
-- **Precedence is `nxtlvl → native`.** There is no agent-skills floor in the rule; the upstream
-  tier is removed.
-- **Endorsement-only, not a gate.** This is a pure router edit. `agent-skills` stays installed and
-  its skills remain discoverable in the session; the router simply no longer endorses or depends on
-  them. No hook, no uninstall.
+- **Precedence is `nxtlvl → native`.** There is no agent-skills floor in the rule; the rule has
+  no upstream tier.
+- **Endorsement-only, not a gate.** This is a router-level rule, not an installation change.
+  `agent-skills` stays installed and its skills remain discoverable in the session; the router does
+  not endorse or depend on them. No hook, no uninstall.
 - **Two named interim exceptions.** `spec-driven-development` and `planning-and-task-breakdown`
   remain in the router as the *only* explicitly-pointed-to upstream skills, because the ideation
   domain ([ADR-018](ADR-018-ideation-domain.md)) composes them as the ideation→contract boundary.

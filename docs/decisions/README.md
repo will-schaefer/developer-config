@@ -37,8 +37,3 @@ Anchors these consume: [`../intent/personal-harness.md`](../intent/personal-harn
 | [023](ADR-023-agent-operation-model.md) | Agent operation — gated, interactive, single-operator sessions; reject autonomous, continuous-loop, and enterprise-fleet runtimes; fold their disciplines into existing gates | Draft |
 | [024](ADR-024-deepwiki-orientation-not-evidence.md) | Secondary sources orient but never testify — DeepWiki gives `harness-review` leads, not citable evidence; read-only by withheld tools | Draft |
 | [025](ADR-025-context7-testifies-primary-sources.md) | Primary sources testify, version-pinned — Context7 scout claims cite the official doc URL @ version (the witness), not Context7 (the courier) | Draft |
-
-> **Lifecycle:** under the project override (see the repo `CLAUDE.md`), a superseded ADR is
-> archived and then deleted once nothing references it; its decision, if still live, is
-> re-recorded as a fresh standalone ADR above. ADRs 017–025 were re-recorded this way from an
-> earlier archived set.

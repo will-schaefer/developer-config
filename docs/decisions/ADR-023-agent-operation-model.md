@@ -18,7 +18,7 @@ and PM2/systemd/container integrations).
 
 All three are built to remove the human from the loop and run long-lived, autonomous, or fleet
 workloads. nxtlvl is the deliberate opposite: a single-operator, gated, interactive, fail-open
-personal harness. Its operate-time posture is already fixed by prior decisions — fail-open hooks
+personal harness. Its operate-time posture is already fixed by standing decisions — fail-open hooks
 with blocking only via the intake gate and kill switches
 ([ADR-010](ADR-010-hook-layer-contract.md)), an invoked (not continuous) promotion gate
 ([ADR-014](ADR-014-audit-gate.md)), the fallback-log metric surfaced as two automatic readouts —
@@ -104,7 +104,7 @@ not autonomous *self-direction*; the line this ADR draws is exactly between the 
 - nxtlvl's operating mode is settled and consistent end-to-end: interactive, gated,
   single-operator sessions; no autonomous runtime is built, so the harness cannot run away from
   its operator.
-- Phase 6 reaffirms rather than extends the prior safety/metric/floor decisions
+- Phase 6 reaffirms rather than extends the safety/metric/floor decisions
   (ADR-009/010/011/014): the operate layer is those decisions seen from the running-it-daily
   angle.
 - Operate-time failures are handled by the existing self-debug loop and gates; recurring ones feed
